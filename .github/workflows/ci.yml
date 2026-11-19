@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Install Python packages
+        run: pip install -r encoding_lab/requirements.txt pytest
+
+      - name: Syntax check (Python and shell)
+        run: |
+          python -m compileall -q encoding_lab demos sdlc build
+          for f in $(git ls-files '*.sh'); do bash -n "$f"; done
+
+      - name: Encoding Lab engine tests
+        run: python -m pytest -q encoding_lab/tests
+
+      - name: Testing-competition starter tests
+        working-directory: workshop/workshop_activities/testing_competition_code
+        run: python -m pytest -q
+
+      - name: Demo smoke tests
+        run: |
+          python demos/01_why_streaming/egypt_cost.py --minutes 1
+          bash demos/03_encoding/gop_view.sh > /dev/null

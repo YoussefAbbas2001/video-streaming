@@ -1,0 +1,68 @@
+name: "🐞 Bug report (Bug Hunt League)"
+description: Found something broken? Report it and score points. Reproducible reports only.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for hunting! Points: Critical 10 · Major 5 · Minor 2 · UX 1. Bonuses: +2 with a video or failing test, +3 if a fixed bug came back.
+        Search the open issues first: the first reporter wins duplicates. Rules: `sdlc/bug-hunt-league.md`.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [Pilot GUI / web app, Video streaming / cameras, Control (thrusters, gripper), Electrical / power / sensors, Other]
+    validations: { required: true }
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity (your guess; a developer confirms it during triage)
+      options:
+        - "Critical: crash, frozen stream, unsafe or wrong command"
+        - "Major: a feature is broken, wrong camera, data lost"
+        - "Minor: works with a workaround"
+        - "UX: confusing, missing feedback, hard to use under stress"
+    validations: { required: true }
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Tag or commit (`git describe --tags --always`), or the date of the build you tested
+      placeholder: v0.6-pool-test or 4f2a9c1
+    validations: { required: true }
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Start the GUI with all 8 cameras
+        2. Click Cam 3, then Cam 1, then Cam 3 within 1 second
+    validations: { required: true }
+  - type: textarea
+    id: expected
+    attributes: { label: Expected result }
+    validations: { required: true }
+  - type: textarea
+    id: actual
+    attributes: { label: Actual result }
+    validations: { required: true }
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence (+2 points)
+      description: Drag a screen recording or a screenshot here, or link a failing test
+  - type: textarea
+    id: setup
+    attributes:
+      label: Setup
+      description: Laptop/OS/browser, SBC, cameras, tether, anything unusual
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched the open issues and this is not a duplicate
+          required: true
+        - label: I can reproduce it with the steps above
+          required: true

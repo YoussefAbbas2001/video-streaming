@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 1600 900" font-family="Arial, Helvetica, sans-serif">
+  <title>ROV pilot dashboard — before and after wireframe</title>
+  <rect width="1600" height="900" fill="#ffffff"/>
+  <text x="40" y="50" font-size="28" font-weight="bold" fill="#0b1526">ROV pilot dashboard — wireframe (before / after)</text>
+  <text x="40" y="80" font-size="15" fill="#52514e">Print A3 landscape. Use it as a starting point for Activity 6 — then test it with a pilot who did not design it.</text>
+
+  <!-- BEFORE -->
+  <text x="40" y="125" font-size="20" font-weight="bold" fill="#c62828">BEFORE — feature list</text>
+  <rect x="40" y="140" width="700" height="560" fill="#f4f4f2" stroke="#8a8a85" stroke-width="2"/>
+  <g font-size="14" fill="#52514e" text-anchor="middle">
+    <g stroke="#8a8a85" fill="#e3e2de">
+      <rect x="60" y="160" width="155" height="110"/><rect x="230" y="160" width="155" height="110"/><rect x="400" y="160" width="155" height="110"/><rect x="570" y="160" width="155" height="110"/>
+      <rect x="60" y="285" width="155" height="110"/><rect x="230" y="285" width="155" height="110"/><rect x="400" y="285" width="155" height="110"/><rect x="570" y="285" width="155" height="110"/>
+    </g>
+    <text x="137" y="220">cam0</text><text x="307" y="220">cam1</text><text x="477" y="220">cam2</text><text x="647" y="220">cam3</text>
+    <text x="137" y="345">cam4</text><text x="307" y="345">cam5</text><text x="477" y="345">cam6</text><text x="647" y="345">cam7</text>
+  </g>
+  <text x="60" y="430" font-size="14" font-family="Courier New, monospace" fill="#52514e">d:2.31 h:184 v:12.1 t:21.4 p:0.4 i:0.1 d:0.02 ...</text>
+  <g font-size="14" text-anchor="middle" fill="#0b1526">
+    <g stroke="#8a8a85" fill="#e3e2de">
+      <rect x="60" y="460" width="155" height="50"/><rect x="230" y="460" width="155" height="50"/><rect x="400" y="460" width="155" height="50"/><rect x="570" y="460" width="155" height="50"/>
+      <rect x="60" y="525" width="155" height="50"/><rect x="230" y="525" width="155" height="50"/><rect x="400" y="525" width="155" height="50"/><rect x="570" y="525" width="155" height="50"/>
+    </g>
+    <text x="137" y="490">ARM</text><text x="307" y="490">STOP</text><text x="477" y="490">REC</text><text x="647" y="490">PID</text>
+    <text x="137" y="555">LIGHT</text><text x="307" y="555">RESET</text><text x="477" y="555">CFG</text><text x="647" y="555">GRIP</text>
+  </g>
+  <g font-size="15" fill="#c62828">
+    <text x="60" y="610">✖ Eight equal tiles — no visual hierarchy</text>
+    <text x="60" y="635">✖ No camera state, no link state, no mode — a frozen tile looks live</text>
+    <text x="60" y="660">✖ Telemetry as cryptic text, far from the pilot's gaze</text>
+    <text x="60" y="685">✖ STOP looks like LIGHT; CFG/PID reachable mid-mission</text>
+  </g>
+
+  <!-- AFTER -->
+  <text x="800" y="125" font-size="20" font-weight="bold" fill="#2e7d32">AFTER — mission tool (one possible design)</text>
+  <rect x="800" y="140" width="760" height="560" fill="#f4f4f2" stroke="#8a8a85" stroke-width="2"/>
+  <!-- status bar -->
+  <rect x="815" y="152" width="730" height="40" fill="#e3e2de"/>
+  <circle cx="835" cy="172" r="7" fill="#2e7d32"/>
+  <text x="850" y="178" font-size="15" font-weight="bold" fill="#0b1526">LINK 94 Mb/s · 18 ms     MODE: DEPTH HOLD     ARMED     LEAK: OK</text>
+  <rect x="1425" y="156" width="112" height="32" rx="6" fill="#c62828"/>
+  <text x="1481" y="178" font-size="15" font-weight="bold" fill="#ffffff" text-anchor="middle">E-STOP</text>
+  <!-- primary -->
+  <rect x="815" y="205" width="540" height="350" fill="#dce9f7" stroke="#2a78d6" stroke-width="3"/>
+  <text x="830" y="230" font-size="15" font-weight="bold" fill="#2a78d6">PRIMARY · CAM 1 PILOT · LIVE</text>
+  <line x1="1065" y1="380" x2="1105" y2="380" stroke="#2a78d6" stroke-width="2"/><line x1="1085" y1="360" x2="1085" y2="400" stroke="#2a78d6" stroke-width="2"/>
+  <rect x="825" y="510" width="520" height="35" fill="#ffffff" opacity="0.85"/>
+  <text x="835" y="534" font-size="16" font-weight="bold" fill="#0b1526">DEPTH 2.31 m ▲0.2 to target     HDG 184°     PITCH 2°</text>
+  <!-- thumbnails -->
+  <g font-size="13" font-weight="bold">
+    <rect x="1370" y="205" width="175" height="62" fill="#ffffff" stroke="#2e7d32" stroke-width="3"/><text x="1380" y="228" fill="#0b1526">[2] MANIPULATOR</text><text x="1380" y="252" fill="#2e7d32">● LIVE</text>
+    <rect x="1370" y="277" width="175" height="62" fill="#ffffff" stroke="#2e7d32" stroke-width="3"/><text x="1380" y="300" fill="#0b1526">[3] REAR / TETHER</text><text x="1380" y="324" fill="#2e7d32">● LIVE</text>
+    <rect x="1370" y="349" width="175" height="62" fill="#ffffff" stroke="#ed8b00" stroke-width="3"/><text x="1380" y="372" fill="#0b1526">[4] AUX</text><text x="1380" y="396" fill="#a35f00">▲ DEGRADED</text>
+    <rect x="1370" y="421" width="175" height="62" fill="#eeeeee" stroke="#c62828" stroke-width="3"/><text x="1380" y="444" fill="#0b1526">[5] AUX</text><text x="1380" y="468" fill="#c62828">✖ LOST · reconnecting</text>
+    <rect x="1370" y="493" width="175" height="62" fill="#ffffff" stroke="#8a8a85" stroke-width="2" stroke-dasharray="6 4"/><text x="1380" y="516" fill="#0b1526">[6]–[8] AUX</text><text x="1380" y="540" fill="#52514e">‖ PAUSED (budget)</text>
+  </g>
+  <!-- bottom bar -->
+  <rect x="815" y="568" width="730" height="45" fill="#e3e2de"/>
+  <text x="830" y="597" font-size="15" fill="#0b1526"><tspan font-weight="bold">GRIPPER</tspan>  commanded: CLOSE · confirmed: CLOSED ✔    LIGHTS 60 %    REC ●    [NAV] [GRAB] [INSPECT]</text>
+  <g font-size="15" fill="#2e7d32">
+    <text x="820" y="640">✔ One dominant view + HUD near the pilot's gaze</text>
+    <text x="820" y="663">✔ Every camera state in text AND colour; frozen never shown as live</text>
+    <text x="820" y="686">✔ Link / mode / armed always visible; E-STOP distinct and fixed; commanded vs confirmed</text>
+  </g>
+
+  <text x="40" y="760" font-size="16" font-weight="bold" fill="#0b1526">Task workspaces (one key; controls never move)</text>
+  <g font-size="14" fill="#0b1526">
+    <rect x="40" y="775" width="220" height="90" fill="#dce9f7" stroke="#2a78d6"/><rect x="190" y="785" width="60" height="70" fill="#ffffff" stroke="#8a8a85"/><text x="50" y="795" font-weight="bold">NAV</text><text x="50" y="852">primary + previews</text>
+    <rect x="290" y="775" width="220" height="90" fill="#dff3ea" stroke="#1baf7a"/><rect x="430" y="783" width="72" height="44" fill="#dce9f7" stroke="#2a78d6"/><text x="300" y="795" font-weight="bold">GRAB</text><text x="300" y="852">manipulator + PiP pilot</text>
+    <rect x="540" y="775" width="220" height="90" fill="#ece9fb" stroke="#6250d6"/><text x="550" y="795" font-weight="bold">INSPECT</text><text x="550" y="852">inspection cam + REC</text>
+  </g>
+  <text x="800" y="800" font-size="14" fill="#52514e">Colour is never the only signal: every state also has a text label and an icon (✔ ▲ ✖ ‖).</text>
+  <text x="800" y="825" font-size="14" fill="#52514e">Configuration (PID, RC mapping) lives on a separate screen that is locked while ARMED.</text>
+  <text x="800" y="850" font-size="14" fill="#52514e">Safety behaviour on link loss must be designed with the control team and competition rules.</text>
+</svg>

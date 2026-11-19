@@ -1,0 +1,10 @@
+# Python packages for ROV_Video_Streaming_Workshop.ipynb  (FFmpeg itself is installed separately — see README)
+numpy>=1.24
+pandas>=2.0
+matplotlib>=3.7
+scipy>=1.10
+jupyterlab>=4.0
+ipywidgets>=8.0     # interactive tuning panels (Experiments 3, 4, 5, 7, 8)
+# optional
+av>=12.0            # PyAV: frame-by-frame encoder-delay measurement in Experiment 9 and single-core capacity in Experiment 10
+lxml>=4.9           # only needed by pandas.read_html if you post-process results

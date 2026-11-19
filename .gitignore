@@ -1,0 +1,32 @@
+# Generated / cached outputs (re-created by running the code)
+notebooks/work/
+encoding_lab/.lab_work/
+demos/**/out/
+build/run.log
+build/deck_data.json.bak
+
+# Python / Jupyter
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.pytest_cache/
+.venv/
+venv/
+
+# Big media belongs in Drive (see README → "Big files on Drive")
+*.mkv
+*.yuv
+*.mov
+*.avi
+recordings/
+footage/
+
+# Presenter-only: keep out of the team repo
+**/referee/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+node_modules/

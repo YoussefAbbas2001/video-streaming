@@ -1,0 +1,243 @@
+{
+ "img": {
+  "hero": "/home/claude/MIA_Robotics_Engineering_Workshop/notebooks/work/src_2.5.png",
+  "hero2": "/home/claude/MIA_Robotics_Engineering_Workshop/notebooks/work/src_5.0.png",
+  "frame": "/home/claude/MIA_Robotics_Engineering_Workshop/notebooks/work/src_0.5.png",
+  "section1": "/home/claude/MIA_Robotics_Engineering_Workshop/notebooks/work/src_0.5.png",
+  "section2": "/home/claude/MIA_Robotics_Engineering_Workshop/notebooks/work/src_5.0.png",
+  "section3": "/home/claude/MIA_Robotics_Engineering_Workshop/notebooks/work/src_2.5.png",
+  "loss": [
+   "/home/claude/MIA_Robotics_Engineering_Workshop/notebooks/work/e5_GOP_30_I_frame_every_after.png",
+   "/home/claude/MIA_Robotics_Engineering_Workshop/notebooks/work/e5_GOP_150_I_frame_ever_after.png",
+   "/home/claude/MIA_Robotics_Engineering_Workshop/notebooks/work/e5_Intra_refresh_over_3_after.png"
+  ]
+ },
+ "rawMbps": 332,
+ "e2": {
+  "h264": {
+   "mbps": "1.5",
+   "ratio": 221
+  },
+  "mjpeg": {
+   "mbps": "8.2",
+   "ratio": 40
+  }
+ },
+ "eqq": {
+  "rows": [
+   {
+    "codec": "H.264",
+    "low": 0.37,
+    "high": 1.25
+   },
+   {
+    "codec": "H.265",
+    "low": 0.45,
+    "high": 1.61
+   },
+   {
+    "codec": "MJPEG",
+    "low": 4.35,
+    "high": 9.4
+   },
+   {
+    "codec": "AV1",
+    "low": 0.1,
+    "high": 2.13
+   }
+  ],
+  "low": "0.96",
+  "target": "0.981",
+  "mjpegVsH264": "8"
+ },
+ "crf23": {
+  "avg": "1.5",
+  "peak": "2.6",
+  "vbvPeak": "2.0"
+ },
+ "e4": [
+  {
+   "preset": "ultrafast",
+   "cpu": 5.3,
+   "mbps": 2.77
+  },
+  {
+   "preset": "superfast",
+   "cpu": 10.4,
+   "mbps": 2.31
+  },
+  {
+   "preset": "veryfast",
+   "cpu": 15.1,
+   "mbps": 1.24
+  },
+  {
+   "preset": "faster",
+   "cpu": 26.9,
+   "mbps": 1.44
+  },
+  {
+   "preset": "fast",
+   "cpu": 37.9,
+   "mbps": 1.5
+  },
+  {
+   "preset": "medium",
+   "cpu": 42.6,
+   "mbps": 1.5
+  },
+  {
+   "preset": "slow",
+   "cpu": 61.8,
+   "mbps": 1.36
+  },
+  {
+   "preset": "slower",
+   "cpu": 104.8,
+   "mbps": 1.31
+  },
+  {
+   "preset": "veryslow",
+   "cpu": 193.2,
+   "mbps": 1.17
+  }
+ ],
+ "e5": {
+  "iKB": "45",
+  "pKB": "12",
+  "ipRatio": "4",
+  "dropKB": "8",
+  "loss": [
+   {
+    "name": "GOP 30 (I-frame every 1 s)",
+    "s": "0.6",
+    "worst": "0.7"
+   },
+   {
+    "name": "GOP 150 (I-frame every 5 s)",
+    "s": "2.2",
+    "worst": "3.6"
+   },
+   {
+    "name": "Intra refresh (30 frames)",
+    "s": "0.6",
+    "worst": "0.7"
+   }
+  ]
+ },
+ "e9": {
+  "defaultFrames": 41,
+  "defaultMs": "1,367",
+  "zlFrames": 0,
+  "budgets": [
+   {
+    "name": "MJPEG · HTTP · browser",
+    "vals": [
+     33,
+     10,
+     3,
+     15,
+     5,
+     25
+    ],
+    "total": 91
+   },
+   {
+    "name": "H.264 defaults · RTSP player",
+    "vals": [
+     33,
+     1367,
+     3,
+     1000,
+     8,
+     25
+    ],
+    "total": 2436
+   },
+   {
+    "name": "H.264 zerolatency · WebRTC",
+    "vals": [
+     33,
+     9,
+     3,
+     50,
+     8,
+     25
+    ],
+    "total": 128
+   }
+  ]
+ },
+ "jitter": {
+  "buffers": [
+   0,
+   5,
+   10,
+   15,
+   20,
+   25,
+   30,
+   35,
+   40,
+   45,
+   50,
+   55,
+   60,
+   65,
+   70,
+   75,
+   80,
+   85,
+   90,
+   95,
+   100
+  ],
+  "late": [
+   100.0,
+   41.08,
+   4.83,
+   2.08,
+   2.0,
+   1.97,
+   1.97,
+   1.92,
+   1.69,
+   1.47,
+   1.28,
+   1.14,
+   0.97,
+   0.78,
+   0.64,
+   0.44,
+   0.19,
+   0.03,
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ "e8": {
+  "main": "2.5",
+  "sub": "0.42",
+  "thumb": "0.12",
+  "pct1": "27%",
+  "strategies": [
+   {
+    "name": "8 × main",
+    "mbps": 19.8
+   },
+   {
+    "name": "2 main + 6 sub",
+    "mbps": 7.4
+   },
+   {
+    "name": "1 main + 7 sub",
+    "mbps": 5.4
+   },
+   {
+    "name": "1 main + 3 sub + 4 thumbs",
+    "mbps": 4.2
+   }
+  ]
+ }
+}

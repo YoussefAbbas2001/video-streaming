@@ -394,6 +394,9 @@ module.exports = async function partA(ctx) {
       ["Good ROV use", "a simple aux camera", "default for live streams", "if HW encode + client decode", "recording/archive later"],
     ], 0.6, 1.75, 12.1, [2.4, 2.3, 2.5, 2.5, 2.4], { fontSize: 12.5, rowH: 0.52 });
   }
+  await require("./deck_part_new").mjpegWhere(ctx);
+  await require("./deck_part_new").ffmpegVsStreamers(ctx);
+  await require("./deck_part_new").ffmpegRecipes(ctx);
   // ---------------------------------------------------------------- 26 Parameters & presets
   {
     const s = content("Encoding", "Experiment 4", "Encoder parameters: what each knob does",

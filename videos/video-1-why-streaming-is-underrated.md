@@ -116,13 +116,13 @@ python3 demos/01_why_streaming/egypt_cost.py --cameras 8 --width 1280 --height 7
 
 الـFPS بيقول إنت بتبعت كام صورة في الثانية، لكن الـlatency بتقول كل صورة بتوصل **متأخرة قد إيه**. ممكن يبقى عندك 60 FPS والصورة متأخرة نص ثانية، لأن الـencoder ماسك frames في الـbuffer، أو الـplayer عامل cache ثانية كاملة.
 
-🎞️ **Slide 40** — Latency is designed, not discovered
+🎞️ **Slide 43** — Latency is designed, not discovered
 
 في الـnotebook بتاعنا قسنا ده: الـx264 بالـdefault settings مسك **41 frame** قبل ما يطلع أول frame، يعني حوالي 1.4 ثانية. وبـ`-tune zerolatency` مسك **صفر**. نفس الكمبيوتر ونفس الكاميرا، والفرق في setting واحد بس.
 
 ## 6. Demo 1 — Glass-to-Glass Latency ⏱️ 4:00
 
-🎞️ **Slide 44** — Your measurement toolbox (الـglass-to-glass في آخر سطر)
+🎞️ **Slide 47** — Your measurement toolbox (الـglass-to-glass في آخر سطر)
 
 🧪 **Demo (45 ثانية):**
 1. افتح `demos/01_why_streaming/clock.html` full screen، ساعة بالـmilliseconds.

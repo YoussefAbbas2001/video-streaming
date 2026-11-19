@@ -14,7 +14,7 @@ The guiding idea: *students leave asking "how would we measure that?" before "ho
 workshop/
 ├── presenter_guide/
 │   ├── Workshop_Design.md                 audience, objectives, agenda, equipment, KNOWN / UNKNOWN about the ROV
-│   └── Presenter_Script.md                block-by-block script for all 79 slides: what to say, questions, misconceptions, timing
+│   └── Presenter_Script.md                block-by-block script for all 82 slides: what to say, questions, misconceptions, timing
 ├── student_materials/
 │   ├── Video_Streaming_Cheat_Sheet.md     formulas, vocabulary, FFmpeg/GStreamer/Linux commands, review checklist
 │   ├── ROV_System_Diagnostic_Checklist.md measure-your-own-ROV checklist (homework after session 1)
@@ -32,7 +32,7 @@ workshop/
 ```
 
 Related, at the repo level:
-- the deck: `../presentation/`, 79 slides with speaker notes;
+- the deck: `../presentation/`, 82 slides with click-by-click builds and speaker notes;
 - the notebook: `../notebooks/`;
 - the Encoding Lab app: `../encoding_lab/`;
 - the video series: `../videos/`;

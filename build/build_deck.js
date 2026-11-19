@@ -77,5 +77,7 @@ const { writeTheme } = require("./write_theme");
   const out = path.join(__dirname, "..", "presentation", "MIA_Robotics_Workshop.pptx");
   await pres.writeFile({ fileName: out });
   await writeTheme(out, THEME);
+  // Click-by-click builds (pptxgenjs cannot write animations): see add_click_builds.py.
+  require("child_process").execFileSync("python3", [path.join(__dirname, "add_click_builds.py"), out], { stdio: "inherit" });
   console.log("wrote", out);
 })().catch((e) => { console.error(e); process.exit(1); });

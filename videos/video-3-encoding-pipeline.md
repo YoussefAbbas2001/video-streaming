@@ -114,7 +114,7 @@
 
 ## 3. The Three Most Important Decisions ⏱️ 5:20
 
-🎞️ **Slide 29** — Encoder parameters: what each knob does
+🎞️ **Slide 32** — Encoder parameters: what each knob does
 
 | القرار | بيتحكم في إيه | الـtrade-off |
 |---|---|---|
@@ -131,7 +131,7 @@
 
 ### الـGOP
 
-🎞️ **Slide 30** — Packet loss: why GOP length matters
+🎞️ **Slide 33** — Packet loss: why GOP length matters
 
 الـGOP الطويل بيوفر bits. بس لو packet ضاع، الصورة بتفضل **بايظة لحد الـI-frame الجاي**. يعني GOP 5 ثواني = ممكن 5 ثواني صورة بايظة قدام الـpilot. وكمان لما نبدّل بين الكاميرات، مش حنشوف صورة غير لما يوصل I-frame.
 
@@ -143,9 +143,17 @@
 
 وبالنسبة للـcodec: الـH.264 لسه الـdefault الآمن، لأن أي browser وأي hardware decoder بيشغله. الـH.265 والـAV1 بيوفروا bits، بس محتاجين CPU أكتر و support في الـdecoder. وبنقارنهم **بنفس الجودة**، مش بنفس رقم الـsetting.
 
+🎞️ **Slides 29–31** — MJPEG, و ليه FFmpeg *(جزء جديد، دقيقة ونص)*
+
+الـMJPEG ببساطة: كل frame عبارة عن صورة JPEG لوحدها. مفيش frame بيعتمد على اللي قبله، فمفيش encoder hold، ولو frame باظ، اللي بعده بيوصل سليم. بس التمن غالي: إحنا قسناها، و**بنفس الجودة الـMJPEG أخد 4.7 مرة bits أكتر من الـH.264**. عشان كده الـpilot camera تفضل H.264، والـMJPEG ينفع للكاميرات الصغيرة والـdebug views.
+
+وهنا سؤال بيتسأل كتير: نستخدم `mjpeg-streamer`؟ إحنا قرينا الكود بتاعه وجربناه: بيعمل encode **لكل viewer لوحده**، وبيبعت frames متكررة عشان شغال بـtimer. الأحسن: **FFmpeg**. بيعدّي الـMJPEG اللي طالع من الكاميرا زي ما هو (`-c:v copy`) بـ1.3% من core واحد، وبيعمل RTP و recording و snapshot في نفس الوقت، وهو أصلاً الأداة اللي بنستخدمها في الـEncoding Lab.
+
+🧪 **Demo:** `demos/02_pipeline/mjpeg_ffmpeg.sh http` وافتح `http://localhost:8080/aux1.mjpg` في الـbrowser.
+
 ## 4. Hardware vs Software Encoding ⏱️ 7:40
 
-🎞️ **Slide 35** — Where should the encoding happen?
+🎞️ **Slide 38** — Where should the encoding happen?
 
 - الـ**Software**: على الـCPU، ومرن، بس تكلفته بتكبر مع الـresolution والـFPS وعدد الـstreams، وبيسخّن.
 - الـ**Hardware**: silicon مخصوص، وCPU قليل، وأداء real-time متوقع، بس الـfeatures والـcodecs محدودة باللي الـchip بيدعمه.
@@ -196,7 +204,7 @@ cd encoding_lab && streamlit run app.py
 
 ## 6. What Can Go Wrong in an ROV? ⏱️ 10:40
 
-🎞️ **Slide 42** — Camera selection & adaptive streaming
+🎞️ **Slide 45** — Camera selection & adaptive streaming
 
 | اللي بيحصل | السبب المحتمل | الحل الهندسي |
 |---|---|---|
@@ -213,7 +221,7 @@ cd encoding_lab && streamlit run app.py
 
 ## 7. Streaming and Computer Vision ⏱️ 11:40
 
-🎞️ **Slide 43** — The robot's eyes only see what the encoder kept
+🎞️ **Slide 46** — The robot's eyes only see what the encoder kept
 
 حاجة الفريق عمره ما ظبطها: الـ**object detection** والـ**3D reconstruction** والـ**autonomous movement** والـ**SLAM**. لو بيشتغلوا على الـstream فوق، فهم بيورثوا كل قرار في الـencoding:
 
@@ -225,7 +233,7 @@ cd encoding_lab && streamlit run app.py
 
 ## 8. The Engineering Mindset ⏱️ 12:20
 
-🎞️ **Slide 78** — Take it back to the ROV
+🎞️ **Slide 81** — Take it back to the ROV
 
 هسيبكم بتلات أسئلة لازم كل الفريق يعرف إجابتها:
 

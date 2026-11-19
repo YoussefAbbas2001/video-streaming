@@ -57,7 +57,7 @@ Keep a running **team scoreboard** across all activities; announce a winner at t
 
 **Goal:** turn symptoms into ranked hypotheses and measurements — before changing anything.
 
-**Scenario (read aloud, also on slide 45):**
+**Scenario (read aloud, also on slide 48):**
 > The ROV has eight cameras streaming at 640×480. After about ten minutes in the water, the video lags by roughly one second. Two cameras freeze occasionally, and one camera sometimes fails to start at all. The pilot also says the thruster response “feels slow”. The team's plan is to reduce the resolution again.
 
 **Task (per team, on the answer sheet):**

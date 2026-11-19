@@ -1,6 +1,6 @@
 # Streaming deep-dive: additions for the 2026–27 season
 
-Companion to the three recorded videos and slides 6, 12, 18, 36, 37 and 43 of the deck. Every number has a source at the end; prices and product lifecycles change, so re-check them before presenting.
+Companion to the three recorded videos and slides 6, 12, 18, 39, 40 and 46 of the deck. Every number has a source at the end; prices and product lifecycles change, so re-check them before presenting.
 
 **Contents**
 1. Why streaming is underrated: compression runs the world

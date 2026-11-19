@@ -1,6 +1,6 @@
 # Presenter Script — *Engineering Better ROV Systems*
 
-**For:** the presenter (you).  **Deck:** `presentation/MIA_Robotics_Workshop.pptx` (70 slides, speaker notes on every slide).
+**For:** the presenter (you).  **Deck:** `presentation/MIA_Robotics_Workshop.pptx` (82 slides, speaker notes on every slide).
 **Companion files:** `Workshop_Design.md` (agenda, objectives, unknowns), the notebook, `student_materials/`, `workshop_activities/`, `ux_materials/`, and the presenter-only `referee/` folder (kept in the presenter's Drive, not in the team repo).
 
 How to use this script:
@@ -16,6 +16,7 @@ How to use this script:
 - [ ] Send the **questionnaire** (Workshop_Design.md §6.5) to the team lead a week before. Even partial answers change the conversation.
 - [ ] Run the notebook top to bottom on the presenter laptop (`jupyter lab`, *Run All*, ~5 min). Keep it open on Experiment 2.
 - [ ] Open the deck in **Presenter View** (speaker notes visible).
+- [ ] Click through the deck once. Every content slide **builds on click** (title and kicker stay; each card, chart or recipe fades in on the next click, at most 8 clicks per slide). The presenter view shows the next step. To change the grouping, edit `build/add_click_builds.py` and rebuild (`node build/build_deck.js`).
 - [ ] Print: Activity 1 cards, Activity 2 answer sheets, the Testing Competition Guide, the UX scenario and A3 sheets, the Diagnostic Checklist (one per subsystem owner), the Cheat Sheet (one per student).
 - [ ] Copy `workshop_activities/testing_competition_code/` to every team laptop; check `python -m pytest -q` passes (7 tests).
 - [ ] Prepare Activity 3 clips: copy the five encodes listed in `Activity_Instructions.md` (Activity 3) from the notebook's `work/` folder, rename them A–E, keep the answer key.
@@ -92,7 +93,7 @@ The key unknown — say it explicitly:
 | Shared bottleneck: the **USB bus** | Shared bottleneck: switch uplink and **tether** |
 | Identify with `lsusb -t`, `v4l2-ctl --list-devices` | Identify with the camera's web page, `ffprobe rtsp://…` |
 
-Second unknown: **Jetson Nano vs Jetson Orin Nano** — they are often confused, and only the original Nano has a hardware video encoder (details on slide 34).
+Second unknown: **Jetson Nano vs Jetson Orin Nano** — they are often confused, and only the original Nano has a hardware video encoder (details on slide 37).
 
 **Slide 11 — three architectures.** Draw them on the whiteboard too.
 - **A — camera encodes:** IP cameras send H.264/H.265; switch forwards; SBC is optional (relay/control). No SBC encode load; you depend on the camera's encoder settings.
@@ -174,7 +175,7 @@ Overhead: Ethernet adds 38 bytes per frame on the wire (preamble+SFD 8, header 1
 
 Duplex: switched Ethernet is full-duplex (both directions at once). A true Ethernet *hub* is half-duplex with collisions — rare today, but check: `ethtool eth0` shows `Duplex: Full`.
 
-Packet loss: on UDP, lost packets corrupt video (slide 30); on TCP, they cause retransmission, which shows up as **growing delay** and freezes. Jitter = variation in packet delay.
+Packet loss: on UDP, lost packets corrupt video (slide 33); on TCP, they cause retransmission, which shows up as **growing delay** and freezes. Jitter = variation in packet delay.
 
 **Ask:** *“A 100 Mb/s tether, 8 cameras, 30 % headroom. Max average bitrate per camera?”*
 Expected: 100 × 0.7 / 8 = 8.75 Mb/s, before ~5 % overhead → ≈ 8.3 Mb/s of video.
@@ -254,11 +255,17 @@ The chart shows the bitrate each codec needed for equal SSIM at two operating po
 - **H.265**: better compression at many operating points; hardware encode on Jetson Nano; Pi 5 decodes it in hardware but can't encode it in hardware; browser support is uneven — **test the pilot laptop's browser**.
 - **AV1**: excellent compression, very expensive software encode; neither board encodes it in hardware. Recording/archiving later, not the live ROV today.
 
-**Slide 29 — knobs.** Walk the table: bitrate, CRF, preset, GOP, B-frames, lookahead, resolution, frame rate. Then the preset charts (measured on the presenter laptop): CPU time per frame grows ~35× from `ultrafast` to `veryslow`, while bitrate at CRF 23 drops with diminishing returns after `medium`/`slow`. (CRF 23 isn't exactly equal quality across presets — `ultrafast` disables many tools.)
+**Slide 29 — MJPEG: costly in bits, cheap in everything else.** *(new, Nov 2026)* Click through the three numbers, then the two cards. MJPEG is every frame as its own JPEG: no encoder hold, and a lost frame never smears into the next. Measured on our 720p30 clip: at the same SSIM, MJPEG needed **4.7×** H.264's bitrate (q=3: 11.9 Mb/s vs CRF 21: 2.52 Mb/s); copying a USB camera's own MJPEG with FFmpeg cost **1.3 % of one core**. So: H.264 for what the pilot drives with; MJPEG where it is free (the camera already makes it) or flexible (CV debug views, snapshots, training data, the fallback stream). Reading: `docs/mjpeg-and-ffmpeg.md`.
+
+**Slide 30 — use FFmpeg, not mjpeg-streamer.** *(new, Nov 2026)* Click once for the table, once for the verdict. We read the PyPI library's source and tested it: it **re-encodes for every viewer** (2 viewers = 28 encodes/s instead of 14) and **paces by a timer** (a 5 fps source went out at ≈ 14 fps of duplicates). mjpg-streamer (C) is fine at passthrough but was last changed in 2021 and its Pi-camera plugin needs MMAL, which the Pi 5 lacks. FFmpeg does every job, plus RTP, recording, filters, H.264 and metrics, and the team already uses it. Be honest about the one gap: FFmpeg's HTTP server serves **one viewer per process**; we cover it by sending RTP once over the tether and fanning out topside.
+
+**Slide 31 — FFmpeg recipes.** *(new, Nov 2026)* One recipe per click. Demo live if time allows: `demos/02_pipeline/mjpeg_ffmpeg.sh http` and open `http://localhost:8080/aux1.mjpg` in a browser; then `mjpeg_ffmpeg.sh tee` and show the recording and `aux1_latest.jpg` growing; then `python3 demos/02_pipeline/cv_debug_ffmpeg.py` and `ffplay … det.sdp`. Two gotchas to say out loud: `-content_type` is required for browsers, and `-huffman default` is required when FFmpeg encodes JPEG for RTP.
+
+**Slide 32 — knobs.** Walk the table: bitrate, CRF, preset, GOP, B-frames, lookahead, resolution, frame rate. Then the preset charts (measured on the presenter laptop): CPU time per frame grows ~35× from `ultrafast` to `veryslow`, while bitrate at CRF 23 drops with diminishing returns after `medium`/`slow`. (CRF 23 isn't exactly equal quality across presets — `ultrafast` disables many tools.)
 
 Profiles & levels: a **profile** limits which tools are used (Constrained Baseline / Main / High); a **level** limits resolution × frame rate × bitrate the decoder must handle. Pick what the decoder (browser, hardware) supports. Raspberry Pi's white paper measured a low-latency x264 configuration with CABAC disabled — CABAC isn't allowed in Baseline profile and costs CPU.
 
-**Slide 30 — packet loss (measured).** We deleted ~8 kB (six UDP datagrams of MPEG-TS) at three moments and decoded:
+**Slide 33 — packet loss (measured).** We deleted ~8 kB (six UDP datagrams of MPEG-TS) at three moments and decoded:
 - **GOP 30**: damaged ≈ 0.6 s on average (worst 0.7 s).
 - **GOP 150**: ≈ 2.2 s on average, worst **3.6 s** — until the next I-frame at t = 5 s. *(One of the three losses was rescued early by the camera cut at t ≈ 4 s, an almost all-intra frame. Luck is not a design: plan for the worst case.)*
 - **Intra refresh** (a column of intra blocks sweeping across the picture every 30 frames, no I-frames): ≈ 0.6 s, within about one refresh period — and **no I-frame bitrate spikes**.
@@ -305,11 +312,11 @@ Expected: TCP retransmits → no corruption, but the stream **waits** → latenc
 **Objective:** Correct facts about Jetson Nano and Pi 5; choose where to encode; choose a transport; understand the latency chain.
 **Duration:** 25 min · **Slides:** 32–40
 
-**Slide 33 — software vs hardware encoding.** Software (x264/x265/SVT-AV1 on CPU): flexible, best quality per bit, cost scales with resolution × fps × streams, competes with control software, heats the SBC. Hardware encoder: dedicated silicon, near-zero CPU, predictable, **fixed total capacity**, fewer knobs, vendor APIs.
+**Slide 36 — software vs hardware encoding.** Software (x264/x265/SVT-AV1 on CPU): flexible, best quality per bit, cost scales with resolution × fps × streams, competes with control software, heats the SBC. Hardware encoder: dedicated silicon, near-zero CPU, predictable, **fixed total capacity**, fewer knobs, vendor APIs.
 
 > *“On this laptop, FFmpeg lists h264_nvenc, h264_qsv, h264_vaapi and h264_v4l2m2m — and every single one failed a test encode. Listed means compiled in, not working. Always run a one-second test encode.”*
 
-**Slide 34 — Jetson Nano vs Raspberry Pi 5.** This is the most fact-sensitive slide. Say exactly:
+**Slide 37 — Jetson Nano vs Raspberry Pi 5.** This is the most fact-sensitive slide. Say exactly:
 
 - **Jetson Nano** (2019, Maxwell GPU, quad Cortex-A57): hardware **encoder** for H.264 and H.265 — up to 4K30, or 4× 1080p30, or 9× 720p30 (NVIDIA spec); hardware decoder up to 4K60 / 8× 1080p30. Use the encoder through **GStreamer** (`nvv4l2h264enc`, `nvv4l2h265enc`) or NVIDIA's Multimedia API. **Upstream FFmpeg does not use the Nano's encoder**; NVIDIA's FFmpeg package accelerates *decode*; community patches (e.g. `jetson-ffmpeg`) exist. The Nano is supported up to JetPack 4.6.x (Ubuntu 18.04).
 - **Raspberry Pi 5** (BCM2712, quad Cortex-A76 @ 2.4 GHz): **no hardware H.264 encoder, no hardware H.264 decoder**; it has a 4Kp60 **HEVC decoder**. Encoding is software (libx264). Raspberry Pi's own white paper (April 2026) measured one 1080p30 low-latency x264 encode at ~62–90 % of one core, and a higher-quality configuration at ~98–153 %, depending on bitrate. It did not test multiple streams or thermals — that's their experiment.
@@ -318,13 +325,13 @@ Expected: TCP retransmits → no corruption, but the stream **waits** → latenc
 **Ask:** *“So which board would you choose for eight cameras — and what measurement would change your mind?”*
 Expected discussion: Nano's encoder covers ~4× 1080p30-equivalent of pixel rate, so 8 cameras at 1080p30 won't fit — but 1–2 main + substreams can; Pi 5 needs camera-side encoding (IP cameras / H.264 UVC) to scale; measure CPU, temperature, and the USB bus in either case.
 
-**Slide 35 — where to encode.** Prefer, in order (after measuring): in the camera → SBC hardware → SBC software. Encoding on the topside laptop saves **zero** tether bandwidth. Remember: MJPEG from USB cameras must be decoded before re-encoding (Jetson can do JPEG decode in hardware: `nvv4l2decoder mjpeg=1` / `nvjpegdec`).
+**Slide 38 — where to encode.** Prefer, in order (after measuring): in the camera → SBC hardware → SBC software. Encoding on the topside laptop saves **zero** tether bandwidth. Remember: MJPEG from USB cameras must be decoded before re-encoding (Jetson can do JPEG decode in hardware: `nvv4l2decoder mjpeg=1` / `nvjpegdec`).
 
-**Slide 36 — can the Pi 5 replace the Nano?** *(new, Nov 2026)* The answer depends on who encodes. Cameras that encode (UVC H.264 or IP) → the Pi 5 is a good replacement, with a much faster CPU. The SBC must encode several raw/MJPEG USB cameras → the Nano's hardware encoder (4× 1080p30) wins; the Pi 5 spends 0.62–0.9 of a core per 1080p30 low-latency stream (Raspberry Pi white paper, April 2026). On-board CV: Nano GPU vs Pi 5 + AI HAT+ (13/26 TOPS). Lifecycle: Nano dev kit EOL, JetPack 4 EOL Nov 2024, modules until Jan 2027. Nobody has tested the Pi 5 on our ROV yet, so finish with the soak-test plan.
+**Slide 39 — can the Pi 5 replace the Nano?** *(new, Nov 2026)* The answer depends on who encodes. Cameras that encode (UVC H.264 or IP) → the Pi 5 is a good replacement, with a much faster CPU. The SBC must encode several raw/MJPEG USB cameras → the Nano's hardware encoder (4× 1080p30) wins; the Pi 5 spends 0.62–0.9 of a core per 1080p30 low-latency stream (Raspberry Pi white paper, April 2026). On-board CV: Nano GPU vs Pi 5 + AI HAT+ (13/26 TOPS). Lifecycle: Nano dev kit EOL, JetPack 4 EOL Nov 2024, modules until Jan 2027. Nobody has tested the Pi 5 on our ROV yet, so finish with the soak-test plan.
 
-**Slide 37 — the 2023 heat failure.** *(new, Nov 2026)* Tell the story briefly and without blame: in a 2023 competition trial the stream died because the SBC overheated. Walk the chain: sealed hull → constant encode load → throttling at 80 °C (Pi) → encoder falls behind → stream stops. Then the five fixes: measure, design a heat path, reduce load, soak-test, show temperature to the pilot. Ask whoever was there for details and fill in `sdlc/postmortem-template.md` together.
+**Slide 40 — the 2023 heat failure.** *(new, Nov 2026)* Tell the story briefly and without blame: in a 2023 competition trial the stream died because the SBC overheated. Walk the chain: sealed hull → constant encode load → throttling at 80 °C (Pi) → encoder falls behind → stream stops. Then the five fixes: measure, design a heat path, reduce load, soak-test, show temperature to the pilot. Ask whoever was there for details and fill in `sdlc/postmortem-template.md` together.
 
-**Slide 38 — protocols.**
+**Slide 41 — protocols.**
 - **UDP**: no retransmission; lost is lost; no waiting.
 - **TCP**: reliable, ordered; under loss/congestion, head-of-line blocking → growing delay.
 - **RTP (+RTCP)**: timestamps and sequence numbers over UDP; RTCP carries receiver reports (loss, jitter) and keyframe requests. The classic low-latency transport.
@@ -334,11 +341,11 @@ Expected discussion: Nano's encoder covers ~4× 1080p30-equivalent of pixel rate
 - **HLS/DASH**: segmented HTTP streaming for viewers — seconds of delay. **Never for piloting.**
 - Bridge: cameras → RTSP → **MediaMTX** (single binary, converts RTSP ↔ WebRTC/WHEP) → browser.
 
-**Slide 39 — latency budget (ESTIMATE).** Three pipelines; numbers are typical, except the x264 encoder hold which is measured. The H.264-with-defaults pipeline is ~2.4 s, dominated by encoder lookahead (≈ 1.37 s) and a 1 s player cache (VLC's default network caching is 1000 ms) — not by the cable.
+**Slide 42 — latency budget (ESTIMATE).** Three pipelines; numbers are typical, except the x264 encoder hold which is measured. The H.264-with-defaults pipeline is ~2.4 s, dominated by encoder lookahead (≈ 1.37 s) and a 1 s player cache (VLC's default network caching is 1000 ms) — not by the cable.
 
 > *“FPS is not latency. A perfect 30 FPS stream can be two seconds late — like a long conveyor belt that still delivers 30 boxes a second.”*
 
-**Slide 40 — latency is designed (measured).** x264 defaults held **41 frames** before the first output (rc-lookahead 40 + frame threading) ≈ 1.37 s at 30 fps — independent of CPU speed. `-tune zerolatency` held **0**. Recipe: `-preset veryfast -tune zerolatency`, capped bitrate with small `bufsize`, short GOP, no B-frames; receiver: small jitter buffer.
+**Slide 43 — latency is designed (measured).** x264 defaults held **41 frames** before the first output (rc-lookahead 40 + frame threading) ≈ 1.37 s at 30 fps — independent of CPU speed. `-tune zerolatency` held **0**. Recipe: `-preset veryfast -tune zerolatency`, capped bitrate with small `bufsize`, short GOP, no B-frames; receiver: small jitter buffer.
 
 Jitter chart: a simulated tether with small everyday jitter and 2 % spikes of 30–80 ms. Every extra millisecond of buffer reduces late frames but adds latency. Choose deliberately (e.g. 30–60 ms on a clean wired tether) and measure.
 
@@ -356,25 +363,25 @@ Jitter chart: a simulated tether with small everyday jitter and 2 % spikes of 30
 **Objective:** Apply everything to eight cameras; produce a measurement-based diagnosis and an optimization procedure.
 **Duration:** 35 min · **Slides:** 41–47
 
-**Slide 41 — main vs substreams (measured).** Main 720p30 ≈ 2.5 Mb/s; sub 640×360@15 ≈ 0.42 Mb/s; thumbnail 320×180@10 ≈ 0.12 Mb/s. Eight cameras: all-main 19.8 Mb/s; 1 main + 7 subs ≈ 5.4 Mb/s (≈ 27 %). IP cameras usually provide substreams natively; on an SBC: GStreamer `tee` or one FFmpeg process with two outputs (costs encoder capacity).
+**Slide 44 — main vs substreams (measured).** Main 720p30 ≈ 2.5 Mb/s; sub 640×360@15 ≈ 0.42 Mb/s; thumbnail 320×180@10 ≈ 0.12 Mb/s. Eight cameras: all-main 19.8 Mb/s; 1 main + 7 subs ≈ 5.4 Mb/s (≈ 27 %). IP cameras usually provide substreams natively; on an SBC: GStreamer `tee` or one FFmpeg process with two outputs (costs encoder capacity).
 
 > *“The pilot looks at one or two cameras at a time. The other six only need to answer: is something happening there?”*
 
-**Slide 42 — priorities and adaptation.** Measure → budget (70 % of throughput minus control/telemetry) → allocate (minimums by priority, then top up) → apply (encoder bitrate, pause/resume) → show (UI states: live, degraded, paused, lost). Priorities change with the task: the manipulator camera becomes priority 1 during a grab. Notebook Experiment 8 shows the tether degrading 100 → 40 → 20 → 6 Mb/s: the pilot view stays sharp; aux cameras degrade then pause — visibly.
+**Slide 45 — priorities and adaptation.** Measure → budget (70 % of throughput minus control/telemetry) → allocate (minimums by priority, then top up) → apply (encoder bitrate, pause/resume) → show (UI states: live, degraded, paused, lost). Priorities change with the task: the manipulator camera becomes priority 1 during a grab. Notebook Experiment 8 shows the tether degrading 100 → 40 → 20 → 6 Mb/s: the pilot view stays sharp; aux cameras degrade then pause — visibly.
 
 Requirements for this: encoders whose bitrate can change at runtime (hardware encoders and x264's API can; many IP cameras expose it via HTTP/ONVIF), a throughput estimate (RTCP receiver reports, WebRTC stats/congestion control, probing), and an honest UI.
 
-**Slide 43 — streaming for computer vision.** *(new, Nov 2026)* Detection, 3D reconstruction, autonomy and SLAM all inherit streaming decisions when they run on the topside stream. A YOLOv5 study on H.264 found moderate compression (CRF 37 vs 22) barely mattered, but performance dropped at stronger compression — worst in poor light and fast motion, which is underwater footage. SLAM needs corners and texture, exactly what compression removes. Rules: run CV next to the raw frames; otherwise give CV its own stream profile; photogrammetry uses stills or local recordings.
+**Slide 46 — streaming for computer vision.** *(new, Nov 2026)* Detection, 3D reconstruction, autonomy and SLAM all inherit streaming decisions when they run on the topside stream. A YOLOv5 study on H.264 found moderate compression (CRF 37 vs 22) barely mattered, but performance dropped at stronger compression — worst in poor light and fast motion, which is underwater footage. SLAM needs corners and texture, exactly what compression removes. Rules: run CV next to the raw frames; otherwise give CV its own stream profile; photogrammetry uses stills or local recordings.
 
-**Slide 44 — toolbox.** Point at the Diagnostic Checklist, which has the full commands. Each claim in their design document should cite one of these measurements.
+**Slide 47 — toolbox.** Point at the Diagnostic Checklist, which has the full commands. Each claim in their design document should cite one of these measurements.
 
-**🎯 Slide 45 — Activity 2: Diagnose the ROV (20 min).** Read the scenario: 8 cameras at 640×480; after ~10 min in the water video lags ~1 s; two cameras freeze occasionally; one sometimes fails to start; thrusters feel slow; plan = reduce resolution again. Teams list ≥ 5 hypotheses, rank them, and give a measurement for each. Answer key in `Activity_Instructions.md`. Score: 1 per plausible hypothesis, 2 per correct measurement, +3 for the best-ranked root cause.
+**🎯 Slide 48 — Activity 2: Diagnose the ROV (20 min).** Read the scenario: 8 cameras at 640×480; after ~10 min in the water video lags ~1 s; two cameras freeze occasionally; one sometimes fails to start; thrusters feel slow; plan = reduce resolution again. Teams list ≥ 5 hypotheses, rank them, and give a measurement for each. Answer key in `Activity_Instructions.md`. Score: 1 per plausible hypothesis, 2 per correct measurement, +3 for the best-ranked root cause.
 
 Good answers to listen for: USB bus/isochronous reservation (camera fails to start; `lsusb -t`, `dmesg`); SBC CPU saturated by MJPEG decode + re-encode (`top`); thermal throttling after 10 minutes in a sealed hull (`vcgencmd get_throttled`, `tegrastats`); TCP-based streaming accumulating delay (latency grows over time); player buffering; tether negotiated 100 Mb/s or with errors (`ethtool`, `ethtool -S`); topside browser decoding 8 streams (DevTools Performance, `chrome://media-internals`); control traffic queued behind video on the same link (thrusters feel slow!); power brown-outs from thrusters resetting USB (`dmesg`).
 
-**Slide 46 — optimization strategy.** In order: inventory & measure → stop wasting bits → stream smart → design latency → design failure → verify. *“Reducing resolution is the last lever, not the first.”*
+**Slide 49 — optimization strategy.** In order: inventory & measure → stop wasting bits → stream smart → design latency → design failure → verify. *“Reducing resolution is the last lever, not the first.”*
 
-**Slide 47 — homework.** Hand out the Diagnostic Checklist; each subsystem owner fills their part. Record 60 s of real footage (re-run the notebook with `ROV_SOURCE`). Measure glass-to-glass latency.
+**Slide 50 — homework.** Hand out the Diagnostic Checklist; each subsystem owner fills their part. Record 60 s of real footage (re-run the notebook with `ROV_SOURCE`). Measure glass-to-glass latency.
 
 **Transition to Session 2 (next time):** *“Bring the numbers. We'll turn them into requirements, tests and a better pilot interface.”*
 
@@ -395,11 +402,11 @@ Ask each subsystem owner for one surprising finding from the checklist. Write th
 **Objective:** A lightweight process the team can actually run; testable requirements; shared definitions of ready and done.
 **Duration:** 30 min · **Slides:** 48–54
 
-**Slide 49 — integration cliff.** The chart is **illustrative**, not data. Tell a story: every subsystem works alone; the week before competition everything is connected; the camera driver and thruster controller fight over USB power; the web app can't keep up with 8 streams; nobody remembers why a setting was chosen. Late discovery = no good fixes.
+**Slide 52 — integration cliff.** The chart is **illustrative**, not data. Tell a story: every subsystem works alone; the week before competition everything is connected; the camera driver and thruster controller fight over USB power; the web app can't keep up with 8 streams; nobody remembers why a setting was chosen. Late discovery = no good fixes.
 
-**Slide 50 — Work force = Quality × Efficiency.** *(new, Nov 2026)* It's a product: a zero in either factor makes the result zero. Fast but broken = 0; perfect but late = 0. Ask the room which factor is weaker today; the rest of the session gives a lever for each.
+**Slide 53 — Work force = Quality × Efficiency.** *(new, Nov 2026)* It's a product: a zero in either factor makes the result zero. Fast but broken = 0; perfect but late = 0. Ask the room which factor is weaker today; the rest of the session gives a lever for each.
 
-**Slide 51 — SDLC loop, ROV examples:**
+**Slide 54 — SDLC loop, ROV examples:**
 1. Requirements — “pilot camera latency ≤ 200 ms median”.
 2. Analysis & architecture — where to encode, which protocol.
 3. Planning — tasks, owners, order, dependencies.
@@ -412,14 +419,14 @@ Ask each subsystem owner for one surprising finding from the checklist. Write th
 
 A 1–2 week loop, not a waterfall.
 
-**Slide 52 — functional vs non-functional.** Functional = what it does; non-functional = how well (latency, bandwidth, reliability, usability, safety). Testable = **a number, a condition, a method**.
+**Slide 55 — functional vs non-functional.** Functional = what it does; non-functional = how well (latency, bandwidth, reliability, usability, safety). Testable = **a number, a condition, a method**.
 
 **2-minute exercise:** each team rewrites “the video should be smooth and low latency” as a testable requirement.
 Good answer: *“With all eight cameras streaming, the pilot camera's glass-to-glass latency is ≤ 200 ms median and ≤ 300 ms worst over 10 measurements, at ≥ 25 fps.”*
 
-**Slide 53 — epic → test case.** Walk down: epic *multi-camera pilot video* → feature *primary camera selection* → user story *“As a pilot, I want to switch the primary camera with one key, so that I can follow the task without looking away from the video”* → acceptance criteria (≤ 1 s, highlight, offline shown honestly, other streams continue) → tasks → test cases tracing to criteria.
+**Slide 56 — epic → test case.** Walk down: epic *multi-camera pilot video* → feature *primary camera selection* → user story *“As a pilot, I want to switch the primary camera with one key, so that I can follow the task without looking away from the video”* → acceptance criteria (≤ 1 s, highlight, offline shown honestly, other streams continue) → tasks → test cases tracing to criteria.
 
-**Slide 54 — DoR/DoD.** Short lists, printed, on the wall, reviewed in retros. DoD includes *tested on the real ROV for hardware-related work* and *UI changes tried by a pilot*.
+**Slide 57 — DoR/DoD.** Short lists, printed, on the wall, reviewed in retros. DoD includes *tested on the real ROV for hardware-related work* and *UI changes tried by a pilot*.
 
 **Misconceptions:**
 - “Process slows us down.” → Rework slows you down; a 30-minute weekly planning saves days of integration panic.
@@ -432,11 +439,11 @@ Good answer: *“With all eight cameras streaming, the pilot camera's glass-to-g
 **Objective:** Testing as discovering failure; levels and techniques; experience finding, reporting and fixing real defects.
 **Duration:** 10 min talk + 60 min activity · **Slides:** 55–58
 
-**Slide 55 — levels and techniques.** Pyramid: many fast unit tests (allocator, command parser, PID maths), fewer integration tests (stream manager + real FFmpeg/GStreamer; web app + backend), few system tests (whole ROV in the pool), acceptance tests with the pilot. Techniques: boundary, negative, stress, performance, regression.
+**Slide 58 — levels and techniques.** Pyramid: many fast unit tests (allocator, command parser, PID maths), fewer integration tests (stream manager + real FFmpeg/GStreamer; web app + backend), few system tests (whole ROV in the pool), acceptance tests with the pilot. Techniques: boundary, negative, stress, performance, regression.
 
-**Slide 56 — mindset.** *“A test that cannot fail is not a test.”* Developers test to confirm; testers test to break. Read 2–3 scenarios and ask: *“For which of these do we already know what our system does?”* (Usually none.)
+**Slide 59 — mindset.** *“A test that cannot fail is not a test.”* Developers test to confirm; testers test to break. Read 2–3 scenarios and ask: *“For which of these do we already know what our system does?”* (Usually none.)
 
-**🎯 Slide 57 — Break the Other Team's Software (60 min).** Follow `student_materials/Testing_Competition_Guide.md`.
+**🎯 Slide 60 — Break the Other Team's Software (60 min).** Follow `student_materials/Testing_Competition_Guide.md`.
 - Teams test `rov_core` (camera manager + command validator) against `SPECIFICATION.md`.
 - The code contains **16 seeded defects**, 6 of them critical (crash, frozen frame reported live, unsafe thruster values). The referee key and a test that proves each one are in the presenter-only `referee/` folder (Drive, not the team repo) — **don't hand those out**. Copy it next to the code and run it yourself: `python -m pytest -q path/to/referee/test_referee_seeded_defects.py` from the code folder → 16 failed. When a team fixes a defect, its referee test passes.
 - Scoring is in the guide (+10 defect, +20 critical, +5 clear repro with automated test, −5 false positive, +10 fix with regression test, −10 fix that breaks something).
@@ -454,19 +461,19 @@ Refereeing tips: validate every claim against the spec, explain each decision, a
 **Objective:** Practical, kind code review; a simple Git workflow; a board and a rhythm; outcome metrics.
 **Duration:** 25 min · **Slides:** 59–64
 
-**Slide 58 — the Bug Hunt League.** *(new, Nov 2026)* The 16 non-GUI members are our best testers. Points by severity (10/5/2/1), bonuses for repro videos, failing tests and regressions; developers can't score on their own code; the hunter verifies the fix. Weekly leaderboard, monthly award, Bug Bash before every pool test. Full rules: `sdlc/bug-hunt-league.md`.
+**Slide 61 — the Bug Hunt League.** *(new, Nov 2026)* The 16 non-GUI members are our best testers. Points by severity (10/5/2/1), bonuses for repro videos, failing tests and regressions; developers can't score on their own code; the hunter verifies the fix. Weekly leaderboard, monthly award, Bug Bash before every pool test. Full rules: `sdlc/bug-hunt-league.md`.
 
-**Slide 59 — code review.** Why: catch defects early, spread knowledge (a student team's “bus factor” is often 1), keep consistency. How: small PRs (< 400 lines, one purpose); label comments *blocking / suggestion / question*; comment on code, not people (*“this function doesn't handle a disconnected camera”*, never *“you forgot”*); approve when it improves the codebase and meets the DoD — not when it's perfect. Disagreements: data or a quick prototype; still stuck → the subsystem lead decides and it goes into the decision log.
+**Slide 62 — code review.** Why: catch defects early, spread knowledge (a student team's “bus factor” is often 1), keep consistency. How: small PRs (< 400 lines, one purpose); label comments *blocking / suggestion / question*; comment on code, not people (*“this function doesn't handle a disconnected camera”*, never *“you forgot”*); approve when it improves the codebase and meets the DoD — not when it's perfect. Disagreements: data or a quick prototype; still stuck → the subsystem lead decides and it goes into the decision log.
 
-**Slide 60 — live review (8 min).** Show only the BEFORE code; teams find ≥ 5 problems in 3 minutes. Expected: cryptic names (`sw`, `c`, `v`); hard-coded IP; no validation; fire-and-forget `fetch` with no error handling; **UI claims success immediately** (“CAM 3 OK” even if offline); no state feedback; string concatenation into a URL. Reveal AFTER; discuss the trade-off (more code, but every state explicit and failures visible to the pilot).
+**Slide 63 — live review (8 min).** Show only the BEFORE code; teams find ≥ 5 problems in 3 minutes. Expected: cryptic names (`sw`, `c`, `v`); hard-coded IP; no validation; fire-and-forget `fetch` with no error handling; **UI claims success immediately** (“CAM 3 OK” even if offline); no state feedback; string concatenation into a URL. Reveal AFTER; discuss the trade-off (more code, but every state explicit and failures visible to the pilot).
 
-**Slide 61 — Git.** Trunk-based with short-lived branches; `main` always runnable on the ROV; PR + 1 review; meaningful commits that explain *why*; tag before every pool test and competition (`v0.4-pool-2026-03-14`). Merge conflicts: pull `main` often; small PRs mean small conflicts.
+**Slide 64 — Git.** Trunk-based with short-lived branches; `main` always runnable on the ROV; PR + 1 review; meaningful commits that explain *why*; tag before every pool test and competition (`v0.4-pool-2026-03-14`). Merge conflicts: pull `main` often; small PRs mean small conflicts.
 
-**Slide 62 — GitHub is a workflow, not a folder.** *(new, Nov 2026)* Today the repo is a backup drive. Show the six features (Issues, PRs, Actions, Releases, branch protection, Projects) and the four-week ladder: one habit per week. Templates are ready in `.github/`. Guide: `sdlc/github-workflow.md`.
+**Slide 65 — GitHub is a workflow, not a folder.** *(new, Nov 2026)* Today the repo is a backup drive. Show the six features (Issues, PRs, Actions, Releases, branch protection, Projects) and the four-week ladder: one habit per week. Templates are ready in `.github/`. Guide: `sdlc/github-workflow.md`.
 
-**Slide 63 — board.** Backlog / Ready / In progress (WIP ≤ 2 per person) / Review / Done. Card types: story, task, bug, debt. Weekly rhythm: Monday 30-min planning; async “done / next / blocked” updates; Friday 30-min review + retro (what went well, what didn't, one improvement). Milestones = pool tests and the competition. Tool doesn't matter (GitHub Projects, Trello, Jira).
+**Slide 66 — board.** Backlog / Ready / In progress (WIP ≤ 2 per person) / Review / Done. Card types: story, task, bug, debt. Weekly rhythm: Monday 30-min planning; async “done / next / blocked” updates; Friday 30-min review + retro (what went well, what didn't, one improvement). Milestones = pool tests and the competition. Tool doesn't matter (GitHub Projects, Trello, Jira).
 
-**Slide 64 — mindset & metrics.** Habits: measurable objectives; decision log (context, options, decision, why); blockers raised the same day; hardware–software interfaces agreed early (connectors, message formats, power budget); failed experiments are data. Useful metrics: requirements met (measured), test pass rate, defects found vs fixed, features done (DoD), main runnable, latency/bandwidth vs targets. Vanity: lines of code, commits, hours, features *started*.
+**Slide 67 — mindset & metrics.** Habits: measurable objectives; decision log (context, options, decision, why); blockers raised the same day; hardware–software interfaces agreed early (connectors, message formats, power budget); failed experiments are data. Useful metrics: requirements met (measured), test pass rate, defects found vs fixed, features done (DoD), main runnable, latency/bandwidth vs targets. Vanity: lines of code, commits, hours, features *started*.
 
 **Transition:** *“We've made the system faster and more reliable. Now: is it usable by a human under pressure?”*
 
@@ -477,27 +484,27 @@ Refereeing tips: validate every claim against the spec, explain each decision, a
 **Objective:** UX as an engineering discipline: understand the pilot, apply principles, design for safety, validate with users.
 **Duration:** 35 min · **Slides:** 65–74
 
-**Slide 66 — central message.** Read the quote slowly:
+**Slide 69 — central message.** Read the quote slowly:
 
 > *“An excellent engineering system is not just one that works technically. It is one that allows its operator to use it effectively, confidently, and safely.”*
 
 The pilot simultaneously understands the situation, monitors several feeds, controls movement, operates the manipulator, watches telemetry, and reacts to the unexpected. Ask a pilot in the room for their worst moment on mission day — it's usually a UX failure. *“Attractive is not the same as usable”*: thin fonts, low-contrast dark-on-dark, decorative animation can actively hurt under stress.
 
-**Slide 67 — vocabulary.** UI = the screens and controls; UX = the experience of getting the job done; HCI = the research discipline; human factors = designing for human abilities and limits (aviation, nuclear, subsea); accessibility = usable in different conditions and by different people. **Cognitive load**: working memory is small — every extra thing to find or remember steals attention from driving. **Situational awareness**: perceive → comprehend → project; e.g. show *“depth 2.31 m, 0.2 m above target”*, not just *“2.31”*.
+**Slide 70 — vocabulary.** UI = the screens and controls; UX = the experience of getting the job done; HCI = the research discipline; human factors = designing for human abilities and limits (aviation, nuclear, subsea); accessibility = usable in different conditions and by different people. **Cognitive load**: working memory is small — every extra thing to find or remember steals attention from driving. **Situational awareness**: perceive → comprehend → project; e.g. show *“depth 2.31 m, 0.2 m above target”*, not just *“2.31”*.
 
-**Slide 68 — persona & journey.** A persona is a realistic composite from observation (Mariam: pilot, gamepad in both hands, glances only). The journey maps a mission with pain points (red): grab object; camera freezes without her noticing. Pain point → requirement: *“A stale feed is visibly marked within 1 s.”* Full persona and journey: `ux_materials/UX_Pilot_Experience_Pack.md`.
+**Slide 71 — persona & journey.** A persona is a realistic composite from observation (Mariam: pilot, gamepad in both hands, glances only). The journey maps a mission with pain points (red): grab object; camera freezes without her noticing. Pain point → requirement: *“A stale feed is visibly marked within 1 s.”* Full persona and journey: `ux_materials/UX_Pilot_Experience_Pack.md`.
 
-**Slide 69 — seven principles** (one ROV example each): information hierarchy; low cognitive load; situational awareness; feedback (**requested ≠ confirmed**); error prevention (dangerous actions deliberate); consistency (never move a control — muscle memory); customization (with a known-good default and reset).
+**Slide 72 — seven principles** (one ROV example each): information hierarchy; low cognitive load; situational awareness; feedback (**requested ≠ confirmed**); error prevention (dangerous actions deliberate); consistency (never move a control — muscle memory); customization (with a known-good default and reset).
 
-**Slide 70 — before/after.** Ask: *“Where does your eye go first on each?”* Before: eight equal tiles, telemetry as tiny text, buttons of equal weight (STOP looks like LIGHT), no camera or link state. After: large primary feed with HUD (depth, heading), thumbnails with explicit states (LIVE/DEGRADED/LOST), link and mode always visible, separated E-STOP, commanded vs confirmed gripper state.
+**Slide 73 — before/after.** Ask: *“Where does your eye go first on each?”* Before: eight equal tiles, telemetry as tiny text, buttons of equal weight (STOP looks like LIGHT), no camera or link state. After: large primary feed with HUD (depth, heading), thumbnails with explicit states (LIVE/DEGRADED/LOST), link and mode always visible, separated E-STOP, commanded vs confirmed gripper state.
 
-**Slide 71 — layouts.** Primary + previews (navigation), grid (search/survey), picture-in-picture (manipulation: manipulator camera large, pilot camera inset), task workspaces (per mission phase, switched with one key). The best layout depends on the task, not on taste — and controls stay in the same place in every layout.
+**Slide 74 — layouts.** Primary + previews (navigation), grid (search/survey), picture-in-picture (manipulation: manipulator camera large, pilot camera inset), task workspaces (per mission phase, switched with one key). The best layout depends on the task, not on taste — and controls stay in the same place in every layout.
 
-**Slide 72 — UX is a safety feature.** The rule: **the UI must never imply that an operation succeeded when the system has not confirmed it.** Commanded vs confirmed; data age (telemetry older than ~1 s marked stale); deliberate dangerous actions (hold-to-confirm, two-step); defined connection-loss behaviour on the ROV + unmistakable banner topside; E-stop always reachable, never moved, visually distinct; safe defaults (start disarmed). Say clearly: *“I'm not prescribing your safety implementation — design it with your control architecture and the competition's safety rules.”*
+**Slide 75 — UX is a safety feature.** The rule: **the UI must never imply that an operation succeeded when the system has not confirmed it.** Commanded vs confirmed; data age (telemetry older than ~1 s marked stale); deliberate dangerous actions (hold-to-confirm, two-step); defined connection-loss behaviour on the ROV + unmistakable banner topside; E-stop always reachable, never moved, visually distinct; safe defaults (start disarmed). Say clearly: *“I'm not prescribing your safety implementation — design it with your control architecture and the competition's safety rules.”*
 
-**Slide 73 — usability testing.** Recruit a pilot who didn't build the UI. Give **tasks, not instructions**: *“While holding depth, switch to the rear camera, find which camera has a problem, then return to the pilot camera.”* Think-aloud. Measure task completion, time on task, errors, and satisfaction (the 10-question **System Usability Scale**, SUS, 0–100). About five users find most of the major problems (Nielsen). Heuristic evaluation = cheap expert review. A/B test only with two concrete variants and enough trials.
+**Slide 76 — usability testing.** Recruit a pilot who didn't build the UI. Give **tasks, not instructions**: *“While holding depth, switch to the rear camera, find which camera has a problem, then return to the pilot camera.”* Think-aloud. Measure task completion, time on task, errors, and satisfaction (the 10-question **System Usability Scale**, SUS, 0–100). About five users find most of the major problems (Nielsen). Heuristic evaluation = cheap expert review. A/B test only with two concrete variants and enough trials.
 
-**Slide 74 — UX in the lifecycle.** Understand → require → wireframe → prototype → test → build → validate. Show the user story (*identify disconnected cameras immediately*), its acceptance criteria (unmistakable indicator; frozen frame never shown as live; feedback on disconnect/reconnect; other feeds continue) and DoD (disconnect/reconnect tested; visual states reviewed; usability-tested with a pilot; no regressions).
+**Slide 77 — UX in the lifecycle.** Understand → require → wireframe → prototype → test → build → validate. Show the user story (*identify disconnected cameras immediately*), its acceptance criteria (unmistakable indicator; frozen frame never shown as live; feedback on disconnect/reconnect; other feeds continue) and DoD (disconnect/reconnect tested; visual states reviewed; usability-tested with a pilot; no regressions).
 
 **Misconceptions:**
 - “UX is the colours at the end.” → UX decides what information exists on screen, when, and how actions are confirmed.
@@ -516,13 +523,13 @@ Debrief: *“What surprised the designers when someone else used their design?�
 
 ## 2.6 Close — the challenge (15 min)
 
-**Slide 77 — Activity 5 + post-workshop challenge.** Mission statement on screen. 4–6 weeks: baseline (week 1) → design with ≥ 2 architecture options compared by numbers (2–3) → build & test incl. failure cases and usability (3–5) → demonstrate before/after against requirements (6). Judged on requirements met (measured), quality of evidence, failure handling, pilot usability, documentation. No architecture is prescribed — the first deliverable is the measured baseline. Details: `workshop_activities/Post_Workshop_Challenge.md`; options: `student_materials/Proposed_Architecture_Options.md`.
+**Slide 80 — Activity 5 + post-workshop challenge.** Mission statement on screen. 4–6 weeks: baseline (week 1) → design with ≥ 2 architecture options compared by numbers (2–3) → build & test incl. failure cases and usability (3–5) → demonstrate before/after against requirements (6). Judged on requirements met (measured), quality of evidence, failure handling, pilot usability, documentation. No architecture is prescribed — the first deliverable is the measured baseline. Details: `workshop_activities/Post_Workshop_Challenge.md`; options: `student_materials/Proposed_Architecture_Options.md`.
 
 If you have 20 minutes left, run **Activity 5** live: each team sketches its target architecture on A3 with a bandwidth budget and an encoder-capacity budget (rubric in `Activity_Instructions.md`).
 
-**Slide 78 — seven things.** Read them as a checklist; ask each student to pick the one they'll act on first. Close with the mindset line.
+**Slide 81 — seven things.** Read them as a checklist; ask each student to pick the one they'll act on first. Close with the mindset line.
 
-**Slide 79 — thanks.** Point to the folder; offer to review their baseline measurements in two weeks; collect feedback (most useful / least clear).
+**Slide 82 — thanks.** Point to the folder; offer to review their baseline measurements in two weeks; collect feedback (most useful / least clear).
 
 ---
 

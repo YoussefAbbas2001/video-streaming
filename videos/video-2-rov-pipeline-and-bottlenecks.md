@@ -63,7 +63,7 @@
 
 ## 3. Three Bottleneck Categories ⏱️ 2:20
 
-🎞️ **Slide 39** — Where the milliseconds go (ESTIMATE)
+🎞️ **Slide 42** — Where the milliseconds go (ESTIMATE)
 
 عندنا تلات أنواع:
 
@@ -77,18 +77,18 @@
 
 ## 4. Processing: Jetson Nano vs Raspberry Pi 5 ⏱️ 3:00
 
-🎞️ **Slide 33** — Who does the work? Software vs hardware encoding
+🎞️ **Slide 36** — Who does the work? Software vs hardware encoding
 
 الـ**software encoding** مرن وجودته عالية، بس بياكل CPU وبيسخن. الـ**hardware encoder** قطعة silicon مخصوصة، شبه ما بتاخدش CPU، بس الـcapacity بتاعتها ثابتة.
 
-🎞️ **Slide 34** — Jetson Nano vs Raspberry Pi 5
+🎞️ **Slide 37** — Jetson Nano vs Raspberry Pi 5
 
 السنة دي الفريق عايز ينقل من الـJetson Nano للـRaspberry Pi 5، والـPi 5 لسه ما اتجربش عندنا. فخلونا نبص على الحقايق:
 
 - الـJetson Nano فيه **hardware encoder**: يعمل 4 streams 1080p30 أو 9 streams 720p30.
 - الـPi 5 **ما فيهوش hardware H.264 encoder خالص**. الـCPU بتاعه أسرع بكتير، بس الـencoding كله software. وتجربة Raspberry Pi نفسها في 2026 قالت إن stream واحد 1080p30 بالـlow-latency settings بياخد حوالي **62 لـ90% من core كامل**.
 
-🎞️ **Slide 36** — Can the Raspberry Pi 5 replace the Jetson Nano?
+🎞️ **Slide 39** — Can the Raspberry Pi 5 replace the Jetson Nano?
 
 فالإجابة: **على حسب مين بيعمل encode.**
 
@@ -100,7 +100,7 @@
 
 ## 5. Reliability: The 2023 Heat Failure ⏱️ 4:10
 
-🎞️ **Slide 37** — When the stream died from heat
+🎞️ **Slide 40** — When the stream died from heat
 
 في 2023، في trial في المسابقة، الـstreaming وقف خالص بسبب الحرارة على الـSBC. والسلسلة كانت كده:
 
@@ -137,7 +137,7 @@ python3 demos/02_pipeline/monitor.py --iface lo    # terminal 2: الـmonitor
 
 ## 7. How to Measure All of This ⏱️ 6:20
 
-🎞️ **Slide 44** — Your measurement toolbox
+🎞️ **Slide 47** — Your measurement toolbox
 
 كل رقم قلناه النهارده ليه tool بيقيسه: `iperf3` للـthroughput، و`ethtool` للـlink speed، و`iftop` و`nload` للـbandwidth المستخدم، و`tegrastats` و`vcgencmd` للـCPU والحرارة، و`chrome://webrtc-internals` للـbrowser، والـglass-to-glass للـlatency الحقيقية.
 

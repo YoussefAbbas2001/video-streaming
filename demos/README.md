@@ -11,6 +11,8 @@ One folder per video. Each demo runs on a normal laptop with FFmpeg and Python 3
 | 2 | Monitor | `python3 02_pipeline/monitor.py` | CPU per core, video-process cores, temperature, throttling, Mb/s vs budget |
 | 2 | Find the bottleneck | follow `02_pipeline/bottleneck_lab.md` (uses `impair.sh`, needs sudo) | Processing vs network vs buffering |
 | 2 | Camera inventory *(board)* | `./02_pipeline/camera_inventory.sh [rtsp://…]` | Which cameras share a USB bus, which encode H.264 themselves |
+| 2 | MJPEG with FFmpeg | `./02_pipeline/mjpeg_ffmpeg.sh http\|rtp\|tee\|small` | Camera MJPEG passthrough to a browser or RTP, record + snapshot from one capture (reading: `docs/mjpeg-and-ffmpeg.md`) |
+| 2 | CV debug stream | `python3 02_pipeline/cv_debug_ffmpeg.py [--http 8090]` | Detector boxes drawn in OpenCV, encoded once by FFmpeg (replaces `mjpeg-streamer`) |
 | 3 · Encoding pipeline | I/P/B frames | `./03_encoding/gop_view.sh` | GOP pattern and I-frame spikes |
 | 3 | Encoding lab matrix | `python3 03_encoding/experiment_matrix.py [--input dive.mp4]` | Experiments A–E: bitrate, FPS, GOP vs size, quality, CPU |
 | 3 | Encoding Lab app | `03_encoding/encoding_lab_walkthrough.md` | Every knob, live, on real video |

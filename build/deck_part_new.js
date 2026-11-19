@@ -252,3 +252,82 @@ exports.githubWorkflow = async ({ H, content }) => {
     text(s, t, { x: x + 0.2, y: y + 0.55, w: 2.45, h: 0.6, fontSize: 16, bold: true });
   });
 };
+
+// ---------------------------------------------------------------- MJPEG: where it fits (added 19 Nov 2026)
+const MJ_NOTE = "Measured 19 Nov 2026 on the Encoding Lab's synthetic 720p30 clip (FFmpeg 6.1). Reading: docs/mjpeg-and-ffmpeg.md.";
+exports.mjpegWhere = async ({ H, content }) => {
+  const { col, text, box, stat, card } = H;
+  const s = content("Encoding", "MJPEG on the ROV", "MJPEG: costly in bits, cheap in everything else",
+    "MJPEG = every frame is its own JPEG. No reference frames, so no encoder hold and a lost frame never smears into the next one. " +
+    "The price is bits: at the same SSIM, MJPEG q=3 needed 11.9 Mb/s where H.264 veryfast zerolatency CRF 21 needed 2.52 Mb/s, 4.7 times more. " +
+    "Copying a USB camera's own MJPEG with FFmpeg (-c:v copy) cost 1.3 % of one CPU core for 720p30: no encoding at all, which matters on the Pi 5. " +
+    "So: H.264 for what the pilot drives with; MJPEG where it is free (the camera already makes it) or flexible (we draw on the frames). " + MJ_NOTE);
+  const stats = [
+    ["4.7×", "more bits than H.264 for the same SSIM (MJPEG q=3 vs CRF 21)", col.rose],
+    ["0 frames", "encoder hold: every frame leaves as soon as it is compressed", col.teal],
+    ["1.3 %", "of one core to pass a USB camera's 720p30 MJPEG through FFmpeg", col.cyan],
+  ];
+  stats.forEach(([v, l, c], i) => {
+    box(s, 0.6 + i * 4.1, 1.75, 3.85, 1.95, { fill: col.card });
+    stat(s, 0.85 + i * 4.1, 1.8, 3.4, v, l, c, { size: 42, labelSize: 13, lh: 0.75 });
+  });
+  await card(s, 0.6, 3.95, 5.95, 2.65, { title: "Use MJPEG for", titleColor: col.teal, line: HEX.teal, bodySize: 15,
+    bullets: ["Aux cameras ≤ 640×480 at 10–15 fps (≈ 1–1.3 Mb/s each)", "CV debug views: boxes, masks, SLAM keypoints",
+      "Measurement snapshots and training-data recordings", "The fallback stream when the H.264 path fails"] });
+  await card(s, 6.75, 3.95, 5.95, 2.65, { title: "Keep H.264 for", titleColor: col.rose, line: HEX.rose, bodySize: 15,
+    bullets: ["Pilot and manipulator cameras", "Anything above ≈ 8 Mb/s in MJPEG",
+      "Any stream that must stay smooth on a busy tether (HTTP is TCP: a lost packet stalls it)"] });
+  text(s, MJ_NOTE, { x: 0.6, y: 6.72, w: 12.1, h: 0.3, fontSize: 11, color: col.muted, italic: true });
+};
+
+// ---------------------------------------------------------------- FFmpeg vs the MJPEG streamers
+exports.ffmpegVsStreamers = async ({ H, content }) => {
+  const { col, text, table } = H;
+  const s = content("Encoding", "Tool choice", "Use FFmpeg, not mjpeg-streamer",
+    "Three tools can serve MJPEG. mjpeg-streamer is a Python library (PyPI, AGPLv3, one maintainer, last release Feb 2024). mjpg-streamer is a C program (last commit Feb 2021; its Pi-camera plugin needs MMAL, which the Pi 5 does not have). FFmpeg is the tool we already use in the Encoding Lab. " +
+    "We read the Python library's source and tested it: it re-encodes the frame for every viewer (2 viewers = 28 encodes/s instead of 14) and paces by a timer, so a 5 fps source went out at about 14 fps of duplicates. " +
+    "FFmpeg passes a camera's MJPEG through untouched (-c:v copy), encodes our own CV frames exactly once, and adds RTP, recording, snapshots, filters, H.264/H.265 and quality metrics. " +
+    "Its one gap: the built-in HTTP server serves one viewer per process. Cover it by sending RTP once over the tether and fanning out topside. " + MJ_NOTE);
+  const ok = (t) => ({ text: t, color: HEX.teal, bold: true });
+  const no = (t) => ({ text: t, color: HEX.rose });
+  const meh = (t) => ({ text: t, color: HEX.amber });
+  table(s, [
+    ["Job", "mjpeg-streamer (Python)", "mjpg-streamer (C)", "FFmpeg"],
+    ["Pass camera MJPEG through, no encode", no("✘ decodes + re-encodes"), ok("✔"), ok("✔ -c:v copy · 1.3 % of a core")],
+    ["Encode our own CV frames", meh("once per viewer (2 viewers = 2×)"), meh("input_opencv only"), ok("✔ once per frame (stdin pipe)")],
+    ["Frame pacing", no("timer: ≈ 3× duplicates at 5 fps"), ok("✔ camera-driven"), ok("✔ source-driven")],
+    ["RTP/UDP (no TCP stalls)", no("✘"), no("✘ listed as not functional"), ok("✔ -f rtp")],
+    ["Stream + record + snapshot", no("✘"), meh("separate plugins"), ok("✔ tee, no re-encode")],
+    ["Filters · H.264/H.265 · quality metrics", no("✘"), no("✘"), ok("✔ same tool")],
+    ["Browser viewers (HTTP)", ok("✔ many"), ok("✔ many"), meh("one per process → RTP + topside fan-out")],
+    ["Maintenance", meh("1 maintainer · Feb 2024"), no("last commit Feb 2021"), ok("✔ active · every distro")],
+  ], 0.6, 1.75, 12.1, [3.3, 2.95, 2.55, 3.3], { fontSize: 13, rowH: 0.5 });
+  text(s, "Verdict: FFmpeg. One tool we already know, from camera to recording, H.264 and testing.",
+    { x: 0.6, y: 6.4, w: 12.1, h: 0.5, fontSize: 16, bold: true, color: col.amber, valign: "middle" });
+};
+
+// ---------------------------------------------------------------- FFmpeg recipes
+exports.ffmpegRecipes = async ({ H, content }) => {
+  const { col, text, code } = H;
+  const s = content("Encoding", "FFmpeg recipes · all tested", "FFmpeg does the same jobs, and more",
+    "Four recipes cover what the team asked mjpeg-streamer for, and more. All were tested on 19 Nov 2026 with FFmpeg 6.1, except the /dev/video0 capture lines (no camera on the test machine). " +
+    "1) Passthrough to a browser: -content_type is required, otherwise the browser treats the stream as a download. FFmpeg's HTTP server takes one viewer and exits when it leaves; demos/02_pipeline/mjpeg_ffmpeg.sh http restarts it in a loop. " +
+    "2) tee: one capture feeds live RTP, a recording and an always-fresh latest.jpg, with no re-encode. " +
+    "3) CV debug: OpenCV draws, FFmpeg encodes each frame once. -huffman default is needed for RTP (RFC 2435 requires the standard Huffman tables). Full script: demos/02_pipeline/cv_debug_ffmpeg.py. " +
+    "4) Topside: one RTP copy crosses the tether; every viewer opens the same .sdp.");
+  const cells = [
+    ["1 · Camera → browser, zero encode",
+      "ffmpeg -f v4l2 -input_format mjpeg \\\n  -video_size 1280x720 -framerate 30 -i /dev/video0 \\\n  -c:v copy -f mpjpeg -content_type \\\n  \"multipart/x-mixed-replace;boundary=ffmpeg\" \\\n  -listen 1 http://0.0.0.0:8080/aux1.mjpg"],
+    ["2 · One capture → live + recording + snapshot",
+      "ffmpeg -f v4l2 -input_format mjpeg -i /dev/video0 \\\n  -map 0:v -c:v copy -f tee \\\n  \"[f=rtp]rtp://192.168.1.100:5600|\\\n[f=avi]dive.avi|\\\n[f=image2:update=1]latest.jpg\""],
+    ["3 · CV debug: OpenCV draws, FFmpeg encodes once",
+      "ff = subprocess.Popen([\"ffmpeg\",\n    \"-f\", \"rawvideo\", \"-pix_fmt\", \"bgr24\",\n    \"-s\", \"640x360\", \"-r\", \"10\", \"-i\", \"-\",\n    \"-c:v\", \"mjpeg\", \"-q:v\", \"7\", \"-huffman\", \"default\",\n    \"-f\", \"rtp\", \"-sdp_file\", \"det.sdp\",\n    \"rtp://192.168.1.100:5610\"], stdin=subprocess.PIPE)\nff.stdin.write(draw_boxes(frame).tobytes())"],
+    ["4 · Topside: one copy on the tether, many viewers",
+      "# browser tile (recipe 1)\n<img src=\"http://rov:8080/aux1.mjpg\">\n\n# RTP (recipes 2 and 3): any number of viewers\nffplay -protocol_whitelist file,udp,rtp \\\n  -fflags nobuffer -flags low_delay aux1.sdp"],
+  ];
+  cells.forEach(([title, src], i) => {
+    const x = 0.6 + (i % 2) * 6.15, y = 1.7 + Math.floor(i / 2) * 2.55;
+    text(s, title, { x, y, w: 5.95, h: 0.38, fontSize: 15, bold: true, color: col.cyan, valign: "middle" });
+    code(s, src, x, y + 0.42, 5.95, 2.0, { fontSize: 11.5 });
+  });
+};

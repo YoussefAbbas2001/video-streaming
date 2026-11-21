@@ -295,6 +295,6 @@ def report_markdown(sysinfo: dict, runs: list[dict], capacity: list[dict], hold:
         tot = sum(b["typical_ms"] for b in budget); worst = sum(b["worst_ms"] for b in budget)
         L += ["", "## Glass-to-glass latency budget", "", "| Stage | Typical (ms) | Worst (ms) | Source |", "|---|---|---|---|"]
         L += [f"| {b['stage']} | {b['typical_ms']:.1f} | {b['worst_ms']:.1f} | {b['source']} |" for b in budget]
-        L += [f"| **Total** | **{tot:.0f}** | **{worst:.0f}** | |", "", "Confirm with a real glass-to-glass measurement (demos/01_why_streaming/clock.html)."]
+        L += [f"| **Total** | **{tot:.0f}** | **{worst:.0f}** | |", "", "Confirm with a real glass-to-glass measurement (photograph a phone stopwatch next to the pilot screen)."]
     L += ["", "> Speed and CPU numbers describe the computer that ran the lab. Run it on the ROV's computer for the numbers that matter."]
     return "\n".join(L)

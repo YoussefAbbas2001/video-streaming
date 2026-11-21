@@ -2,7 +2,7 @@
 
 An interactive app for seeing how each encoder setting changes **file size, bitrate, picture quality, encoding speed and robustness to packet loss**. You can use a synthetic underwater clip or your own ROV footage.
 
-It is the hands-on companion to Experiments 3–9 of the workshop notebook. The notebook explains each idea once; the lab lets you keep turning the knobs.
+It is the tool we use in the workshop session itself: every experiment is run here, live, on the presenter's laptop and on the ROV's computer. The **Live camera** tab streams the laptop's own camera through a choice of encoders (MJPEG passthrough, x264, NVENC, …) with a head-up display of what each stage costs.
 
 ## Run it
 
@@ -32,14 +32,12 @@ Set **your targets** once in the sidebar (bitrate budget per camera, glass-to-gl
 
 | Tab | What you do | What you get |
 |---|---|---|
-| **Encode** | Codec, CRF or bitrate cap + VBV, preset, keyframe interval, B-frames, low latency, resolution, frame rate | Verdict chips: real time? quality? within budget? encoder hold? how many such streams fit this CPU? Colour-coded cards: size, bitrate, compression, bits/pixel, PSNR, SSIM, encode speed, CPU per stream, each with the change since your last try. Views: frame compare / diff ×8 / zoom, bitrate over time (I/P/B), quality over time, side-by-side playback, and **🧮 Show the math**, every formula with your numbers |
-| **Compare** | Every encode is collected automatically | Rate–quality chart with your budget and quality floor, the best trade-offs line, the best setting inside your budget, CSV export |
+| **Encode** (master tab) | One compact control bar: codec, CRF or bitrate cap, preset, keyframe interval, resolution, frame rate, low latency (B-frames, VBV and VMAF under **More**) | Verdict chips: real time? quality? within budget? encoder hold? how many such streams fit this CPU? Cards: size, bitrate, compression, bits/pixel, PSNR, SSIM, encode speed, CPU per stream, each with the change since your last try. Views: frame compare / diff ×8 / zoom, bitrate over time (I/P/B), quality over time, side-by-side playback, **🧮 Show the math**. Below them: the **glass-to-glass latency graph** of this encode (stage by stage, typical and worst, hover a block for its source) and **Compare**, the rate–quality chart of every run with your budget, quality floor and best trade-offs |
+| **Live camera** | Pick a camera (or a simulated MJPEG camera), the size and fps to ask it for, an encoder, an output size, bitrate, speed, keyframe interval, low latency; press **Start** | The live picture with a head-up display: encoder latency (average and 95th percentile), frames held, bitrate, frame size, bits/pixel, JPEG decode, convert/scale, pilot-side decode, CPU, dropped frames, a keyframe flash and a 30 s bitrate sparkline. A pipeline strip shows which stages run and what each costs; charts show bitrate and encoder time over time; a **scoreboard** compares every run. Encoders: MJPEG passthrough, MJPEG re-encode, x264, NVENC (H.264/H.265), Quick Sync, AMF, VideoToolbox, V4L2 M2M, x265, SVT-AV1 — each probed with a real test encode, with the reason when it can't run |
 | **Sweep** | Vary one knob across several values | Bitrate and SSIM curves plus encode speed against real time |
 | **Benchmark** | Run it **on the ROV computer and on the pilot laptop** | This computer's specs; **capacity**: fps on one core, CPU ms per frame, streams per core, real-time streams the machine can carry at 70 % CPU, per resolution × preset; hardware encoders (listed vs actually working); decode speed; encoder hold: x264 defaults vs low latency |
-| **Latency budget** | Capture buffering, network, jitter buffer, monitor refresh | Glass-to-glass estimate, stage by stage (typical and worst), each labelled measured / estimated / your input, against your target, plus the biggest stage and what to do about it |
 | **Packet loss** | Delete kB of an MPEG-TS stream | How long the picture stays broken: GOP length vs intra refresh |
 | **Bandwidth** | Edit the 8-camera table | Fits / tight / doesn't fit the tether; Jetson Nano encoder load |
-| **Live monitor** | Toggle it on while streaming | CPU per core, temperature, clock, Raspberry Pi throttling, busiest link (Mb/s vs your tether), with a CSV log: the soak-test view |
 | **Report** | Download | One Markdown report (this computer, every encode, capacity, hold, decode, latency budget) + CSV, ready for a GitHub issue |
 | **Learn** | Read | What each knob and each number means, with a "try it" for each |
 
@@ -57,6 +55,15 @@ Set **your targets** once in the sidebar (bitrate budget per camera, glass-to-gl
 | Encoder hold | frames held before the first output ÷ fps (measured with PyAV, else estimated) |
 | Glass-to-glass | capture + hold + encode + send (frame size ÷ link) + network + jitter buffer + decode + display |
 | Recording size | bitrate × 3600 ÷ 8 per hour |
+
+## Live camera tab
+
+* **Cameras.** Windows (DirectShow), Linux (V4L2) and macOS (AVFoundation) cameras are listed automatically; ↻ looks again. With no camera, use one of the two simulated MJPEG cameras (a test pattern, or the lab clip looped).
+* **How it works.** FFmpeg asks the camera for its own MJPEG mode and copies it (`-c:v copy`). Everything after that runs in the lab with PyAV, one stage at a time, so each stage gets its own clock. The picture reaches your browser as an MJPEG stream from a small local server (`127.0.0.1:8765`, `/stream.mjpg` and `/stats`).
+* **The resolution trap.** Passthrough costs almost nothing. Set *Output size* below Native and the lab has to decode, scale and re-encode every frame, which is exactly what happens when an MJPEG camera is shrunk in software. Compare the two rows on the scoreboard, then ask the camera for the smaller size instead.
+* **Encoder latency** is measured per frame from the moment a frame enters the encoder until its packet comes out, so frames held back by lookahead or B-frames count (x264 with Low latency off holds about 30 frames ≈ 1 s).
+* **Settings.** `LAB_LIVE_PORT` changes the port. To watch from another computer (e.g. the lab runs on the ROV), start it with `LAB_LIVE_HOST=0.0.0.0` and only on a network you trust: the camera is then visible to that network.
+* **Shortcuts.** H hides the overlay, F goes full screen.
 
 ## Using real ROV footage
 
@@ -78,9 +85,10 @@ The Jetson Nano's hardware encoder is used through GStreamer (`nvv4l2h264enc`), 
 encoding_lab/
 ├── app.py                 Streamlit user interface
 ├── lab/engine.py          FFmpeg logic: encode, measure (PSNR/SSIM/VMAF), frame stats, packet-loss experiment
-├── lab/bench.py           benchmarking: system info, HW encoders, capacity, decode, encoder hold, latency budget, live monitor, report
-├── tests/test_engine.py   self-test of engine + benchmarks (pytest, ~10 s)
-├── .streamlit/config.toml theme (M.I.A red)
+├── lab/bench.py           benchmarking: system info, HW encoders, capacity, decode, encoder hold, latency budget, report
+├── lab/live.py            Live camera: capture, per-stage timing, encoders, MJPEG server for the browser
+├── tests/test_engine.py   self-test of engine, benchmarks and the live pipeline (pytest, ~30 s)
+├── .streamlit/config.toml theme (dark, M.I.A red)
 ├── requirements.txt
 └── run_lab.sh / run_lab.bat
 ```

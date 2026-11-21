@@ -75,3 +75,67 @@ def test_sysmon_sample():
     m = B.SysMon()
     s = m.sample()
     assert 0 <= s["cpu_total"] <= 100 and len(s["cores"]) >= 1
+
+
+# ----------------------------------------------------------------------------- live camera pipeline
+import json  # noqa: E402
+import time  # noqa: E402
+import urllib.request  # noqa: E402
+
+from lab import live as L  # noqa: E402
+
+
+def test_multipart_parser_splits_jpegs():
+    import io
+    import threading
+    parts = [b"\xff\xd8" + bytes([i]) * (100 + i) + b"\xff\xd9" for i in range(3)]
+    raw = b"".join(b"--ffmpeg\r\nContent-type: image/jpeg\r\nContent-length: %d\r\n\r\n" % len(p) + p + b"\r\n" for p in parts)
+    got = []
+    L.read_multipart_jpegs(io.BufferedReader(io.BytesIO(raw)), got.append, threading.Event())
+    assert got == parts
+
+
+def test_passthrough_needs_no_transcode_but_resize_does():
+    assert not L.LiveConfig(encoder=L.PASSTHROUGH).needs_transcode()
+    assert L.LiveConfig(encoder=L.PASSTHROUGH, out_scale=0.5).needs_transcode()
+    assert L.LiveConfig(encoder=L.PASSTHROUGH, camera_mjpeg=False).needs_transcode()
+
+
+@pytest.fixture(scope="module")
+def mgr():
+    m = L.LiveManager(port=8830)
+    yield m
+    m.close()
+
+
+def _run(mgr, cfg, seconds=3.0):
+    mgr.start(cfg)
+    time.sleep(seconds)
+    s = json.load(urllib.request.urlopen(f"http://127.0.0.1:{mgr.port}/stats"))
+    mgr.stop()
+    return s, mgr.runs[-1]
+
+
+def test_live_passthrough_costs_no_encoding(mgr):
+    s, run = _run(mgr, L.LiveConfig(encoder=L.PASSTHROUGH, width=640, height=360, fps=15))
+    assert s["status"] == "running" and s["mbps"] > 0
+    assert s["encode_ms"] == 0 and s["decode_ms"] == 0
+    assert run["pipeline"] == "passthrough"
+
+
+def test_live_resize_forces_decode_and_encode(mgr):
+    s, run = _run(mgr, L.LiveConfig(encoder=L.PASSTHROUGH, width=640, height=360, fps=15, out_scale=0.5))
+    assert s["out_res"] == "320×180" and s["decode_ms"] > 0 and s["encode_ms"] > 0
+    assert run["pipeline"] == "decode → scale → encode"
+
+
+def test_live_x264_default_holds_frames_zerolatency_does_not(mgr):
+    _, held = _run(mgr, L.LiveConfig(encoder="libx264", width=640, height=360, fps=15, zerolatency=False, preset_speed=5), 4.0)
+    _, fast = _run(mgr, L.LiveConfig(encoder="libx264", width=640, height=360, fps=15, zerolatency=True))
+    assert held["hold_frames"] >= 10 and fast["hold_frames"] == 0
+    assert held["encode_ms"] > 10 * fast["encode_ms"]
+
+
+def test_unavailable_encoder_reports_a_reason():
+    ok, why = L.probe_encoder("h264_videotoolbox")
+    assert (ok and why == "works") or (not ok and why)

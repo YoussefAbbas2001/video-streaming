@@ -5,7 +5,8 @@ A metric you don't measure is a guess. This page lists every performance number 
 **Conventions**
 - `ROV` is the ROV computer's IP address and `eth0` the tether interface. Replace both with yours (`ip -br addr` shows them).
 - "Good" values are starting targets for a pilot camera, not laws.
-- Live monitor for most of this: `python demos/02_pipeline/monitor.py --iface eth0 --csv run.csv`.
+- Per stream, live: `python3 encoding_lab/tools/rtp_probe.py --port 5600 --forward 5700` (throughput, packet loss, jitter; see [gui-stream-metrics.md](gui-stream-metrics.md)).
+- Per computer, live: `sar -n DEV 1` (Mb/s per interface), `htop` (CPU per core), `vcgencmd measure_temp; vcgencmd get_throttled` (Pi) or `tegrastats` (Jetson).
 
 ---
 
@@ -54,9 +55,9 @@ A metric you don't measure is a guess. This page lists every performance number 
 
 | What | How | Notes |
 |---|---|---|
-| **Glass-to-glass** (the number the pilot feels) | Open `demos/01_why_streaming/clock.html` full screen. Point the ROV camera at it, show the received video next to it, and take 10+ phone photos. In each photo, latency = clock − clock-in-video | Report **median and worst**, not one photo |
+| **Glass-to-glass** (the number the pilot feels) | Run a millisecond stopwatch on a phone in front of the ROV camera, put the phone next to the pilot screen, and take 10+ photos of both. In each photo, latency = stopwatch − stopwatch-in-video | Report **median and worst**, not one photo |
 | Per-stage latency (GStreamer) | `GST_TRACERS="latency(flags=pipeline+element)" GST_DEBUG=GST_TRACER:7 gst-launch-1.0 …` | Shows which element holds frames |
-| Encoder hold (frames buffered before the first output) | Notebook Experiment 9: x264 defaults held 41 frames; `-tune zerolatency` held 0 | Lookahead and B-frames are the usual culprits |
+| Encoder hold (frames buffered before the first output) | Measured: x264 defaults held 41 frames (the Encoding Lab's Live camera tab measures it live); `-tune zerolatency` held 0 | Lookahead and B-frames are the usual culprits |
 | Network delay | `ping` RTT ÷ 2 (rough one-way estimate) | Usually tiny on a tether |
 | Browser receive side (WebRTC) | `chrome://webrtc-internals`: inbound-rtp `jitterBufferDelay ÷ jitterBufferEmittedCount`, `totalDecodeTime ÷ framesDecoded` | Jitter buffer is often the largest part |
 | Player cache (VLC, ffplay) | VLC's network caching defaults to 1000 ms. Use `ffplay -fflags nobuffer -flags low_delay -framedrop` | A big, avoidable delay |
@@ -70,7 +71,7 @@ A metric you don't measure is a guess. This page lists every performance number 
 | VMAF | `ffmpeg -i encoded.mp4 -i reference.mkv -lavfi libvmaf -f null -` (needs FFmpeg built with libvmaf) |
 | All of the above, interactively | Encoding Lab app (`encoding_lab/`), Encode and Compare tabs |
 
-The reference must be the **lossless** source, at the same resolution and frame rate (the notebook and Encoding Lab handle the scaling and timestamp alignment for you).
+The reference must be the **lossless** source, at the same resolution and frame rate (the Encoding Lab handles the scaling and timestamp alignment for you).
 
 ## 6. Reliability
 

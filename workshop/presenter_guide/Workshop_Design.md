@@ -13,7 +13,7 @@
 | Pilots and mission leads | Mixed; may be mechanical engineers | Latency, situational awareness, what a good pilot UI must show; how to write requirements |
 | New members | First- or second-year students | Intuition for bandwidth and compression; how a team organizes work |
 
-Design consequence: every technical topic is introduced **intuition → picture → numbers → measurement**. Nobody needs prior codec knowledge. Advanced students get depth through the notebook exercises and the "go deeper" boxes in the cheat sheet.
+Design consequence: every technical topic is introduced **intuition → picture → numbers → measurement**. Nobody needs prior codec knowledge. Advanced students get depth through the Encoding Lab (Sweep, Benchmark, Live camera) and the "go deeper" boxes in the cheat sheet.
 
 Recommended group size: 12–30 students, in teams of 3–5 (mixed experience in every team).
 
@@ -54,7 +54,7 @@ The full content is about **7 h 45 min including breaks** (≈ 7 h of contact ti
 | 0:40 | Bandwidth engineering + **Activity 1: Estimate the Bandwidth** (15 min) | Talk + activity | 13–18 |
 | 1:10 | *Break 10 min* | | |
 | 1:20 | How encoding works (YUV, prediction, transform, quantization, GOP) | Talk | 19–23 |
-| 1:50 | CRF vs bitrate, codecs, parameters, presets, packet loss — **notebook Exp. 2–5 live** | Talk + demo | 24–27 |
+| 1:50 | CRF vs bitrate, codecs, parameters, presets, packet loss — **Encoding Lab live (Encode, Sweep, Packet loss)** | Talk + demo | 24–27 |
 | 2:20 | *Break 10 min* | | |
 | 2:30 | Quality metrics + **Activity 3: Compression Challenge** | Activity | 28 |
 | 2:50 | Hardware (Jetson Nano vs Pi 5), where to encode, protocols, latency | Talk | 29–35 |
@@ -85,13 +85,13 @@ Cut: Experiment 4 (presets) becomes a pre-recorded result; Activity 3 shortened 
 | Item | Required? | Notes |
 |---|---|---|
 | Projector + presenter laptop with the `.pptx` | Required | Deck uses only built-in fonts (Segoe UI/Calibri fallback) |
-| Presenter laptop with Python 3.10+, FFmpeg 5+ and the notebook | Required | Run the notebook once the night before; outputs are cached in `notebooks/work/` |
-| Student laptops (1 per team minimum) | Required for activities | Notebook optional for students; activities work on paper |
+| Presenter laptop with Python 3.10+, FFmpeg 5+ and the Encoding Lab | Required | Run the Encoding Lab once the night before; outputs are cached in `encoding_lab/.lab_work/` |
+| Student laptops (1 per team minimum) | Required for activities | the Encoding Lab is optional for students; activities work on paper |
 | Paper, sticky notes, markers, A3 sheets | Required | Wireframing and bug reports |
 | A timer visible to the room | Required | Competitions |
 | **The real ROV + tether + topside laptop** | Strongly recommended | Turns the diagnostic section from theory into measurement |
 | One USB camera (UVC) + one IP camera, if they have them | Recommended | Live `v4l2-ctl` / `ffprobe` demo |
-| Jetson Nano and/or Raspberry Pi 5 with SSH | Recommended | Notebook Experiment 10 hardware path |
+| Jetson Nano and/or Raspberry Pi 5 with SSH | Recommended | run the Encoding Lab's Benchmark tab on the board |
 | A small managed or unmanaged Ethernet switch | Optional | Show link speed negotiation with `ethtool` |
 | A phone with a camera (high-speed mode helps) | Optional | Glass-to-glass latency measurement |
 

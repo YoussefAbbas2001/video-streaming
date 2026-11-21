@@ -21,7 +21,7 @@
 | 1920×1080 NV12 | 373 Mb/s | 746 Mb/s | 1,493 Mb/s |
 | 1920×1080 RGB24 | 746 Mb/s | 1,493 Mb/s | 2,986 Mb/s |
 
-**Compressed estimate:** R ≈ bits-per-pixel × W × H × f. Measure your own bpp (notebook Exp. 6). On the workshop's synthetic clip at good quality (SSIM ≈ 0.98): H.264 ≈ 0.045, MJPEG ≈ 0.34 bits/pixel. Real camera footage usually needs more.
+**Compressed estimate:** R ≈ bits-per-pixel × W × H × f. Measure your own bpp (Encoding Lab → Encode, Bits per pixel card). On the workshop's synthetic clip at good quality (SSIM ≈ 0.98): H.264 ≈ 0.045, MJPEG ≈ 0.34 bits/pixel. Real camera footage usually needs more.
 
 **On the wire:** + ~5 % (RTP/UDP, 1500 MTU) · + ~7 % (MPEG-TS/UDP) · TCP adds ACK traffic in the other direction.
 

@@ -1,25 +1,44 @@
 # Presenter Script — *Engineering Better ROV Systems*
 
 **For:** the presenter (you).  **Deck:** `presentation/MIA_Robotics_Workshop.pptx` (82 slides, speaker notes on every slide).
-**Companion files:** `Workshop_Design.md` (agenda, objectives, unknowns), the notebook, `student_materials/`, `workshop_activities/`, `ux_materials/`, and the presenter-only `referee/` folder (kept in the presenter's Drive, not in the team repo).
+**Companion files:** `Workshop_Design.md` (agenda, objectives, unknowns), the **ROV Encoding Lab** (`../encoding_lab/`, run `streamlit run app.py`), `student_materials/`, `workshop_activities/`, `ux_materials/`, and the presenter-only `referee/` folder (kept in the presenter's Drive, not in the team repo).
 
 How to use this script:
 - Each block has **Objective · Duration · Slides**, then **How to open**, **What to explain**, **Emphasise**, **Real-world examples**, **Ask the room** (with expected answers), **Misconceptions**, and **Transition**.
 - Lines in *“quotes”* are phrasings you can use as-is. Adapt them, don't recite them.
-- ⏱ marks a natural place to check time. 🧪 marks a live notebook demo. 🎯 marks an activity.
-- The numbers quoted come from the notebook run on a 2-core laptop with the synthetic clip. **Re-run the notebook the night before** (and on the team's own footage if you get it) and update any number you quote.
+- ⏱ marks a natural place to check time. 🧪 marks a live Encoding Lab demo. 🎯 marks an activity.
+- The numbers quoted were measured on a 2-core laptop with the synthetic clip. **Re-measure them in the Encoding Lab the night before** (and on the team's own footage if you get it: sidebar → Upload your own video) and update any number that differs.
+
+### The session runs on the Encoding Lab, not the notebook
+
+Every demo is done live in the **ROV Encoding Lab**. Where this script names a notebook experiment, use the matching Lab tab:
+
+| Notebook experiment | Encoding Lab |
+|---|---|
+| 1 · Raw bandwidth | sidebar (raw 4:2:0 Mb/s) + Encode → 🧮 Show the math |
+| 2 · Codecs and the FFmpeg command | Encode: codec selector; Compare section at the bottom |
+| 3 · CRF vs bitrate cap | Encode: Rate control + Bitrate over time; Sweep → Quality / Target bitrate |
+| 4 · Encoder parameters | Sweep → Preset, Keyframe interval, Resolution, Frame rate |
+| 5 · Packet loss and GOP | Packet loss |
+| 6 · Quality metrics | Encode → Frame compare (Diff ×8, Zoom), Quality over time (VMAF under More) |
+| 7 · Bandwidth planning | Bandwidth |
+| 8 · Substreams and priorities | Bandwidth (edit the camera table) + Live camera → Output size |
+| 9 · Latency | Encode → latency graph; Live camera (x264 with Low latency off, then on); Benchmark → Compare defaults vs low latency |
+| 10 · What this machine can do | Benchmark |
+| 11 · Take it to the ROV | Report + `docs/streaming/jetson-nano-vs-pi5.md` |
+| *(new)* MJPEG passthrough vs resize, NVENC | Live camera |
 
 ---
 
 ## Before the session — checklist
 
 - [ ] Send the **questionnaire** (Workshop_Design.md §6.5) to the team lead a week before. Even partial answers change the conversation.
-- [ ] Run the notebook top to bottom on the presenter laptop (`jupyter lab`, *Run All*, ~5 min). Keep it open on Experiment 2.
+- [ ] Start the Encoding Lab on the presenter laptop (`streamlit run encoding_lab/app.py`). Run one encode in Encode, run the Benchmark once, and press **Start** once in Live camera with the laptop camera (Windows and macOS ask for camera permission the first time). Keep it open on the Encode tab.
 - [ ] Open the deck in **Presenter View** (speaker notes visible).
 - [ ] Click through the deck once. Every content slide **builds on click** (title and kicker stay; each card, chart or recipe fades in on the next click, at most 8 clicks per slide). The presenter view shows the next step. To change the grouping, edit `build/add_click_builds.py` and rebuild (`node build/build_deck.js`).
 - [ ] Print: Activity 1 cards, Activity 2 answer sheets, the Testing Competition Guide, the UX scenario and A3 sheets, the Diagnostic Checklist (one per subsystem owner), the Cheat Sheet (one per student).
 - [ ] Copy `workshop_activities/testing_competition_code/` to every team laptop; check `python -m pytest -q` passes (7 tests).
-- [ ] Prepare Activity 3 clips: copy the five encodes listed in `Activity_Instructions.md` (Activity 3) from the notebook's `work/` folder, rename them A–E, keep the answer key.
+- [ ] Prepare Activity 3 clips: copy the five encodes listed in `Activity_Instructions.md` (Activity 3) by encoding them in the Encoding Lab's Encode tab (they are saved under `encoding_lab/.lab_work/`), rename them A–E, keep the answer key.
 - [ ] If possible: bring the real ROV, tether, and the topside laptop. Ask for SSH access to the SBC.
 - [ ] Replace the title slide image with a photo of **their** ROV if you have one.
 
@@ -76,7 +95,7 @@ Connect to compression immediately:
 
 > *“An encoder works by predicting the next frame from the previous one. What's unpredictable? Noise. Particles. Rippling light. Every unpredictable pixel costs bits. Underwater video is expensive to compress — and that's before we talk about the tether.”*
 
-Point at the image: it's from the notebook's synthetic clip, which was built to have these properties.
+Point at the image: it's the Encoding Lab's synthetic clip, which was built to have these properties.
 
 **Slide 9 — student vs industrial.** Be respectful: they build in months, as volunteers. The point is which industrial practices are **cheap to adopt**: measuring, configuring encoders deliberately, budgeting bandwidth, specifying latency, testing failures, designing with pilots. Industrial ROVs often use fibre-optic tethers with multiplexers — but they *still* budget, prioritise and test. The difference is as much discipline as money.
 
@@ -163,7 +182,7 @@ Units: networks use decimal — 1 Mb/s = 10⁶ bit/s. Storage often uses MiB (2�
 
 > *“Halving width and height divides pixels by four — and throws away detail the pilot may need. Moving from MJPEG to H.264 at similar quality saved about 8× in our measurement — with no loss of resolution.”*
 
-Caveat out loud: compression ratios depend heavily on content. Their real footage will compress differently — that's why the notebook can run on their own clip.
+Caveat out loud: compression ratios depend heavily on content. Their real footage will compress differently — that's why the Encoding Lab can run on their own clip (sidebar → Upload your own video).
 
 **Slide 21 — words that get mixed up.**
 - **Bitrate**: what the encoder produces (e.g. 4 Mb/s per camera).
@@ -233,12 +252,12 @@ Expected: fewer big I-frames → lower average bitrate; cost: slower start/switc
 
 ---
 
-## 1.5 Codecs, parameters, rate control, GOP and loss (🧪 notebook)
+## 1.5 Codecs, parameters, rate control, GOP and loss (🧪 Encoding Lab)
 
 **Objective:** Students understand what each encoder knob does, the CRF vs bitrate decision, and the GOP/loss trade-off — from measurements.
-**Duration:** 30 min · **Slides:** 27–30 · **Notebook:** Experiments 2–5
+**Duration:** 30 min · **Slides:** 27–30 · **Encoding Lab:** Encode, Sweep and Packet loss tabs
 
-**🧪 Live demo first (5 min):** in the notebook, show Experiment 2's command and table. Read the H.264 command argument by argument (`-c:v libx264`, `-preset`, `-crf`, `-pix_fmt yuv420p`, `-an`). Then run `ffprobe -hide_banner work/e2_libx264.mp4` and read the output together: container, codec, profile, pixel format, resolution, fps, bitrate.
+**🧪 Live demo first (5 min):** in the Encoding Lab, run one H.264 encode in the Encode tab and read the result chips and cards together. Then show the same encode as an FFmpeg command, argument by argument (`-c:v libx264`, `-preset`, `-crf`, `-pix_fmt yuv420p`, `-an`), and open **🧮 Show the math**: raw bitrate, compression ratio, bits per pixel, cores per stream.
 
 **Slide 27 — CRF vs bitrate-based.**
 - **CRF** (quality-based): constant perceived quality, bitrate floats with content. Each +6 CRF roughly halves the x264 bitrate. Great for **recording**.
@@ -247,7 +266,7 @@ Expected: fewer big I-frames → lower average bitrate; cost: slower start/switc
 
 > *“When the ROV kicks up sediment, a CRF stream can double its bitrate — exactly when the pilot needs the picture most. Live streams need a ceiling.”*
 
-The chart shows the bitrate each codec needed for equal SSIM at two operating points. **The curves cross**: on our clip, at the tight-tether point (SSIM 0.96) AV1 needs about a quarter of H.264's bits while H.265 is roughly level with H.264 (it pulls ahead only at even lower bitrates); at the high-quality end x264 holds up best. Published results on natural camera footage usually show larger gains for H.265/AV1; our synthetic clip suits H.264's tools. The lesson: *“which codec is best?” has no answer without an operating point and real content.* (In the notebook, we use `-tune ssim` for this comparison — otherwise each encoder's psychovisual tuning distorts the metric.)
+The chart shows the bitrate each codec needed for equal SSIM at two operating points. **The curves cross**: on our clip, at the tight-tether point (SSIM 0.96) AV1 needs about a quarter of H.264's bits while H.265 is roughly level with H.264 (it pulls ahead only at even lower bitrates); at the high-quality end x264 holds up best. Published results on natural camera footage usually show larger gains for H.265/AV1; our synthetic clip suits H.264's tools. The lesson: *“which codec is best?” has no answer without an operating point and real content.* (In our measurement we used `-tune ssim` for this comparison — otherwise each encoder's psychovisual tuning distorts the metric.)
 
 **Slide 28 — codec comparison.** Don't crown a winner:
 - **MJPEG**: lowest encode cost and latency, no inter-frame error propagation, decodes everywhere — but several times the bitrate. Fine for a simple auxiliary camera.
@@ -287,7 +306,7 @@ Expected: TCP retransmits → no corruption, but the stream **waits** → latenc
 ## 1.6 Measuring quality (🎯 Activity 3)
 
 **Objective:** Know PSNR/SSIM/VMAF, their maths and their limits; experience a blind comparison.
-**Duration:** 20 min · **Slide:** 28 · **Notebook:** Experiment 6
+**Duration:** 20 min · **Slide:** 28 · **Encoding Lab:** Encode → Frame compare (Diff ×8, Zoom 3×) and Quality over time
 
 **Explain (5 min):**
 - **PSNR** = 10·log₁₀(255² / MSE). Every pixel error counts equally. Rough guide for 8-bit video: < 30 dB clearly degraded; 35–40 dB good; > 45 dB near-transparent. +6 dB ≈ half the average error.
@@ -295,9 +314,9 @@ Expected: TCP retransmits → no corruption, but the stream **waits** → latenc
 - **VMAF** (Netflix) fuses several features with a model trained on human opinion scores for TV/film viewing; 0–100. Needs FFmpeg with `libvmaf`.
 - **Limitations:** all three need the original (full-reference) — fine in the lab, impossible live; they measure *fidelity*, not *usefulness for a pilot*; noise removal can lower PSNR while looking better.
 
-🧪 Show notebook §6.1: a harmless brightness shift (+8 levels) scores ~30 dB PSNR, *worse* than a blur that removed real detail; SSIM ranks them closer to how people do.
+Explain (the Lab does not stage this one): a harmless brightness shift (+8 levels) scores ~30 dB PSNR, *worse* than a blur that removed real detail; SSIM ranks them closer to how people do.
 
-**🎯 Activity 3 — Compression Challenge (12 min).** Play clips A–E (prepared from the notebook) on the projector, same scene. Teams rank by quality and guess bitrates. Reveal measured bitrate/PSNR/SSIM. Points: 3 per correctly placed clip in the ranking, 2 for the closest bitrate guess overall. Debrief:
+**🎯 Activity 3 — Compression Challenge (12 min).** Play clips A–E (prepared in the Encoding Lab) on the projector, same scene. Teams rank by quality and guess bitrates. Reveal measured bitrate/PSNR/SSIM. Points: 3 per correctly placed clip in the ranking, 2 for the closest bitrate guess overall. Debrief:
 
 > *“Did the metric agree with you? Would it agree with the pilot doing a manipulator task?”*
 
@@ -367,7 +386,7 @@ Jitter chart: a simulated tether with small everyday jitter and 2 % spikes of 30
 
 > *“The pilot looks at one or two cameras at a time. The other six only need to answer: is something happening there?”*
 
-**Slide 45 — priorities and adaptation.** Measure → budget (70 % of throughput minus control/telemetry) → allocate (minimums by priority, then top up) → apply (encoder bitrate, pause/resume) → show (UI states: live, degraded, paused, lost). Priorities change with the task: the manipulator camera becomes priority 1 during a grab. Notebook Experiment 8 shows the tether degrading 100 → 40 → 20 → 6 Mb/s: the pilot view stays sharp; aux cameras degrade then pause — visibly.
+**Slide 45 — priorities and adaptation.** Measure → budget (70 % of throughput minus control/telemetry) → allocate (minimums by priority, then top up) → apply (encoder bitrate, pause/resume) → show (UI states: live, degraded, paused, lost). Priorities change with the task: the manipulator camera becomes priority 1 during a grab. The measurement (former notebook Experiment 8; Bandwidth tab in the Encoding Lab) shows the tether degrading 100 → 40 → 20 → 6 Mb/s: the pilot view stays sharp; aux cameras degrade then pause — visibly.
 
 Requirements for this: encoders whose bitrate can change at runtime (hardware encoders and x264's API can; many IP cameras expose it via HTTP/ONVIF), a throughput estimate (RTCP receiver reports, WebRTC stats/congestion control, probing), and an honest UI.
 
@@ -381,7 +400,7 @@ Good answers to listen for: USB bus/isochronous reservation (camera fails to sta
 
 **Slide 49 — optimization strategy.** In order: inventory & measure → stop wasting bits → stream smart → design latency → design failure → verify. *“Reducing resolution is the last lever, not the first.”*
 
-**Slide 50 — homework.** Hand out the Diagnostic Checklist; each subsystem owner fills their part. Record 60 s of real footage (re-run the notebook with `ROV_SOURCE`). Measure glass-to-glass latency.
+**Slide 50 — homework.** Hand out the Diagnostic Checklist; each subsystem owner fills their part. Record 60 s of real footage (upload it to the Encoding Lab (sidebar → Upload your own video). Measure glass-to-glass latency.
 
 **Transition to Session 2 (next time):** *“Bring the numbers. We'll turn them into requirements, tests and a better pilot interface.”*
 
@@ -557,7 +576,7 @@ If you have 20 minutes left, run **Activity 5** live: each team sketches its tar
 | Bandwidth + Activity 1 | 15–21 | 30 | 1:10 |
 | Break | | 10 | 1:20 |
 | Encoding | 22–26 | 30 | 1:50 |
-| Codecs, knobs, GOP (+ notebook) | 27–30 | 30 | 2:20 |
+| Codecs, knobs, GOP (+ Encoding Lab) | 27–30 | 30 | 2:20 |
 | Break | | 10 | 2:30 |
 | Quality + Activity 3 | 31 | 20 | 2:50 |
 | Hardware, protocols, latency | 32–40 | 25 | 3:15 |

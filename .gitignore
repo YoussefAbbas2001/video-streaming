@@ -4,6 +4,7 @@ encoding_lab/.lab_work/
 demos/**/out/
 build/run.log
 build/deck_data.json.bak
+out/
 
 # Python / Jupyter
 __pycache__/

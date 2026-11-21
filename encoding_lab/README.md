@@ -87,7 +87,9 @@ encoding_lab/
 ├── lab/engine.py          FFmpeg logic: encode, measure (PSNR/SSIM/VMAF), frame stats, packet-loss experiment
 ├── lab/bench.py           benchmarking: system info, HW encoders, capacity, decode, encoder hold, latency budget, report
 ├── lab/live.py            Live camera: capture, per-stage timing, encoders, MJPEG server for the browser
+├── tools/rtp_probe.py     throughput, packet loss and jitter of an RTP stream (for the pilot GUI; see docs/streaming/gui-stream-metrics.md)
 ├── tests/test_engine.py   self-test of engine, benchmarks and the live pipeline (pytest, ~30 s)
+├── tests/test_rtp_probe.py tests for the probe
 ├── .streamlit/config.toml theme (dark, M.I.A red)
 ├── requirements.txt
 └── run_lab.sh / run_lab.bat

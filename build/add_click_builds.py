@@ -343,6 +343,7 @@ def main():
     ap.add_argument("pptx", type=Path)
     ap.add_argument("-o", "--out", type=Path, help="output file (default: overwrite input)")
     ap.add_argument("-v", "--verbose", action="store_true", help="print the plan for every slide")
+    ap.add_argument("--only", help="comma-separated slide numbers to process; every other slide (and its hand-made animations) is left untouched")
     a = ap.parse_args()
 
     src = a.pptx
@@ -370,7 +371,10 @@ def main():
                         c = etree.fromstring(z.read(lay)).find("p:cSld", NS)
                         return c.get("name", "") if c is not None else ""
                 return ""
-            for name in order:
+            only = {int(n) for n in a.only.split(",")} if a.only else None
+            for k, name in enumerate(order, 1):
+                if only is not None and k not in only:
+                    continue
                 new_xml, steps = process_slide(z.read(name), slide_w, slide_h, layout_of(name))
                 plans[name] = (new_xml, steps)
             for item in z.infolist():
@@ -379,6 +383,8 @@ def main():
                 data = plans[item.filename][0] if item.filename in plans else z.read(item.filename)
                 out.writestr(item, data)
         for n, name in enumerate(order, 1):
+            if name not in plans:
+                continue
             steps = plans[name][1]
             total_clicks += len(steps); animated += bool(steps)
             if a.verbose:
@@ -386,7 +392,7 @@ def main():
                 print(f"slide {n:2d}: {len(steps)} clicks  {desc[:160]}")
     dst = a.out or src
     shutil.move(tmp, dst)
-    print(f"{animated}/{len(order)} slides animated, {total_clicks} clicks in total -> {dst}")
+    print(f"{animated}/{len(plans)} processed slides animated, {total_clicks} clicks in total -> {dst}")
 
 
 if __name__ == "__main__":

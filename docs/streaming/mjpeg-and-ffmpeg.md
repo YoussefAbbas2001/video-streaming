@@ -1,10 +1,15 @@
 # MJPEG on our ROV, and why we use FFmpeg for it
 
-*M.I.A Robotics · streaming reading · measured 19 Nov 2026 (FFmpeg 6.1, Encoding Lab synthetic 720p30 clip)*
+*M.I.A Robotics · streaming reading · measured 19–21 Nov 2026 (FFmpeg 6.1, Encoding Lab synthetic 720p30 clip)*
 
 **In one paragraph.** MJPEG is video made of separate JPEG photos. No frame depends on another, so encoding is cheap, there is no frame hold, and a broken frame never smears into the next one. The price is size: about **4–5× the bitrate of H.264** for the same picture quality (measured below). We keep **H.264 over RTP/UDP** for the pilot and manipulator cameras, and use MJPEG for aux cameras, CV debug views, snapshots, recordings and the fallback stream. **We build all of it with FFmpeg**, not with `mjpeg-streamer` (Python) or `mjpg-streamer` (C).
 
-Demos: [`demos/02_pipeline/mjpeg_ffmpeg.sh`](../demos/02_pipeline/mjpeg_ffmpeg.sh) · [`demos/02_pipeline/cv_debug_ffmpeg.py`](../demos/02_pipeline/cv_debug_ffmpeg.py)
+**Try it live:** Encoding Lab → **Live camera** tab: your laptop camera with MJPEG passthrough, MJPEG re-encode, x264 or NVENC, and what each stage costs.
+
+**Two things the team should know first:**
+
+1. Lowering an MJPEG camera's resolution is free **only if the camera does it** ([§ The resolution trap](#the-resolution-trap)).
+2. When a camera must be re-encoded, a hardware encoder such as NVENC or the Jetson's beats software MJPEG ([§ Better than re-encoding MJPEG](#better-than-re-encoding-mjpeg-nvenc-and-friends)).
 
 ---
 
@@ -96,7 +101,7 @@ ffmpeg -f v4l2 -input_format mjpeg -video_size 1280x720 -framerate 30 -i /dev/vi
 ```
 
 ```python
-# 5. CV debug stream (full version: demos/02_pipeline/cv_debug_ffmpeg.py)
+# 5. CV debug stream: OpenCV draws, FFmpeg encodes each frame once
 import subprocess, cv2
 W, H, FPS = 640, 360, 10                                  # FPS = the detector's real rate
 ff = subprocess.Popen(["ffmpeg", "-loglevel", "error",
@@ -110,9 +115,53 @@ while True:
 
 **The one gap.** FFmpeg's built-in HTTP server takes one viewer, and the process ends when that viewer disconnects. Three ways to cover it:
 
-- **One GUI tile per stream:** run it in a loop (`mjpeg_ffmpeg.sh http` does this) or as a systemd service with `Restart=always`.
+- **One GUI tile per stream:** run it in a loop (a `while true; do ffmpeg …; sleep 0.5; done` loop) or as a systemd service with `Restart=always`.
 - **Several viewers:** send RTP once over the tether, and let every viewer on the topside PC open the same `.sdp`.
 - **Several browsers:** put a relay on the topside PC, never on the ROV, so only one copy crosses the tether.
+
+## The resolution trap
+
+The team streams USB cameras with mjpeg-streamer and **lowers the resolution**. Whether that costs anything depends on **where** the resolution is lowered.
+
+| How the resolution is lowered | What happens to every frame | Cost (720p30 → 640×360, measured) |
+|---|---|---|
+| **Ask the camera:** mjpg-streamer `input_uvc -r 640x480`, FFmpeg `-input_format mjpeg -video_size 640x480 … -c:v copy` | The camera's chip makes the smaller JPEGs. **Nothing is decoded or encoded** on the ROV. | ≈ 1 % of a core (copy only) |
+| **Shrink in software:** PyPI mjpeg-streamer `Stream(size=…)`, any OpenCV `resize`, FFmpeg `-vf scale` | **decode → scale → encode**. The PyPI library repeats the encode **for every viewer**. | JPEG decode ≈ 2.4 ms + scale ≈ 0.4 ms + JPEG encode ≈ 0.9 ms per frame ≈ **13 % of a core** per camera |
+| **Ask for raw frames:** mjpg-streamer `-y` (YUYV) | the CPU encodes every JPEG (no decode) | an encode per frame; USB 2.0 also limits raw frames to small sizes |
+
+Measured with the Encoding Lab's Live camera tab (passthrough vs Output size 50 %) on a 2-core test PC; an ARM board pays more.
+
+**How to tell which one you have:**
+
+```bash
+v4l2-ctl -d /dev/video0 --list-formats-ext        # every size listed under 'MJPG' is made by the camera itself
+ffmpeg -f v4l2 -list_formats all -i /dev/video0   # the same list, from FFmpeg
+```
+
+mjpg-streamer asks the camera (V4L2) for the size you pass with `-r`. If the camera does not offer that size in MJPG, the driver picks the closest size it has and mjpg-streamer prints `The specified resolution is unavailable, using: width … height … instead` (from its `v4l2uvc.c`). mjpg-streamer has no scaler of its own, so with `input_uvc` in MJPEG mode it never decodes or re-encodes. The **PyPI** `mjpeg-streamer` library always works on decoded OpenCV frames, so shrinking with it is always decode → scale → encode.
+
+**If the size you need is not offered,** a transcode is unavoidable, so make it count. Encode that camera to **H.264**: one encode, and 4–5 × fewer bits than a smaller MJPEG. Do it in hardware where you can (next section).
+
+## Better than re-encoding MJPEG: NVENC and friends
+
+Once a camera has to be decoded anyway, re-encoding to MJPEG wastes the work. An H.264 encoder gives 4–5 × fewer bits for the same decode, and a **hardware** encoder does it with almost no CPU. Each option below shows up in the Live camera tab when the computer running the lab has it.
+
+| Option | Where it exists | FFmpeg / GStreamer | Notes |
+|---|---|---|---|
+| **NVENC** | NVIDIA GPUs (pilot laptop, desktop) | `-c:v h264_nvenc -preset p1 -tune ull -zerolatency 1 -bf 0 -b:v 2M` | very low latency, near-zero CPU; also `hevc_nvenc` (and `av1_nvenc` on RTX 40+) |
+| **Jetson hardware encoder** | Jetson Nano / Orin | GStreamer `nvv4l2h264enc` (MJPEG in: `nvv4l2decoder mjpeg=1`) | ≈ 4 × 1080p30; mainline FFmpeg cannot use it; see [jetson-nano-vs-pi5.md](jetson-nano-vs-pi5.md) |
+| **Intel Quick Sync** | most Intel laptops | `-c:v h264_qsv -preset veryfast -async_depth 1` | good for a topside relay or recorder |
+| **AMD AMF** | AMD GPUs (Windows) | `-c:v h264_amf -usage ultralowlatency` | |
+| **VA-API** | Intel/AMD on Linux | `-vaapi_device /dev/dri/renderD128 -vf format=nv12,hwupload -c:v h264_vaapi` | |
+| **V4L2 M2M** | Raspberry Pi 4 (not Pi 5) | `-c:v h264_v4l2m2m` | the Pi 5 has no hardware H.264 encoder |
+| **x264 ultrafast + zerolatency** | any CPU, incl. Pi 5 | `-c:v libx264 -preset ultrafast -tune zerolatency` | the universal fallback; ≈ 62–90 % of a Pi 5 core per 1080p30 stream (Raspberry Pi white paper, Apr 2026) |
+| **Cameras that encode H.264 themselves** | IP cameras, UVC H.264 cameras | `-c:v copy` | no ROV CPU at all; check their GOP and latency settings |
+
+Rule of thumb for our ROV:
+
+- **Small aux cameras:** MJPEG passthrough at a size the camera offers.
+- **Main cameras:** H.264, from the camera itself, from a hardware encoder, or from x264 zerolatency.
+- **Never shrink MJPEG in software.**
 
 ## 5. Where MJPEG helps us
 
@@ -143,9 +192,10 @@ while True:
 ## 7. Next steps
 
 - [ ] List the formats of every camera we own (`v4l2-ctl --list-formats-ext`)
-- [ ] Bench one aux camera on the Pi 5 with `mjpeg_ffmpeg.sh tee`: CPU %, Mb/s, glass-to-glass latency (`demos/01_why_streaming/clock.html`)
+- [ ] Bench one aux camera on the Pi 5 with recipe 3 (tee): CPU %, Mb/s, glass-to-glass latency (photograph a phone stopwatch next to the pilot screen)
+- [ ] For every camera, check whether the size we stream is one the camera makes itself (`v4l2-ctl --list-formats-ext`); if not, switch that camera to H.264
 - [ ] Compare MJPEG over HTTP vs RTP with 1% loss (`impair.sh`)
-- [ ] Put `cv_debug_ffmpeg.py` behind the real detector, `--fps` = its real rate
+- [ ] Put the CV debug pipe (recipe 5) behind the real detector, at its real frame rate
 - [ ] Re-run the measurements on the Pi 5 / Jetson with pool footage
 
 Sources: [mjpg-streamer on GitHub](https://github.com/jacksonliam/mjpg-streamer) (plugin options read from its source at the 20 Feb 2021 commit) · [mjpeg-streamer on PyPI](https://pypi.org/project/mjpeg-streamer/) (behaviour read from the 2024.2.8 source and tested) · all numbers measured by us on 19 Nov 2026.

@@ -55,7 +55,7 @@ sealed hull → constant encode load → SoC at its thermal limit → firmware t
 
 | Action | Type | Owner | Issue |
 |---|---|---|---|
-| Log SoC temperature and throttling every second during every pool test (`demos/02_pipeline/monitor.py --csv`) | detect | | |
+| Log SoC temperature and throttling every second during every pool test (`vcgencmd` on a Pi, `tegrastats --logfile` on a Jetson) | detect | | |
 | Show SoC temperature on the pilot GUI, warning at 75 °C | detect | | |
 | Thermal path: pad → aluminium plate → hull, measured with the soak test | prevent | | |
 | Move encoding into the cameras (H.264 UVC or IP) where possible | prevent | | |

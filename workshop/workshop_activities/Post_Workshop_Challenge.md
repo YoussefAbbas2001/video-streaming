@@ -47,7 +47,7 @@ Replace the placeholder numbers (marked ⟨…⟩) with values agreed with your 
 
 | Week | Phase | Output | Milestone check |
 |---|---|---|---|
-| 1 | **Baseline** | Filled `ROV_System_Diagnostic_Checklist.md`; 60 s of real footage; notebook re-run with `ROV_SOURCE` (your bits-per-pixel) | Baseline review with the whole team |
+| 1 | **Baseline** | Filled `ROV_System_Diagnostic_Checklist.md`; 60 s of real footage; the footage uploaded to the Encoding Lab (your bits-per-pixel) | Baseline review with the whole team |
 | 2–3 | **Design** | ≥ 2 architecture options compared with numbers (`Proposed_Architecture_Options.md`); decision log entry; updated requirements with agreed targets; user stories with acceptance criteria | Design review (another team member challenges it) |
 | 3–5 | **Build & test** | Small PRs, reviewed; unit + integration tests; failure tests (§5); usability test with a pilot; weekly pool or bench integration | Tagged release `v<x>-challenge-rc` |
 | 6 | **Demonstrate** | Before/after measurements; demo; report | Final demonstration |

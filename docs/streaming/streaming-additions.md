@@ -43,7 +43,7 @@ How the numbers are calculated:
 - **Data per hour:** bitrate × 3600 s ÷ 8 bits per byte.
 - **Two takeaways:** H.264 is about **300× cheaper** than raw RGB for the same hour. A 30 Mb/s WE line would need about **50× more speed** just to carry raw 1080p30 live.
 
-Run the calculator with your own numbers: `python demos/01_why_streaming/egypt_cost.py --price 1.71 --minutes 60`.
+Do it with your own numbers: GB per hour = Mb/s × 3600 ÷ 8 ÷ 1000; cost = GB × your price per GB (the Encoding Lab's Show the math view does the first half for any encode).
 
 ## 3. USB cameras vs IP cameras
 
@@ -64,7 +64,7 @@ We already stream 8 cameras, and network video recorders (NVRs) routinely ingest
 - `v4l2-ctl -d /dev/videoN --list-formats-ext` lists the formats it offers (look for H264).
 - For IP cameras, `ffprobe rtsp://…` shows codec, resolution and frame rate.
 
-The demo `demos/02_pipeline/camera_inventory.sh` runs all three.
+Run all three for every camera and keep the output in the team docs.
 
 **Recommendation for M.I.A:** keep what works, but prefer cameras that deliver H.264 themselves, either UVC cameras with onboard H.264 or IP cameras. The SBC then only forwards packets, which also decides the Pi 5 question below.
 
@@ -86,7 +86,7 @@ The Pi 5 has not been tested on our ROV yet. What the vendors document:
 2. **The SBC must encode several raw or MJPEG USB cameras.** The **Jetson Nano is better.** Its hardware encoder handles four 1080p30 streams almost for free. A Pi 5 would spend most of a core per 1080p30 stream, so realistically about three such streams, with heat as the next problem (section 5).
 3. **On-board computer vision.** With the AI HAT+ the Pi 5 is competitive for detection networks. Without it, the Nano's GPU wins.
 
-**Before deciding, run a soak test:** 8 streams in the real configuration, 30 minutes, inside the sealed enclosure. Log CPU per core, temperature, throttling flags and dropped frames with `demos/02_pipeline/monitor.py --csv soak.csv`, then compare both boards with the same script.
+**Before deciding, run a soak test:** 8 streams in the real configuration, 30 minutes, inside the sealed enclosure. Log CPU per core, temperature and throttling flags every second (`while true; do date +%T; vcgencmd measure_temp; vcgencmd get_throttled; sleep 1; done >> soak.log` on a Pi, `tegrastats --interval 1000 --logfile soak.log` on a Jetson) and dropped frames, then compare both boards the same way. Full comparison: [jetson-nano-vs-pi5.md](jetson-nano-vs-pi5.md).
 
 ## 5. Reliability: the 2023 heat failure and how to prevent it
 
@@ -104,7 +104,7 @@ The Pi 5 Active Cooler's fan starts at 60 °C and reaches full speed at 75 °C [
 
 | Fix | What to do |
 |---|---|
-| Measure | Log temperature and throttle flags every second: `vcgencmd measure_temp` and `vcgencmd get_throttled` on a Pi, `tegrastats` on a Jetson. `demos/02_pipeline/monitor.py` does both |
+| Measure | Log temperature and throttle flags every second: `vcgencmd measure_temp` and `vcgencmd get_throttled` on a Pi, `tegrastats` on a Jetson |
 | Design | Make a heat path: thermal pad → aluminium plate → hull wall → water. Keep the SBC away from the ESCs and power converters |
 | Reduce | Let cameras encode. Lower the frame rate and resolution of auxiliary cameras. Stop streams nobody is watching |
 | Soak-test | Run 30 minutes in the sealed enclosure, in water as warm as the competition pool, before every event |

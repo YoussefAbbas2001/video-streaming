@@ -6,7 +6,7 @@ The full two-session workshop:
 
 The guiding idea: *students leave asking "how would we measure that?" before "how do we fix that?"*
 
-> **Paths inside this folder** (e.g. `student_materials/…` in the presenter script) are relative to `workshop/`. Repo-level items are written with `../` (e.g. `../notebooks/`).
+> **Paths inside this folder** (e.g. `student_materials/…` in the presenter script) are relative to `workshop/`. Repo-level items are written with `../` (e.g. `../encoding_lab/`).
 
 ## What's here
 
@@ -32,12 +32,11 @@ workshop/
 ```
 
 Related, at the repo level:
-- the deck: `../presentation/`, 82 slides with click-by-click builds and speaker notes;
-- the notebook: `../notebooks/`;
-- the Encoding Lab app: `../encoding_lab/`;
+- the decks: `../presentation/` (MIA_Video_Streaming.pptx, MIA_Software_Dev_Cycle.pptx), click-by-click builds and speaker notes;
+- the **Encoding Lab** app, used for every live demo: `../encoding_lab/`;
 - the video series: `../videos/`;
-- the demos: `../demos/`;
-- the SDLC live session: `../sdlc/`.
+- the write-ups: `../docs/streaming/` and the SDLC live session: `../docs/sdlc/`;
+- the original notebook (optional, not used in the session): `../encoding_lab/notebooks/`.
 
 **Presenter-only (not in this repo):** the testing-competition referee key and the seeded-defect proof tests live in the presenter's Drive folder (see the main README), so the team can't read the answers before the competition.
 
@@ -52,24 +51,22 @@ Two half-day sessions (≈ 3 h 50 min each, incl. breaks). Full timing is in `pr
 
 **Before session 1:**
 - Send the questionnaire in `Workshop_Design.md` §6.5 to the team lead.
-- Run the notebook once.
+- Run the Encoding Lab once (one encode, one benchmark, one Live camera start).
 - Print the handouts (the list is in `Presenter_Script.md`).
 
-## Running the notebook
+## Running the Encoding Lab
 
-Requirements: **Python 3.10+** and **FFmpeg 5+** with `libx264`. `libx265` and `libsvtav1` are optional; VMAF works only if FFmpeg has `libvmaf`.
+Requirements: **Python 3.10+** and **FFmpeg 5+** with `libx264` (`libx265`, `libsvtav1` optional; VMAF only if FFmpeg has `libvmaf`).
 
 ```bash
-sudo apt install ffmpeg python3-venv          # Ubuntu / Debian / Raspberry Pi OS / JetPack
-cd ../notebooks
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-jupyter lab ROV_Video_Streaming_Workshop.ipynb  # then Run → Run All Cells (≈ 4–10 min)
+sudo apt install ffmpeg                       # macOS: brew install ffmpeg · Windows: winget install ffmpeg
+pip install -r ../encoding_lab/requirements.txt
+streamlit run ../encoding_lab/app.py          # http://localhost:8501
 ```
 
-- **Use your own footage:** `ROV_SOURCE=/path/to/dive.mp4 jupyter lab`. Without it, a synthetic underwater clip is generated.
-- Results are cached in `notebooks/work/` (≈ 400 MB, ignored by git, safe to delete).
-- The included notebook was executed on a 2-core x86 Linux machine with FFmpeg 6.1.1. Your numbers will differ; that's the point.
+- **Use your own footage:** sidebar → *Upload your own video*. Without it, a synthetic underwater clip is generated.
+- **Live camera tab:** uses the laptop's camera; Windows and macOS ask for permission the first time.
+- Results are cached in `encoding_lab/.lab_work/` (safe to delete). The presenter script's notebook-experiment → Lab-tab table is at the top of `Presenter_Script.md`.
 
 ## Running the testing competition code
 

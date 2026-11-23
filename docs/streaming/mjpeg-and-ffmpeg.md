@@ -51,7 +51,7 @@ Each frame is compressed on its own as a JPEG (DCT blocks, quantisation set by a
 
 | Camera mix | All MJPEG q=5 | All H.264 |
 |---|---|---|
-| Encoding Lab Bandwidth-tab mix (1080p30 pilot, 720p30 manipulator, 6 small aux at 10–15 fps) | 32.0 Mb/s | 7.9 Mb/s |
+| Encoding Lab Bandwidth-budget mix (1080p30 pilot, 720p30 manipulator, 6 small aux at 10–15 fps) | 32.0 Mb/s | 7.9 Mb/s |
 | 8 × 720p30 | 63.7 Mb/s | 15.8 Mb/s |
 | 2 × 1080p30 + 6 × 720p30 | 83.6 Mb/s (over budget) | 20.8 Mb/s |
 

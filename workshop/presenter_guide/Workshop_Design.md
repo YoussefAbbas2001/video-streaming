@@ -91,7 +91,7 @@ Cut: Experiment 4 (presets) becomes a pre-recorded result; Activity 3 shortened 
 | A timer visible to the room | Required | Competitions |
 | **The real ROV + tether + topside laptop** | Strongly recommended | Turns the diagnostic section from theory into measurement |
 | One USB camera (UVC) + one IP camera, if they have them | Recommended | Live `v4l2-ctl` / `ffprobe` demo |
-| Jetson Nano and/or Raspberry Pi 5 with SSH | Recommended | run the Encoding Lab's Benchmark tab on the board |
+| Jetson Nano and/or Raspberry Pi 5 with SSH | Recommended | run the Encoding Lab's Bandwidth budget → Measure this computer on the board |
 | A small managed or unmanaged Ethernet switch | Optional | Show link speed negotiation with `ethtool` |
 | A phone with a camera (high-speed mode helps) | Optional | Glass-to-glass latency measurement |
 

@@ -78,7 +78,7 @@ The reference must be the **lossless** source, at the same resolution and frame 
 | Metric | How |
 |---|---|
 | Dropped or duplicated frames | FFmpeg status line `drop=` / `dup=`; WebRTC `framesDropped`; GStreamer `fpsdisplaysink` (rendered vs dropped) |
-| Recovery after loss | Unplug the tether for 2 s and time how long until a clean picture returns; the Encoding Lab *Packet loss* tab shows the same effect |
+| Recovery after loss | Unplug the tether for 2 s and time how long until a clean picture returns; the Encoding Lab *Bandwidth budget → Packet-loss lab* shows the same effect |
 | Time to switch cameras | Stopwatch from button press to clean picture (bounded by the keyframe interval) |
 | Soak test | 30 min, sealed enclosure, real camera configuration: `monitor.py --csv soak.csv`. Pass when there is no throttling, no growth in latency and no stream restarts |
 

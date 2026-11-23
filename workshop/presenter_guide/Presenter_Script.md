@@ -19,12 +19,12 @@ Every demo is done live in the **ROV Encoding Lab**. Where this script names a n
 | 2 · Codecs and the FFmpeg command | Encode: codec selector; Compare section at the bottom |
 | 3 · CRF vs bitrate cap | Encode: Rate control + Bitrate over time; Sweep → Quality / Target bitrate |
 | 4 · Encoder parameters | Sweep → Preset, Keyframe interval, Resolution, Frame rate |
-| 5 · Packet loss and GOP | Packet loss |
+| 5 · Packet loss and GOP | Bandwidth budget → Packet-loss lab (and the *Broken picture* card in Plan the budget) |
 | 6 · Quality metrics | Encode → Frame compare (Diff ×8, Zoom), Quality over time (VMAF under More) |
-| 7 · Bandwidth planning | Bandwidth |
-| 8 · Substreams and priorities | Bandwidth (edit the camera table) + Live camera → Output size |
-| 9 · Latency | Encode → latency graph; Live camera (x264 with Low latency off, then on); Benchmark → Compare defaults vs low latency |
-| 10 · What this machine can do | Benchmark |
+| 7 · Bandwidth planning | Bandwidth budget → Plan the budget (start from *What we fly now*, then switch the tether to powerline) |
+| 8 · Substreams and priorities | Bandwidth budget (edit the camera table, read *Cheapest ways to make it fit*) + Live camera → Output size |
+| 9 · Latency | Encode → latency graph; Live camera (x264 with Low latency off, then on); Bandwidth budget → Measure this computer → Compare defaults vs low latency |
+| 10 · What this machine can do | Bandwidth budget → Measure this computer (then pick *This computer (benchmarked)* in Plan the budget) |
 | 11 · Take it to the ROV | Report + `docs/streaming/jetson-nano-vs-pi5.md` |
 | *(new)* MJPEG passthrough vs resize, NVENC | Live camera |
 
@@ -33,7 +33,7 @@ Every demo is done live in the **ROV Encoding Lab**. Where this script names a n
 ## Before the session — checklist
 
 - [ ] Send the **questionnaire** (Workshop_Design.md §6.5) to the team lead a week before. Even partial answers change the conversation.
-- [ ] Start the Encoding Lab on the presenter laptop (`streamlit run encoding_lab/app.py`). Run one encode in Encode, run the Benchmark once, and press **Start** once in Live camera with the laptop camera (Windows and macOS ask for camera permission the first time). Keep it open on the Encode tab.
+- [ ] Start the Encoding Lab on the presenter laptop (`streamlit run encoding_lab/app.py`). Run one encode in Encode, run Bandwidth budget → Measure this computer once, and press **Start** once in Live camera with the laptop camera (Windows and macOS ask for camera permission the first time). Keep it open on the Encode tab.
 - [ ] Open the deck in **Presenter View** (speaker notes visible).
 - [ ] Click through the deck once. Every content slide **builds on click** (title and kicker stay; each card, chart or recipe fades in on the next click, at most 8 clicks per slide). The presenter view shows the next step. To change the grouping, edit `build/add_click_builds.py` and rebuild (`node build/build_deck.js`).
 - [ ] Print: Activity 1 cards, Activity 2 answer sheets, the Testing Competition Guide, the UX scenario and A3 sheets, the Diagnostic Checklist (one per subsystem owner), the Cheat Sheet (one per student).
@@ -255,7 +255,7 @@ Expected: fewer big I-frames → lower average bitrate; cost: slower start/switc
 ## 1.5 Codecs, parameters, rate control, GOP and loss (🧪 Encoding Lab)
 
 **Objective:** Students understand what each encoder knob does, the CRF vs bitrate decision, and the GOP/loss trade-off — from measurements.
-**Duration:** 30 min · **Slides:** 27–30 · **Encoding Lab:** Encode, Sweep and Packet loss tabs
+**Duration:** 30 min · **Slides:** 27–30 · **Encoding Lab:** Encode, Sweep and Bandwidth budget → Packet-loss lab
 
 **🧪 Live demo first (5 min):** in the Encoding Lab, run one H.264 encode in the Encode tab and read the result chips and cards together. Then show the same encode as an FFmpeg command, argument by argument (`-c:v libx264`, `-preset`, `-crf`, `-pix_fmt yuv420p`, `-an`), and open **🧮 Show the math**: raw bitrate, compression ratio, bits per pixel, cores per stream.
 
@@ -386,7 +386,7 @@ Jitter chart: a simulated tether with small everyday jitter and 2 % spikes of 30
 
 > *“The pilot looks at one or two cameras at a time. The other six only need to answer: is something happening there?”*
 
-**Slide 45 — priorities and adaptation.** Measure → budget (70 % of throughput minus control/telemetry) → allocate (minimums by priority, then top up) → apply (encoder bitrate, pause/resume) → show (UI states: live, degraded, paused, lost). Priorities change with the task: the manipulator camera becomes priority 1 during a grab. The measurement (former notebook Experiment 8; Bandwidth tab in the Encoding Lab) shows the tether degrading 100 → 40 → 20 → 6 Mb/s: the pilot view stays sharp; aux cameras degrade then pause — visibly.
+**Slide 45 — priorities and adaptation.** Measure → budget (70 % of throughput minus control/telemetry) → allocate (minimums by priority, then top up) → apply (encoder bitrate, pause/resume) → show (UI states: live, degraded, paused, lost). Priorities change with the task: the manipulator camera becomes priority 1 during a grab. The measurement (former notebook Experiment 8; Bandwidth budget tab in the Encoding Lab) shows the tether degrading 100 → 40 → 20 → 6 Mb/s: the pilot view stays sharp; aux cameras degrade then pause — visibly.
 
 Requirements for this: encoders whose bitrate can change at runtime (hardware encoders and x264's API can; many IP cameras expose it via HTTP/ONVIF), a throughput estimate (RTCP receiver reports, WebRTC stats/congestion control, probing), and an honest UI.
 

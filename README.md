@@ -11,7 +11,7 @@ Everything for our video-streaming session: two slide decks, three recorded vide
 | **In the session** | Run the [Encoding Lab](encoding_lab/) (below). Every experiment in the deck is done there, live. |
 | **Watching the videos** | [`videos/`](videos/): three videos, about 25 min |
 | **Trying a camera and an encoder live** | Encoding Lab → **Live camera** tab (laptop camera, MJPEG passthrough vs x264 vs NVENC, with a latency overlay) |
-| **Benchmarking the Pi 5 / Jetson / laptop** | Run the Encoding Lab on that computer → **Benchmark** tab |
+| **Benchmarking the Pi 5 / Jetson / laptop** | Run the Encoding Lab on that computer → **Bandwidth budget → Measure this computer** |
 | **Choosing Jetson Nano 2GB vs Raspberry Pi 5** | [`docs/streaming/jetson-nano-vs-pi5.md`](docs/streaming/jetson-nano-vs-pi5.md) |
 | **MJPEG cameras, lowering their resolution, NVENC** | [`docs/streaming/mjpeg-and-ffmpeg.md`](docs/streaming/mjpeg-and-ffmpeg.md) |
 | **Adding bandwidth and loss to the pilot GUI** | [`docs/streaming/gui-stream-metrics.md`](docs/streaming/gui-stream-metrics.md) |
@@ -25,7 +25,7 @@ Everything for our video-streaming session: two slide decks, three recorded vide
 
 ```
 ├── presentation/   MIA_Video_Streaming.pptx (56 slides) and MIA_Software_Dev_Cycle.pptx (36 slides), click-by-click builds, speaker notes
-├── encoding_lab/   ROV Encoding Lab: Streamlit app — Encode, Live camera, Sweep, Benchmark, Packet loss, Bandwidth, Report, Learn
+├── encoding_lab/   ROV Encoding Lab: Streamlit app — Encode, Live camera, Sweep, Bandwidth budget, Report, Learn
 ├── docs/
 │   ├── streaming/  compression economics, USB vs IP, Jetson Nano vs Pi 5, MJPEG + FFmpeg, GUI stream metrics, measuring
 │   └── sdlc/       Quality × Efficiency, Bug Hunt League, GitHub workflow, knowledge exchange, postmortems

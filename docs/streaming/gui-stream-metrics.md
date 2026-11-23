@@ -19,7 +19,7 @@ Add one total for the whole tether. Most "the video is bad" reports from the poo
 | Status bar | **Tether** | sum of all streams ÷ the tether throughput you measured with iperf3 | < 70 % | 70–90 % | > 90 % |
 | Tooltip | Jitter | RFC 3550 interarrival jitter, ms | < 10 ms | 10–30 ms | > 30 ms |
 
-**Why the loss thresholds are this low.** With a 1 s GOP, one lost packet corrupts the picture until the next keyframe, up to a second later (Encoding Lab → Packet loss tab). Half a percent of loss is very visible.
+**Why the loss thresholds are this low.** With a 1 s GOP, one lost packet corrupts the picture until the next keyframe, up to a second later (Encoding Lab → Bandwidth budget: the *Broken picture* card, and the Packet-loss lab). Half a percent of loss is very visible.
 
 **Why STALE matters.** It is the "never show success the system hasn't confirmed" rule from the UX slides. A frozen last frame looks exactly like a still scene, so the pilot must be told.
 

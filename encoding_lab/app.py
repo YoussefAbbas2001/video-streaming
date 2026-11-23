@@ -4,6 +4,7 @@ Run:  streamlit run app.py
 """
 from __future__ import annotations
 
+import base64
 import os
 from dataclasses import asdict
 from pathlib import Path
@@ -14,6 +15,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from lab import bench as B
+from lab import budget as G
 from lab import engine as E
 from lab import live as L
 
@@ -26,7 +28,11 @@ CODEC_COL = {"H.264": RED, "H.265": "#8FB8E8", "AV1": "#E07A5F", "MJPEG": AMBER}
 STATUS = {"good": GREEN, "warn": AMBER, "bad": RED, "info": GRAY}
 STAGE_COL = ["#B23A48", RED, "#E07A5F", AMBER, "#8B93A1", BLUE, "#C9A0DC", GREEN]
 
-st.set_page_config(page_title="ROV Encoding Lab", page_icon=":material/videocam:", layout="wide")
+LOGO = APP_DIR / "assets" / "mia_logo.png"
+LOGO_B64 = base64.b64encode(LOGO.read_bytes()).decode() if LOGO.exists() else ""
+st.set_page_config(page_title="M.I.A ROV Encoding Lab", page_icon=str(LOGO) if LOGO.exists() else ":material/videocam:", layout="wide")
+if LOGO.exists():
+    st.logo(str(LOGO), size="large")
 
 # ============================================================================= style
 st.markdown(f"""
@@ -37,6 +43,10 @@ st.markdown(f"""
 .hero h1 {{ color: white; font-size: 2.1rem; margin: 0; letter-spacing: -.5px; padding: 0; }}
 .hero p {{ color: #FFE3E3; margin: .3rem 0 .7rem; font-size: 1.02rem; }}
 .kicker {{ font-size: .74rem; letter-spacing: .22em; font-weight: 700; color: #FFC2C2; }}
+.hero .brand {{ display:flex; align-items:center; justify-content:center; gap:1.1rem; margin-bottom:.35rem; }}
+.hero .brand img {{ height: 58px; width:auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.25)); }}
+.hero .brand .sep {{ width:1px; height:46px; background: rgba(255,255,255,.45); }}
+.hero .brand .kicker {{ text-align:left; line-height:1.5; }}
 .steps {{ display:flex; justify-content:center; gap:.6rem; flex-wrap:wrap; }}
 .step {{ background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.28); border-radius: 999px; padding: .28rem .85rem; font-size: .88rem; }}
 .step b {{ color: #FFD6D6; margin-right: .3rem; }}
@@ -77,11 +87,11 @@ div[role="tablist"]::after, div[role="tablist"]::before {{ display: none !import
 .stTabs .stTabs [data-testid="stTab"][aria-selected="true"] {{ background: linear-gradient(120deg, #B3121A, {RED}); border-color: {RED}; }}
 div[data-testid="stSegmentedControl"] button {{ white-space: nowrap; }}
 </style>
-<div class="hero"><div class="kicker">M.I.A ROBOTICS · ENGINEERING BETTER ROV SYSTEMS</div>
+<div class="hero"><div class="brand"><img src="data:image/png;base64,{LOGO_B64}" alt="M.I.A Robotics"><span class="sep"></span><div class="kicker">ENGINEERING<br>BETTER ROV SYSTEMS</div></div>
 <h1>ROV Encoding Lab</h1>
 <p>Turn one knob, see what it does to size, quality, speed and latency — then benchmark the computer that has to do it.</p>
 <div class="steps"><span class="step"><b>1</b>Pick a video (sidebar)</span><span class="step"><b>2</b>Turn one knob (Encode)</span>
-<span class="step"><b>3</b>Watch it live (Live camera)</span><span class="step"><b>4</b>Benchmark this computer</span></div></div>
+<span class="step"><b>3</b>Watch it live (Live camera)</span><span class="step"><b>4</b>Plan the tether budget</span></div></div>
 """, unsafe_allow_html=True)
 
 
@@ -243,8 +253,8 @@ def live_manager() -> L.LiveManager:
     return L.LiveManager()
 
 
-tabs = st.tabs([":material/tune: Encode", ":material/videocam: Live camera", ":material/stacked_line_chart: Sweep", ":material/speed: Benchmark",
-                ":material/signal_wifi_bad: Packet loss", ":material/lan: Bandwidth", ":material/description: Report", ":material/school: Learn"])
+tabs = st.tabs([":material/tune: Encode", ":material/videocam: Live camera", ":material/stacked_line_chart: Sweep",
+                ":material/lan: Bandwidth budget", ":material/description: Report", ":material/school: Learn"])
 
 # ============================================================================= 1 · ENCODE (master tab)
 with tabs[0]:
@@ -290,7 +300,7 @@ with tabs[0]:
             ("Bitrate", f"{R.bitrate_mbps:.2f} Mb/s", f"peak 200 ms: {roll.max():.2f}", "good" if R.bitrate_mbps <= BUDGET else "bad",
              change(R.bitrate_mbps, p.get("bitrate_mbps"), False, lambda d: f"{d:+.2f}")),
             ("Compression", f"{R.compression_ratio:,.0f} : 1", "vs raw 4:2:0", "info"),
-            ("Bits per pixel", f"{R.bpp:.3f}", "use it in the Bandwidth tab", "info"),
+            ("Bits per pixel", f"{R.bpp:.3f}", "use it in Bandwidth budget", "info"),
             ("PSNR", f"{R.psnr:.1f} dB", "≥ 40 dB looks clean", "good" if R.psnr >= 40 else ("warn" if R.psnr >= 35 else "bad"),
              change(R.psnr, p.get("psnr"), True, lambda d: f"{d:+.1f} dB")),
             ("SSIM", f"{R.ssim:.4f}", f"floor {SSIM_FLOOR:.2f} · {grade}", gstat, change(R.ssim, p.get("ssim"), True, lambda d: f"{d:+.4f}")),
@@ -680,7 +690,7 @@ LOOK_FOR = {
     "Quality (CRF / q)": "Bitrate roughly halves every +6 CRF (x264), while SSIM falls slowly at first and then quickly — find the knee.",
     "Target bitrate": "Diminishing returns: the step from 0.25 → 1 Mb/s buys far more quality than 4 → 8 Mb/s.",
     "Preset": "Slower presets cost much more CPU for a modest bitrate saving. On an SBC without a hardware encoder you live at the fast end.",
-    "Keyframe interval": "Short GOPs cost bits but make camera switching and loss recovery fast (see the Packet loss tab).",
+    "Keyframe interval": "Short GOPs cost bits but make camera switching and loss recovery fast (see Bandwidth budget → Packet-loss lab).",
     "Resolution": "Fewer pixels = fewer bits, but detail is gone for good. Compare with changing the codec instead.",
     "Frame rate": "Halving fps does not halve the bitrate — consecutive frames get less similar, so each costs more.",
     "Codec": "Compare at the same quality, not the same setting number. Then check speed — and whether your board and browser support it.",
@@ -737,9 +747,163 @@ with tabs[2]:
         else:
             st.info("Pick a parameter and press **Run sweep**.")
 
-# ============================================================================= 4 · BENCHMARK
+# ============================================================================= 4 · BANDWIDTH BUDGET (plan + measure + loss)
 with tabs[3]:
-    st.markdown("### How much video can this computer handle?")
+    st.markdown("### Will our cameras fit the tether, and can the ROV encode them?")
+    sub = st.tabs([":material/calculate: Plan the budget", ":material/memory: Measure this computer", ":material/signal_wifi_bad: Packet-loss lab"])
+
+with sub[0]:
+    # ------------------------------------------------------------------ inputs
+    measured = None
+    if ss.capacity:
+        best_c = min(ss.capacity, key=lambda c: c["ms_per_frame"] / (c["width"] * c["height"]))
+        measured = best_c["ms_per_frame"] / 1000 / (best_c["width"] * best_c["height"] / 1e6)
+    pcs = dict(G.COMPUTERS)
+    if measured:
+        pcs["This computer (benchmarked)"] = G.Computer("This computer (benchmarked)", int(B.system_info()["Logical cores"] or 1),
+                                                       h264_core_per_mpx=measured, jpeg_core_per_mpx=measured * G.PI5.jpeg_core_per_mpx / G.PI5.h264_core_per_mpx,
+                                                       note=f"Measured in 'Measure this computer' ({best_c['label']} at {best_c['res']}).")
+    tethers = {f"Sidebar value ({LINK:g} Mb/s)": LINK, **G.TETHERS}
+    with st.container(border=True):
+        r1 = st.columns([2.3, 2.3, 2.3], gap="medium")
+        scen = r1[0].selectbox(":material/flag: Start from", list(G.SCENARIOS), key="bw_scen",
+                               help="A ready-made setup to edit. Every number below can be changed.")
+        pc_names = list(pcs)
+        pc_key = r1[1].selectbox(":material/developer_board: Encode computer on the ROV", pc_names,
+                                 index=pc_names.index(G.SCENARIOS[scen][0]), key=f"bw_pc_{scen}",
+                                 help="Run 'Measure this computer' on the real board to add it here with measured numbers.")
+        teth = r1[2].selectbox(":material/cable: Tether", list(tethers), key="bw_tether",
+                               help="Typical measured throughput. Always measure yours with iperf3: the label on the switch is not the throughput.")
+        r2 = st.columns(5, gap="medium")
+        link = r2[0].number_input("Measured throughput (Mb/s)", 1.0, 10000.0, float(tethers[teth]), 1.0, key=f"bw_link_{teth}")
+        headroom = r2[1].select_slider("Plan to use at most", [50, 60, 70, 80, 90], 70, format_func=lambda v: f"{v} %", key="bw_head") / 100
+        control = r2[2].select_slider("Control + telemetry", [0.1, 0.5, 1.0, 2.0, 5.0], 1.0, format_func=lambda v: f"{v:g} Mb/s", key="bw_ctrl")
+        transport = r2[3].selectbox("Transport", list(E.OVERHEAD), key="bw_tr")
+        loss_pct = r2[4].select_slider("Packet loss", [0.0, 0.001, 0.01, 0.05, 0.1, 0.5, 1.0], 0.01, format_func=lambda v: f"{v:g} %", key="bw_loss",
+                                       help="Good wired tether ≈ 0–0.01 %. A loose connector or powerline under thruster noise: 0.1–1 %.")
+    pc = pcs[pc_key]
+    st.caption(f":material/info: {pc.note}")
+
+    res_opts = G.RESOLUTIONS
+    start = pd.DataFrame([{"Camera": c.name, "Pipeline": c.pipeline, "Camera res": c.camera_res or c.stream_res, "Stream res": c.stream_res,
+                           "FPS": int(c.fps), "Quality": c.quality, "GOP (s)": c.gop_s, "On": c.on} for c in G.SCENARIOS[scen][1]])
+    table = st.data_editor(start, hide_index=True, width="stretch", num_rows="dynamic", key=f"bw_cams_{scen}", column_config={
+        "Camera": st.column_config.TextColumn(width="small"),
+        "Pipeline": st.column_config.SelectboxColumn(options=list(G.PIPELINES), width="medium", required=True,
+                                                     help="; ".join(f"{k}: {p.help}" for k, p in G.PIPELINES.items())),
+        "Camera res": st.column_config.SelectboxColumn(options=res_opts, help="What the camera captures. Only costs CPU when the ROV decodes the JPEGs."),
+        "Stream res": st.column_config.SelectboxColumn(options=res_opts, help="What goes on the tether."),
+        "FPS": st.column_config.NumberColumn(min_value=1, max_value=60, step=1),
+        "Quality": st.column_config.SelectboxColumn(options=list(G.QUALITY), help="Lean ≈ 0.6×, Standard ≈ SSIM 0.98 on our clip, Crisp ≈ 1.6× the bits"),
+        "GOP (s)": st.column_config.NumberColumn(min_value=0.25, max_value=10.0, step=0.25, format="%.2f", help="Keyframe interval. Ignored for MJPEG (every frame is a keyframe)."),
+        "On": st.column_config.CheckboxColumn()})
+    cams_in: list[G.Camera] = []
+    for i, r in table.iterrows():
+        pipe = r.get("Pipeline") if r.get("Pipeline") in G.PIPELINES else "MJPEG → H.264 on ROV"
+        sres = r.get("Stream res") if r.get("Stream res") in res_opts else "1280×720"
+        cres = r.get("Camera res") if r.get("Camera res") in res_opts else sres
+        if not G.PIPELINES[pipe].jpeg_decode:
+            cres = sres                                  # passthrough / camera H.264: the camera's mode IS the stream
+        cams_in.append(G.Camera(str(r.get("Camera") or f"Camera {i + 1}"), pipe, sres, float(r.get("FPS") or 30),
+                                r.get("Quality") if r.get("Quality") in G.QUALITY else "Standard", float(r.get("GOP (s)") or 1.0), cres,
+                                bool(r.get("On")) if pd.notna(r.get("On")) else True))
+    traps = [c.name for c in cams_in if c.on and G.PIPELINES[c.pipeline].jpeg_decode and G.parse_res(c.camera_res)[0] > G.parse_res(c.stream_res)[0]]
+
+    with st.expander(":material/tune: Bits per pixel (calibrate with your own footage)"):
+        st.caption("Defaults come from our underwater clip at SSIM ≈ 0.98. Encode your own ROV footage in the Encode tab, then press "
+                   "'Use my last encode' to replace the number for that codec.")
+        bc = st.columns(5)
+        bpp = {k: bc[i].number_input(f"{k}", 0.001, 2.0, ss.get(f"bpp_{k}", v), 0.005, format="%.3f", key=f"bppin_{k}")
+               for i, (k, v) in enumerate(E.DEFAULT_BPP.items())}
+        if bc[4].button("Use my last encode", width="stretch", disabled="last" not in ss):
+            last = ss.last; k = last["label"].split(" · ")[0]
+            ss[f"bpp_{k}"] = round(last["bitrate_mbps"] * 1e6 / (last["width"] * last["height"] * last["fps"]), 4)
+            ss.pop(f"bppin_{k}", None); st.rerun()
+
+    args = (cams_in, pc, link, headroom, control, transport, loss_pct, bpp, None)
+    P = G.plan(*args)
+    fixes = G.suggestions(*args)
+    spare = G.spare_streams(P, link, transport, bpp)
+
+    # ------------------------------------------------------------------ verdict + KPIs
+    st.markdown(f'<div class="verdict" style="background:{STATUS[P.status]}">{P.headline[:1].upper() + P.headline[1:]} · '
+                f'{P.total:.1f} Mb/s = {P.total / link:.0%} of the tether</div>', unsafe_allow_html=True)
+    worst_res, worst_load = max(P.loads.items(), key=lambda kv: kv[1])
+    lvl = lambda v, warn, bad: "bad" if v > bad else ("warn" if v > warn else "good")
+    pile = P.pileup
+    cards([("On the tether", f"{P.total:.1f} Mb/s", f"plan ≤ {P.plan_mbps:.0f} of {link:g} Mb/s", lvl(P.total, P.plan_mbps, link)),
+           ("Encoder load", f"{worst_load:.0%}", f"{worst_res} of {pc.key.split(' (')[0]}", lvl(worst_load, 1.0, 1 / G.HEADROOM)),
+           ("Keyframe pile-up", f"+{pile['extra_ms']:.0f} ms", f"{pile['burst_mbps']:.0f} Mb/s if all keyframes align", lvl(pile["extra_ms"], 5, 33)),
+           ("Broken picture", f"{P.worst_broken:.1f} %", f"of the time, worst camera, at {loss_pct:g} % loss", lvl(P.worst_broken, 1, 5)),
+           ("Spare room", f"{spare}", "more 720p30 H.264 cameras fit the plan", "good" if spare >= 2 else ("warn" if spare else "bad"))], cols=5)
+
+    # ------------------------------------------------------------------ charts
+    g1, g2 = st.columns([1.6, 1], gap="large")
+    with g1:
+        fig = go.Figure()
+        pal = [RED, CHAR, "#E07A5F", GRAY, AMBER, GREEN, "#6D4C9F", "#B23A48", "#C9A0DC", "#8FB8E8"]
+        for i, r in enumerate(P.rows):
+            if r["On"] and r["Mb/s"] > 0:
+                fig.add_bar(y=["tether"], x=[r["Mb/s"]], orientation="h", name=f"{r['Camera']} {r['Mb/s']:.1f}", marker_color=pal[i % len(pal)],
+                            marker_line=dict(color=BG, width=2), hovertemplate=f"{r['Camera']}<br>{r['Stream']} · {r['Codec']}<br>%{{x:.2f}} Mb/s<extra></extra>")
+        fig.add_bar(y=["tether"], x=[control], orientation="h", name=f"control {control:g}", marker_color=BLUE, marker_line=dict(color=BG, width=2))
+        fig.add_vline(x=P.plan_mbps, line_dash="dot", line_color=GRAY, annotation_text=f"{headroom:.0%} plan", annotation_position="top left")
+        fig.add_vline(x=link, line_color=CHAR, annotation_text="tether", annotation_position="top left")
+        fig_layout(fig, "Tether budget (Mb/s on the wire)", 250, barmode="stack", xaxis_range=[0, max(link, P.total) * 1.08],
+                   legend=dict(orientation="h", y=-0.35), margin=dict(l=10, r=10, t=55, b=10), yaxis=dict(showticklabels=False))
+        st.plotly_chart(fig, width="stretch")
+    with g2:
+        names = list(P.loads)
+        vals = [P.loads[n] * 100 for n in names]
+        fig = go.Figure(go.Bar(x=vals, y=names, orientation="h", text=[f"{v:.0f} %" for v in vals], textposition="outside", width=0.5,
+                               marker_color=[STATUS[lvl(v / 100, 1.0, 1 / G.HEADROOM)] for v in vals],
+                               hovertemplate="%{y}: %{x:.0f} % of the planned capacity<extra></extra>"))
+        fig.add_vline(x=100, line_dash="dot", line_color=GRAY, annotation_text="plan", annotation_position="top")
+        fig_layout(fig, "Encode computer load (% of plan)", 250, showlegend=False, xaxis_range=[0, max(vals + [100]) * 1.35],
+                   margin=dict(l=10, r=10, t=55, b=30))
+        st.plotly_chart(fig, width="stretch")
+
+    if traps:
+        tip(f"<b>Resolution trap:</b> {', '.join(traps)} {'is' if len(traps) == 1 else 'are'} decoded at the camera's full size and shrunk on the ROV. "
+            "Ask the camera for the smaller mode (<code>v4l2-ctl --list-formats-ext</code>) and the decode cost disappears.")
+
+    rows_df = pd.DataFrame([r for r in P.rows if r["On"]])
+    if len(rows_df):
+        rows_df["Glitch every (s)"] = rows_df["Glitch every (s)"].replace(np.inf, np.nan)
+        st.dataframe(rows_df.drop(columns=["On"]), hide_index=True, width="stretch", column_config={
+            "Mb/s": st.column_config.ProgressColumn("Mb/s on the wire", format="%.1f", min_value=0, max_value=float(max(rows_df["Mb/s"].max(), 0.1))),
+            "Cores": st.column_config.NumberColumn("CPU cores", format="%.2f"),
+            "HW Mpx/s": st.column_config.NumberColumn("HW Mpx/s", format="%.0f", help="Hardware encoder / JPEG engine load (Jetson)"),
+            "Glitch every (s)": st.column_config.NumberColumn("Glitch every", format="%.0f s", help="Average time between lost packets on this stream (empty = never)"),
+            "Broken %": st.column_config.NumberColumn("Broken picture", format="%.1f %%")})
+
+    # ------------------------------------------------------------------ fixes / room
+    f1, f2 = st.columns([1.6, 1], gap="large")
+    with f1:
+        st.markdown("#### " + ("Cheapest ways to make it fit" if P.status != "good" else "Biggest savings if you need room"))
+        if fixes:
+            st.dataframe(pd.DataFrame(fixes).drop(columns=["fits_encoder"]), hide_index=True, width="stretch", column_config={
+                "Saves Mb/s": st.column_config.NumberColumn(format="%.1f"), "Encoder load": "Encoder load after"})
+            st.caption("One change at a time, ranked by bits saved; changes the encode computer can't take go last.")
+        else:
+            st.info("Nothing left to trim: every camera is already at its leanest setting.")
+    with f2:
+        st.markdown("#### Rules of thumb")
+        st.markdown(f"""<div class="side">
+• <b>MJPEG ≈ 5–8× the bits of H.264</b> at the same quality, but needs no encoder and survives loss best.<br>
+• <b>Lower the camera's mode, never resize on the ROV:</b> resizing decodes every frame.<br>
+• <b>1 lost packet = broken picture until the next keyframe</b> (H.264/H.265). Short GOP or intra refresh for lossy tethers.<br>
+• <b>Stagger keyframes</b> (start cameras at different times, or intra refresh) so they don't arrive together.<br>
+• <b>Plan ≤ {headroom:.0%}</b> of the measured throughput and of the CPU: heat, spikes and other software need the rest.</div>""",
+                    unsafe_allow_html=True)
+    md_plan = G.plan_markdown(P, cams_in, pc, link, headroom, control, transport, loss_pct, fixes)
+    d1, d2 = st.columns(2)
+    d1.download_button(":material/download: Download this plan (Markdown)", md_plan, "rov_bandwidth_plan.md", type="primary", width="stretch")
+    d2.download_button(":material/table: Download cameras (CSV)", rows_df.to_csv(index=False) if len(rows_df) else "", "rov_bandwidth_plan.csv",
+                       width="stretch", disabled=not len(rows_df))
+
+with sub[1]:
+    st.markdown("#### How much video can this computer handle?")
     tip("Run this tab <b>on the computer that will do the work</b> — the ROV's Raspberry Pi 5 / Jetson, and the pilot laptop. "
         "A laptop is several times faster than an SBC, so laptop numbers say nothing about the ROV.")
     info = B.system_info()
@@ -843,9 +1007,8 @@ with tabs[3]:
             st.plotly_chart(fig, width="stretch")
             st.caption(ss.holdcmp[0][1]["method"].capitalize() + ". Settings alone can add more than a second.")
 
-# ============================================================================= 5 · PACKET LOSS
-with tabs[4]:
-    st.markdown("### What happens when the tether drops packets?")
+with sub[2]:
+    st.markdown("#### What happens when the tether drops packets?")
     c1, c2 = st.columns([1, 2.2], gap="large")
     with c1:
         variants = st.multiselect("Stream structure", ["GOP 0.5 s", "GOP 1 s", "GOP 2 s", "GOP 5 s", "Intra refresh (1 s)"], ["GOP 1 s", "GOP 5 s", "Intra refresh (1 s)"])
@@ -878,55 +1041,8 @@ with tabs[4]:
         else:
             st.info("Choose stream structures and press **Simulate loss**.")
 
-# ============================================================================= 6 · BANDWIDTH
-with tabs[5]:
-    st.markdown("### Will our eight cameras fit the tether?")
-    c1, c2, c3 = st.columns(3)
-    headroom = c1.slider("Plan to use at most", 40, 95, 70, 5, format="%d %%")
-    control = c2.number_input("Control + telemetry (Mb/s)", 0.0, 50.0, 1.0, 0.5)
-    transport = c3.selectbox("Transport", list(E.OVERHEAD))
-    st.caption(f"Tether throughput comes from the sidebar target: **{LINK:g} Mb/s** (measure it with iperf3). "
-               "Bits per pixel: workshop defaults — calibrate with **your** footage via the button.")
-    bc = st.columns(5)
-    bpp = {k: bc[i].number_input(f"{k} bpp", 0.001, 2.0, ss.get(f"bpp_{k}", v), 0.005, format="%.3f", key=f"bppin_{k}") for i, (k, v) in enumerate(E.DEFAULT_BPP.items())}
-    if bc[4].button("Use my last encode", width="stretch") and ss.get("last"):
-        last = ss.last; k = last["label"].split(" · ")[0]
-        ss[f"bpp_{k}"] = round(last["bitrate_mbps"] * 1e6 / (last["width"] * last["height"] * last["fps"]), 4)
-        ss.pop(f"bppin_{k}", None); st.rerun()
-    default = pd.DataFrame([
-        ["Pilot", "H.264", "1920×1080", 30, True], ["Manipulator", "H.264", "1280×720", 30, True], ["Rear", "H.264", "640×360", 15, True],
-        ["Aux 1", "H.264", "640×360", 15, True], ["Aux 2", "H.264", "640×360", 15, True], ["Aux 3", "MJPEG", "640×480", 15, True],
-        ["Aux 4", "MJPEG", "640×480", 10, True], ["Aux 5", "MJPEG", "640×480", 10, False]], columns=["Camera", "Codec", "Resolution", "FPS", "Streaming"])
-    res_list = ["320×180", "640×360", "640×480", "1280×720", "1920×1080", "3840×2160"]
-    cams = st.data_editor(default, hide_index=True, width="stretch", num_rows="dynamic", column_config={
-        "Codec": st.column_config.SelectboxColumn(options=list(E.DEFAULT_BPP)), "Resolution": st.column_config.SelectboxColumn(options=res_list),
-        "FPS": st.column_config.NumberColumn(min_value=1, max_value=60, step=1), "Streaming": st.column_config.CheckboxColumn()}).dropna()
-
-    def cam_rate(r):
-        w, h = map(int, str(r.Resolution).split("×"))
-        return E.camera_mbps(bpp[r.Codec], w, h, float(r.FPS)) * (1 + E.OVERHEAD[transport]) if r.Streaming else 0.0
-    cams["Mb/s"] = cams.apply(cam_rate, axis=1)
-    total = cams["Mb/s"].sum() + control
-    plan = LINK * headroom / 100
-    col, word = (GREEN, "FITS with headroom") if total <= plan else ((AMBER, "TIGHT — above your headroom") if total <= LINK else (RED, "DOES NOT FIT"))
-    st.markdown(f'<div class="verdict" style="background:{col}">{word} · {total:.1f} Mb/s = {total / LINK:.0%} of measured throughput</div>', unsafe_allow_html=True)
-    fig = go.Figure()
-    pal = [RED, CHAR, "#E07A5F", GRAY, AMBER, GREEN, "#6D4C9F", BLUE, "#999"]
-    for i, r in cams.reset_index(drop=True).iterrows():
-        if r["Mb/s"] > 0:
-            fig.add_bar(y=["tether"], x=[r["Mb/s"]], orientation="h", name=f"{r.Camera} ({r['Mb/s']:.1f})", marker_color=pal[i % len(pal)])
-    fig.add_bar(y=["tether"], x=[control], orientation="h", name=f"control ({control:g})", marker_color="#5B9BD5")
-    fig.add_vline(x=plan, line_dash="dot", line_color=GRAY, annotation_text=f"{headroom}% plan", annotation_position="top left")
-    fig.add_vline(x=LINK, line_color=CHAR, annotation_text="measured", annotation_position="top left")
-    fig_layout(fig, "Tether budget", 260, barmode="stack", xaxis_title="Mb/s on the wire", xaxis_range=[0, max(LINK, total) * 1.1])
-    st.plotly_chart(fig, width="stretch")
-    px_rate = sum(int(str(r.Resolution).split("×")[0]) * int(str(r.Resolution).split("×")[1]) * float(r.FPS) for _, r in cams.iterrows() if r.Streaming and r.Codec != "MJPEG")
-    nano = 4 * 1920 * 1080 * 30
-    tip(f"If a <b>Jetson Nano</b> encodes all non-MJPEG streams: {px_rate / 1e6:.0f} Mpx/s of its ≈ {nano / 1e6:.0f} Mpx/s hardware budget "
-        f"(<b>{px_rate / nano:.0%}</b>). A <b>Raspberry Pi 5</b> has no hardware encoder — use the Benchmark tab on the Pi itself.")
-
-# ============================================================================= 7 · REPORT
-with tabs[6]:
+# ============================================================================= 5 · REPORT
+with tabs[4]:
     st.markdown("### Benchmark report")
     st.caption("Everything measured in this session — this computer, every encode on this clip, the capacity benchmark, encoder hold, decode speed and the latency budget — in one file you can paste into a GitHub issue or the team docs.")
     runs = [h for h in ss.history.values() if h["source"] == SRC.sid]
@@ -943,21 +1059,22 @@ with tabs[6]:
     with st.container(border=True):
         st.markdown(md.replace("\n## ", "\n#### ").replace("# ROV Encoding Lab: benchmark report", "### ROV Encoding Lab: benchmark report", 1))
 
-# ============================================================================= 8 · LEARN
-with tabs[7]:
+# ============================================================================= 6 · LEARN
+with tabs[5]:
     st.markdown("### What each knob and number means")
     learn = [
         ("Codec", "How pixels are compressed. H.264 is the universal default; H.265/AV1 save bits at some operating points but cost CPU and need decoder support; MJPEG is simple but large.", "Encode the same clip with each codec, then compare at equal SSIM in <b>Compare</b>."),
         ("CRF / quality", "Constant quality: the encoder spends as many bits as each scene needs. +6 CRF ≈ half the bitrate in x264. Bitrate jumps when the scene gets busy.", "Look at <b>Bitrate over time</b>: where are the peaks?"),
         ("Target bitrate + VBV", "A cap on the bitrate: what a fixed-capacity tether needs. Quality drops on hard scenes instead. A smaller buffer = smoother, lower latency.", "Set 1 Mb/s and watch <b>Quality over time</b> dip."),
-        ("Preset", "How hard the encoder searches. Slower = fewer bits for the same quality, much more CPU, sometimes more latency.", "Run the <b>Benchmark</b> with three presets."),
-        ("Keyframe interval (GOP)", "How often a full picture is sent. Short = quick joins and recovery, more bits. Long = efficient but fragile.", "Try GOP 0.25 s vs 10 s, then <b>Packet loss</b>."),
-        ("B-frames & low latency", "B-frames use future frames, so the encoder must wait. Low-latency mode disables them and the lookahead — essential for piloting.", "Benchmark → <b>Compare defaults vs low latency</b>."),
+        ("Preset", "How hard the encoder searches. Slower = fewer bits for the same quality, much more CPU, sometimes more latency.", "Bandwidth budget → <b>Measure this computer</b> with three presets."),
+        ("Keyframe interval (GOP)", "How often a full picture is sent. Short = quick joins and recovery, more bits. Long = efficient but fragile.", "Try GOP 0.25 s vs 10 s, then the <b>Packet-loss lab</b>."),
+        ("B-frames & low latency", "B-frames use future frames, so the encoder must wait. Low-latency mode disables them and the lookahead — essential for piloting.", "Measure this computer → <b>Compare defaults vs low latency</b>."),
         ("Real-time factor", "Encode fps ÷ video fps. Below ×1 the encoder falls behind: frames queue up, latency grows, frames drop.", "Read the chip at the top of the Encode tab."),
         ("Cores per stream & headroom", "CPU ms per frame × fps ÷ 1000. We plan to use only 70 % of the CPU (and of the tether) so spikes, heat and other software still fit.", "Open <b>Show the math</b>."),
         ("Encoder hold", "Frames the encoder keeps before releasing the first one. 30 frames at 30 fps = 1 s of delay that no faster network can remove.", "<b>Live camera</b>: x264 with Low latency off, then on."),
         ("Glass-to-glass latency", "From light hitting the lens to light leaving the pilot's screen — the only latency the pilot feels. The budget estimates it; a photo test measures it.", "Encode tab → latency graph; then a phone-stopwatch photo test"),
         ("PSNR · SSIM · VMAF", "Objective quality against the original. Useful to compare settings consistently — but the pilot decides what is good enough.", "Use <b>Diff ×8</b>: where does the encoder throw detail away?"),
+        ("Bandwidth budget", "Every camera's bits on the wire, plus control, must stay under ≈ 70 % of the MEASURED tether throughput — and the ROV computer must be able to encode them.", "<b>Bandwidth budget</b>: start from 'What we fly now', then switch the tether to powerline."),
         ("MJPEG passthrough", "A UVC camera compresses JPEG on its own chip. Copying those JPEGs costs almost no CPU — until you resize them: then every frame is decoded, scaled and encoded again.", "<b>Live camera</b>: passthrough, then Output size 50 %."),
         ("Resolution & frame rate", "The bluntest tools: fewer pixels or frames means fewer bits but lost detail or smoothness. Try codec and rate control first.", "Compare 50 % resolution with switching MJPEG → H.264."),
     ]

@@ -35,9 +35,7 @@ Set **your targets** once in the sidebar (bitrate budget per camera, glass-to-gl
 | **Encode** (master tab) | One compact control bar: codec, CRF or bitrate cap, preset, keyframe interval, resolution, frame rate, low latency (B-frames, VBV and VMAF under **More**) | Verdict chips: real time? quality? within budget? encoder hold? how many such streams fit this CPU? Cards: size, bitrate, compression, bits/pixel, PSNR, SSIM, encode speed, CPU per stream, each with the change since your last try. Views: frame compare / diff ×8 / zoom, bitrate over time (I/P/B), quality over time, side-by-side playback, **🧮 Show the math**. Below them: the **glass-to-glass latency graph** of this encode (stage by stage, typical and worst, hover a block for its source) and **Compare**, the rate–quality chart of every run with your budget, quality floor and best trade-offs |
 | **Live camera** | Pick a camera (or a simulated MJPEG camera), the size and fps to ask it for, an encoder, an output size, bitrate, speed, keyframe interval, low latency; press **Start** | The live picture with a head-up display: encoder latency (average and 95th percentile), frames held, bitrate, frame size, bits/pixel, JPEG decode, convert/scale, pilot-side decode, CPU, dropped frames, a keyframe flash and a 30 s bitrate sparkline. A pipeline strip shows which stages run and what each costs; charts show bitrate and encoder time over time; a **scoreboard** compares every run. Encoders: MJPEG passthrough, MJPEG re-encode, x264, NVENC (H.264/H.265), Quick Sync, AMF, VideoToolbox, V4L2 M2M, x265, SVT-AV1 — each probed with a real test encode, with the reason when it can't run |
 | **Sweep** | Vary one knob across several values | Bitrate and SSIM curves plus encode speed against real time |
-| **Benchmark** | Run it **on the ROV computer and on the pilot laptop** | This computer's specs; **capacity**: fps on one core, CPU ms per frame, streams per core, real-time streams the machine can carry at 70 % CPU, per resolution × preset; hardware encoders (listed vs actually working); decode speed; encoder hold: x264 defaults vs low latency |
-| **Packet loss** | Delete kB of an MPEG-TS stream | How long the picture stays broken: GOP length vs intra refresh |
-| **Bandwidth** | Edit the 8-camera table | Fits / tight / doesn't fit the tether; Jetson Nano encoder load |
+| **Bandwidth budget** | Pick a starting setup, the ROV computer (Jetson Nano hardware, Pi 5, Orin Nano, or this computer once measured), the tether, headroom, control traffic, transport and packet loss; edit the camera table (pipeline, camera and stream resolution, fps, quality, GOP) | **Plan the budget:** fits / over plan / doesn't fit; Mb/s on the tether per camera; encode-computer load (CPU cores or Jetson hardware Mpx/s); keyframe pile-up delay; how often each camera glitches and how much of the time its picture is broken; spare room; the cheapest one-change fixes; a Markdown plan to download. **Measure this computer** (run it on the ROV computer and the pilot laptop): capacity per resolution × preset, hardware encoders that really work, encoder hold, decode speed. **Packet-loss lab:** delete kB of an MPEG-TS stream and see how long the picture stays broken, GOP vs intra refresh |
 | **Report** | Download | One Markdown report (this computer, every encode, capacity, hold, decode, latency budget) + CSV, ready for a GitHub issue |
 | **Learn** | Read | What each knob and each number means, with a "try it" for each |
 
@@ -87,9 +85,12 @@ encoding_lab/
 ├── lab/engine.py          FFmpeg logic: encode, measure (PSNR/SSIM/VMAF), frame stats, packet-loss experiment
 ├── lab/bench.py           benchmarking: system info, HW encoders, capacity, decode, encoder hold, latency budget, report
 ├── lab/live.py            Live camera: capture, per-stage timing, encoders, MJPEG server for the browser
+├── lab/budget.py          Bandwidth budget planner: pipelines, encode computers, loss and keyframe pile-up, fixes
+├── assets/mia_logo.png    header logo
 ├── tools/rtp_probe.py     throughput, packet loss and jitter of an RTP stream (for the pilot GUI; see docs/streaming/gui-stream-metrics.md)
 ├── tests/test_engine.py   self-test of engine, benchmarks and the live pipeline (pytest, ~30 s)
 ├── tests/test_rtp_probe.py tests for the probe
+├── tests/test_budget.py   tests for the planner
 ├── .streamlit/config.toml theme (dark, M.I.A red)
 ├── requirements.txt
 └── run_lab.sh / run_lab.bat

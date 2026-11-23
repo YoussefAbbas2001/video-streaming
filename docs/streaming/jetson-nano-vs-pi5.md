@@ -7,7 +7,7 @@
 | | Jetson Nano 2GB · hardware encoder | Jetson Nano 2GB · software x264 | Raspberry Pi 5 · software x264 | Any board · USB MJPEG passthrough |
 |---|---|---|---|---|
 | Who encodes | NVENC block in the Tegra X1 (via GStreamer `nvv4l2h264enc`) | 4 × Cortex-A57 @ 1.43 GHz | 4 × Cortex-A76 @ 2.4 GHz | the camera's own chip |
-| Capacity (vendor / our estimate) | **1 × 4K30, 2 × 1080p60, 4 × 1080p30, 4 × 720p60, 9 × 720p30** (H.264 and H.265), ≈ 250 Mpx/s total [1] | far below the Pi 5: **measure** with the Encoding Lab Benchmark tab | **≈ 3–4 × 1080p30** or **≈ 7–10 × 720p30** in low-latency mode *(estimate from [2], at 70 % CPU, with cooling)* | limited by USB bandwidth and the tether, not the CPU |
+| Capacity (vendor / our estimate) | **1 × 4K30, 2 × 1080p60, 4 × 1080p30, 4 × 720p60, 9 × 720p30** (H.264 and H.265), ≈ 250 Mpx/s total [1] | far below the Pi 5: **measure** with the Encoding Lab's Bandwidth budget → Measure this computer | **≈ 3–4 × 1080p30** or **≈ 7–10 × 720p30** in low-latency mode *(estimate from [2], at 70 % CPU, with cooling)* | limited by USB bandwidth and the tether, not the CPU |
 | CPU per 1080p30 stream | near zero (frame copies only) | high; measure | **62–90 % of one core** (low latency) · **98–153 %** (high quality) [2] | ≈ 1 % of a core for 720p30 (measured) |
 | Encoder latency | hardware, about a frame or less when configured without B-frames; **measure** glass-to-glass | x264 zerolatency: 0 frames held, encode time = CPU time per frame | 0 frames held with zerolatency; ≈ 21–30 ms of single-core work per 1080p frame *(0.62–0.9 × 33 ms)* | 0 encode; the camera chip adds its own buffering |
 | Bitrate for good quality | H.264 at a few Mb/s per 1080p stream; quality per bit **not yet measured** (older-generation encoder) | same as the Pi (same x264) | 1080p30 at ≈ 1 Mb/s: **39.1 dB / SSIM 0.956** (low latency), **41.8 dB / 0.974** (high quality) [2] | **4–5 × H.264's bitrate** for the same SSIM (measured): ≈ 1.3 Mb/s at 640×480@15, ≈ 18 Mb/s at 1080p30 |
@@ -36,9 +36,9 @@ The 2 GB board has the same Tegra X1 video engines as the 4 GB Nano. Its 2 GB of
 - Raspberry Pi's measurements cover 1080p30 only [2]. In low-latency mode, 62 % of one core at 100 kb/s rising to 90 % at 20 Mb/s.
 - With 4 cores and our 70 % headroom rule (2.8 cores), that is **about 3–4 low-latency 1080p30 streams**.
 - Scaling by pixels (720p is 44 % of 1080p) gives **about 7–10 × 720p30**.
-- These are **estimates**. Multi-stream scaling, other software on the Pi and thermal throttling all reduce them. Run the Encoding Lab **Benchmark** tab on the Pi itself, and soak-test with the enclosure closed.
+- These are **estimates**. Multi-stream scaling, other software on the Pi and thermal throttling all reduce them. Run the Encoding Lab **Bandwidth budget → Measure this computer** tab on the Pi itself, and soak-test with the enclosure closed.
 
-**Jetson Nano in software.** Its Cortex-A57 cores are an older, slower design than the Pi 5's A76 cores. Software x264 on the Nano is a fallback, not a plan. If you need it, measure it with the Benchmark tab.
+**Jetson Nano in software.** Its Cortex-A57 cores are an older, slower design than the Pi 5's A76 cores. Software x264 on the Nano is a fallback, not a plan. If you need it, measure it with the Encoding Lab (Bandwidth budget → Measure this computer).
 
 ## 2. Latency
 
@@ -88,12 +88,12 @@ The 2 GB board has the same Tegra X1 video engines as the 4 GB Nano. Its 2 GB of
 | If we use… | Pilot + manipulator | Rear + aux cameras | Watch out for |
 |---|---|---|---|
 | **Jetson Nano 2GB** | hardware H.264 (≈ 90 of 250 Mpx/s) | MJPEG passthrough, or hardware H.264 via the MJPEG → H.264 pipeline above | 2 GB shared memory with CV; old JetPack 4.6 base; set no B-frames |
-| **Raspberry Pi 5** | x264 `ultrafast` + `zerolatency`: ≈ 1–1.5 cores for 1080p30 + 720p30 (estimate) | MJPEG passthrough (no CPU) | **active cooling is mandatory** (our 2023 heat failure); measure capacity with the Benchmark tab |
+| **Raspberry Pi 5** | x264 `ultrafast` + `zerolatency`: ≈ 1–1.5 cores for 1080p30 + 720p30 (estimate) | MJPEG passthrough (no CPU) | **active cooling is mandatory** (our 2023 heat failure); measure capacity with the Encoding Lab (Bandwidth budget → Measure this computer) |
 | **Either** | cameras that encode H.264 themselves (IP cameras, UVC H.264 cameras) remove the problem | | camera latency and GOP settings |
 
 **How to decide:** run the same three measurements on both boards with the real cameras and tether:
 
-1. Encoding Lab **Benchmark**: streams per board.
+1. Encoding Lab **Bandwidth budget → Measure this computer**: streams per board; then **Plan the budget** with *This computer (benchmarked)* for the full camera mix.
 2. **Glass-to-glass** latency: median of 10.
 3. **30-minute soak test** in the closed enclosure, logging temperature and throttling.
 

@@ -85,3 +85,5 @@ The reference must be the **lossless** source, at the same resolution and frame 
 ## 7. Reporting template
 
 For every test, write down: date, hardware, software versions, camera settings, the command used, the **number**, and what you will change because of it. Paste it into the GitHub issue or pull request it belongs to, so measurements live next to the code they justify.
+
+When a measurement shows a problem, look it up in the [video diagnostics field guide](video-diagnostics.md): symptom → cause → fix, with pictures.

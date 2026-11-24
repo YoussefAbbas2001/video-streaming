@@ -14,6 +14,7 @@ Everything for our video-streaming session: two slide decks, three recorded vide
 | **Benchmarking the Pi 5 / Jetson / laptop** | Run the Encoding Lab on that computer → **Bandwidth budget → Measure this computer** |
 | **Choosing Jetson Nano 2GB vs Raspberry Pi 5** | [`docs/streaming/jetson-nano-vs-pi5.md`](docs/streaming/jetson-nano-vs-pi5.md) |
 | **MJPEG cameras, lowering their resolution, NVENC** | [`docs/streaming/mjpeg-and-ffmpeg.md`](docs/streaming/mjpeg-and-ffmpeg.md) |
+| **Diagnosing a bad picture (45 symptoms, causes, fixes, with pictures)** | [`docs/streaming/video-diagnostics.md`](docs/streaming/video-diagnostics.md) |
 | **Adding bandwidth and loss to the pilot GUI** | [`docs/streaming/gui-stream-metrics.md`](docs/streaming/gui-stream-metrics.md) |
 | **Measuring our ROV** | [`docs/streaming/measuring-performance.md`](docs/streaming/measuring-performance.md) |
 | **Testing the GUI (everyone!)** | [`docs/sdlc/bug-hunt-league.md`](docs/sdlc/bug-hunt-league.md), then open an issue with the 🐞 Bug report form |

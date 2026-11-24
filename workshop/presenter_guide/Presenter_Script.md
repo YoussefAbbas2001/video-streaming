@@ -394,6 +394,15 @@ Requirements for this: encoders whose bitrate can change at runtime (hardware en
 
 **Slide 47 — toolbox.** Point at the Diagnostic Checklist, which has the full commands. Each claim in their design document should cite one of these measurements.
 
+**Diagnostics block (deck slides 54–59, Nov 2026, ≈ 8 min).** Six slides between the toolbox and Activity 2, so teams have the method before they diagnose.
+- *Find the stage:* one cause in one of eight stages; the six cards are traps where a healthy number hides the problem (high latency at a perfect 30 fps, a frozen frame on a live link…).
+- *Troubleshooting matrix:* symptom → first suspect → what to inspect. Tell them to use it during Activity 2.
+- *Measure, don't guess:* nine metric categories and where we already get each one (Encoding Lab, `rtp_probe.py`, tegrastats). Stress **frame age**.
+- *Latency three ways:* ms-clock photo (truth, no clock sync), timestamp overlay, stage timestamps; always median and p95.
+- *First 15 diagnostics:* 9 exist today; the 6 GUI timers are a first task for the software sub-team.
+- *Pilot screen:* four numbers and six stage lights; correlate over time.
+The **Field guide appendix** (slides 63–79) has one picture per problem: 45 symptoms with cause, ROV meaning and fix. Do not present it; point to it and to `docs/streaming/video-diagnostics.md` as the pool reference.
+
 **🎯 Slide 48 — Activity 2: Diagnose the ROV (20 min).** Read the scenario: 8 cameras at 640×480; after ~10 min in the water video lags ~1 s; two cameras freeze occasionally; one sometimes fails to start; thrusters feel slow; plan = reduce resolution again. Teams list ≥ 5 hypotheses, rank them, and give a measurement for each. Answer key in `Activity_Instructions.md`. Score: 1 per plausible hypothesis, 2 per correct measurement, +3 for the best-ranked root cause.
 
 Good answers to listen for: USB bus/isochronous reservation (camera fails to start; `lsusb -t`, `dmesg`); SBC CPU saturated by MJPEG decode + re-encode (`top`); thermal throttling after 10 minutes in a sealed hull (`vcgencmd get_throttled`, `tegrastats`); TCP-based streaming accumulating delay (latency grows over time); player buffering; tether negotiated 100 Mb/s or with errors (`ethtool`, `ethtool -S`); topside browser decoding 8 streams (DevTools Performance, `chrome://media-internals`); control traffic queued behind video on the same link (thrusters feel slow!); power brown-outs from thrusters resetting USB (`dmesg`).

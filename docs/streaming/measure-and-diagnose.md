@@ -809,5 +809,6 @@ $ chronyc tracking
 
 - [hardware-and-encoders.md](hardware-and-encoders.md): encoder capacity, Jetson vs Pi 5, heat
 - [codecs-and-ffmpeg.md](codecs-and-ffmpeg.md): MJPEG, the resolution trap, FFmpeg recipes
+- [../debug/ROV_Debug_Checklist.md](../debug/ROV_Debug_Checklist.md): the short version of this page as a checklist, with an automatic health check
 - [../experiments/ROV_Experiments.md](../experiments/ROV_Experiments.md): every measurement on this page as a hands-on experiment
 - Encoding Lab: Encode (Frame compare, Bitrate over time), Live camera, Bandwidth budget (Measure this computer, Packet-loss lab)

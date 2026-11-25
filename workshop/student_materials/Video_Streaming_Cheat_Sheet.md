@@ -141,6 +141,8 @@ Upstream FFmpeg does **not** use the Jetson Nano's hardware encoder. The **Jetso
 
 ## 5. Troubleshooting commands
 
+**First:** `bash docs/debug/rov_healthcheck.sh --top <topside IP> --cams <N>` on the ROV runs most of these for you and says what a bad value means. Full list, in order: [ROV Video Debug Checklist](../../docs/debug/ROV_Debug_Checklist.md).
+
 | Question | Command |
 |---|---|
 | Which SBC / OS exactly? | `cat /proc/device-tree/model` · `cat /etc/nv_tegra_release` (Jetson) · `uname -a` |

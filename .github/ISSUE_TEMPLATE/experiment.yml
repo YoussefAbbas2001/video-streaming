@@ -43,4 +43,4 @@ body:
     attributes: { label: Next question this raises }
   - type: markdown
     attributes:
-      value: "A mentor verifies the result and adds `exp:E__` plus any bonus labels (`bonus:prediction`, `bonus:replicated`, `bonus:bug`, `bonus:chart`)."
+      value: "Your team leader verifies the result and adds `exp:E__` plus any bonus labels (`bonus:prediction`, `bonus:replicated`, `bonus:bug`, `bonus:chart`)."

@@ -66,6 +66,8 @@ Keep a running **team scoreboard** across all activities; announce a winner at t
 3. For each, write **one measurement** that would confirm or reject it, and what result you would expect if it's true.
 4. Say what you would do **first** on Monday.
 
+**After the activity:** show the [ROV Video Debug Checklist](../../docs/debug/ROV_Debug_Checklist.md). Every hypothesis in the answer key is one of its rows (B4/B5 USB, C1 CPU, A1/A2 heat, D6 TCP, F3 buffer, E1/E2 tether, E9 control, F1 topside, A3/A5 power), and `rov_healthcheck.sh` checks the ROV-side ones (USB, CPU, heat, TCP, tether, power) in about 10 seconds. The point: on Monday, run the checklist before forming opinions.
+
 ### Answer key (accept any well-reasoned equivalent)
 
 | Hypothesis | Symptom it explains | Measurement | Expected if true |

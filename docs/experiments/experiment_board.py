@@ -4,7 +4,7 @@
     gh issue list --state all --label experiment --limit 500 --json number,title,labels,author > experiments.json
     python3 docs/experiments/experiment_board.py experiments.json
 
-A mentor verifies a result issue by adding `exp:E07` (worth that experiment's points) and any bonus labels:
+The team leader verifies a result issue by adding `exp:E07` (worth that experiment's points) and any bonus labels:
 bonus:prediction +5, bonus:replicated +10, bonus:bug +20, bonus:chart +10. The issue author collects the points.
 Points and badges are read from the mission map in ROV_Experiments.md, so the doc is the only source.
 """

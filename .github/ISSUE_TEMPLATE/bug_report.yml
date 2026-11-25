@@ -57,6 +57,14 @@ body:
     attributes:
       label: Setup
       description: Laptop/OS/browser, SBC, cameras, tether, anything unusual
+  - type: textarea
+    id: health
+    attributes:
+      label: Health check (video bugs)
+      description: |
+        For video problems, run on the ROV computer and paste the output: `sudo bash docs/debug/rov_healthcheck.sh --top <topside IP> --cams <N> --md`.
+        Say which checks of the ROV Video Debug Checklist (docs/debug/ROV_Debug_Checklist.md) failed, e.g. "B5, A3".
+      render: markdown
   - type: checkboxes
     id: checks
     attributes:

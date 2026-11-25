@@ -407,11 +407,13 @@ The **Field guide appendix** (slides 63–79) has one picture per problem: 45 sy
 
 Good answers to listen for: USB bus/isochronous reservation (camera fails to start; `lsusb -t`, `dmesg`); SBC CPU saturated by MJPEG decode + re-encode (`top`); thermal throttling after 10 minutes in a sealed hull (`vcgencmd get_throttled`, `tegrastats`); TCP-based streaming accumulating delay (latency grows over time); player buffering; tether negotiated 100 Mb/s or with errors (`ethtool`, `ethtool -S`); topside browser decoding 8 streams (DevTools Performance, `chrome://media-internals`); control traffic queued behind video on the same link (thrusters feel slow!); power brown-outs from thrusters resetting USB (`dmesg`).
 
+**🩺 The debug checklist (≈ 3 min, right after Activity 2; slide 61 of `MIA_Video_Streaming.pptx`).** Reveal it as the answer to the activity: every hypothesis on their sheets is a row of `docs/debug/ROV_Debug_Checklist.md`, in pipeline order (power → cameras → computer → streams → tether → topside → pilot). The rule: *go in order; the first ❌ is usually the cause.* Walk through the example output: under-voltage (A3) → USB resets (B5) → the pilot sees freezes. The freezes are the symptom, the power is the cause. `rov_healthcheck.sh` does the A–E checks in about 10 s; the bug report template now asks for its output.
+
 **Slide 49 — optimization strategy.** In order: inventory & measure → stop wasting bits → stream smart → design latency → design failure → verify. *“Reducing resolution is the last lever, not the first.”*
 
 **Slide 50 — homework.** Launch the ROV experiments homework (see the *Experiments mission* block below); everyone starts with E0 and E1. Also record 60 s of real footage and upload it to the Encoding Lab (sidebar → Upload your own video).
 
-**🧪 Experiments mission (≈ 12 min).** In `presentation/MIA_Video_Streaming.pptx` this is the 7-slide section after "A practical optimization strategy" (slides 62–68); the doc is `docs/experiments/ROV_Experiments.md`.
+**🧪 Experiments mission (≈ 12 min).** In `presentation/MIA_Video_Streaming.pptx` this is the 8-slide section after "A practical optimization strategy" (slides 63–70); the doc is `docs/experiments/ROV_Experiments.md`.
 
 - **Mission briefing.** 27 experiments, 6 badges, 775 points, one boss level. The loop is **Predict → Measure → Explain → Post**. Stress *predict*: a written guess before measuring is how intuition improves, and it earns +5 if within 20 %.
 - **How the game works.** 🟢 15 / 🟡 30 / 🔴 50 points; bonuses for prediction, replication (+10 for both pairs), a real defect (+20), chart of the week (+10). Ranks Cadet → Technician (100) → Engineer (250) → Chief Engineer (450 + 3 badges). Pairs, roles rotate: operator, recorder, skeptic.
@@ -419,7 +421,9 @@ Good answers to listen for: USB bus/isochronous reservation (camera fails to sta
 - **Spotlight E1 — do it live if you can.** Everyone writes a guess in ms first. Open `docs/experiments/ms_clock.html`, press F, point a camera at it, photograph both. Closest guess gets the first bonus of the season. Target ≤ 150 ms median, ≤ 250 ms worst.
 - **Spotlight Chaos Monkey.** `tc netem`, `tc tbf`, `kill -STOP` reproduce competition failures on the bench. **Safety, say it twice:** props off, bench only, `tc` also hits control traffic, always `tc qdisc del` and check with `tc qdisc show`.
 - **Spotlight Pilot's Eye.** The eye test: the lowest readable bitrate becomes requirement N2. Show that 1 Mb/s still reads and 0.2 Mb/s loses the bottom row, then ask what *our* smallest mission marking needs.
-- **The plan.** Weeks 1–6 of experiments (week 3 = chaos week, bench only; weeks 4–5 = pool days), weeks 7–12 the boss level. Results go in a GitHub issue (🧪 Experiment result template); a mentor labels it; `python3 docs/experiments/experiment_board.py` prints the leaderboard for the weekly knowledge exchange. **Tonight: E0 + E1.**
+- **The plan.** Weeks 1–6 of experiments (week 3 = chaos week, bench only; weeks 4–5 = pool days), weeks 7–12 the boss level. Results go in a GitHub issue (🧪 Experiment result template); the team leader labels it; `python3 docs/experiments/experiment_board.py` prints the leaderboard for the weekly knowledge exchange. **Tonight: E0 + E1.**
+
+- **For team leaders.** Each leader runs one 90-minute session a week with their members using `docs/experiments/Leader_Guide.md`: hook and predict → brief → pre-flight health check → measure at stations → explain → reveal and debrief → post. Three hats: facilitator, safety officer, referee. Ask the leaders in the room to book their first session before they leave.
 
 *Ask the room:* "How late do you think the pilot camera is?" Write three or four guesses on the board and keep them for next session's recap.
 

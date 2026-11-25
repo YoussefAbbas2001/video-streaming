@@ -27,6 +27,9 @@ jobs:
           python -m compileall -q encoding_lab demos sdlc build
           for f in $(git ls-files '*.sh'); do bash -n "$f"; done
 
+      - name: Health-check script tests
+        run: bash docs/debug/test_healthcheck.sh
+
       - name: Encoding Lab engine tests
         run: python -m pytest -q encoding_lab/tests
 

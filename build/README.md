@@ -33,6 +33,14 @@ python3 build/insert_slides.py out/new_slides_experiments.pptx presentation/MIA_
 python3 build/add_click_builds.py presentation/MIA_Video_Streaming.pptx --only 62,63,64,65,66,67,68
 ```
 
+Debug checklist and leaders slides (25 Nov 2026): two slides; the check counts are read from `docs/debug/ROV_Debug_Checklist.md`. The insert positions refer to the deck before the insert (after Activity 2, and after the experiments plan):
+
+```bash
+node build/new_slides_debug_leaders.js        # → out/new_slides_debug_leaders.pptx (2 slides)
+python3 build/insert_slides.py out/new_slides_debug_leaders.pptx presentation/MIA_Video_Streaming.pptx --place 1:60 --place 2:68
+python3 build/add_click_builds.py presentation/MIA_Video_Streaming.pptx --only 61,70
+```
+
 Note: the generated regions of `docs/streaming/measure-and-diagnose.md` (between `<!-- gen:NAME -->` markers) come from `diagnostics_catalog.py`; edit the catalog, not those regions.
 
 (These commands were run on 21 Nov 2026 against the decks as they were that day. To add more slides later, write a new generator like `new_slides_nov2026.js` and insert only those.)
@@ -42,6 +50,7 @@ Note: the generated regions of `docs/streaming/measure-and-diagnose.md` (between
 | `new_slides_nov2026.js` | The November 2026 slides: chroma subsampling, intra and inter prediction, transform + quantization, entropy coding + loop filters, containers, Netflix-scale Fermi estimate, what the big streamers do, the MJPEG resolution trap, the weekly knowledge exchange. Numbers are measured by us or sourced in the speaker notes. |
 | `make_diagnostic_images.py`, `diagnostics_catalog.py`, `new_slides_diagnostics.js` | The video-diagnostics field guide: pictures (real bad encodes, real damaged streams, simulated camera/display effects, charts), the catalog of 45 problems, and the slides. |
 | `make_experiment_images.py`, `new_slides_experiments.js` | The homework experiments: the glass-to-glass photo and the eye-test encodes, and the 7 experiment slides built from the doc's mission map. |
+| `new_slides_debug_leaders.js` | The *When it breaks: the debug checklist* slide and the *Leaders: one 90-minute session a week* slide. |
 | `fix_shape_ids.py` | Gives every shape on a slide a unique id. pptxgenjs can give a table the same id as a text box; LibreOffice accepts that but PowerPoint asks to repair the file. `insert_slides.py` runs it automatically; re-run `add_click_builds.py --only` on the slides it lists. |
 | `insert_slides.py` | Copies slides (with their pictures and speaker notes) into a hand-edited deck after given slide numbers, mapped onto the target's own layout of the same name, so they take its footer, logo and theme. Touches nothing else. |
 | `add_click_builds.py` | Click-by-click Fade builds: each card, chart or row appears on its own click. `--only` limits it to the slides you name, so hand-made animations elsewhere are kept. |

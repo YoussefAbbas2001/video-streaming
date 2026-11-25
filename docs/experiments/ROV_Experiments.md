@@ -1,10 +1,14 @@
-# 🧪 ROV Experiments: the homework
+# 🧪 ROV Experiments: the member handbook
 
 *M.I.A Robotics · video-streaming homework · 25 Nov 2026 · replaces the Diagnostic Checklist and the Post-Workshop Challenge*
 
 > **Every number we argue about can be measured on our own ROV in an afternoon.** This document lists all of them as experiments: how late the pilot's picture is, how much the tether really carries, what one lost packet does, when the ROV computer gives up, how hot it gets in the hull, and whether the pilot can actually read a marking at 1 Mb/s.
 >
 > Do them in pairs, post every result, collect points and badges. The numbers you collect become the team's requirements, test cases and engineering documentation for MATE.
+
+**How it runs:** your **team leader** runs one 90-minute session a week, using the [Leader's Recipe](Leader_Guide.md): a short briefing, everyone predicts, pairs measure at stations, then each pair explains its number and the predictions are revealed. You bring this handbook; your leader brings the kit, keeps it safe and verifies your results. You can also do any experiment on your own time with a partner: post it the same way.
+
+**Something broken right now?** That is not an experiment: use the [ROV Video Debug Checklist](../debug/ROV_Debug_Checklist.md).
 
 **Contents:** [How the game works](#how-the-game-works) · [Kit and setup](#kit-and-setup) · [Safety rules](#safety-rules) · [Mission map](#mission-map) · [Level 0: know your ROV](#level-0--know-your-rov) · [⏱ Latency Hunter](#-latency-hunter) · [📡 Tether Whisperer](#-tether-whisperer) · [💥 Chaos Monkey](#-chaos-monkey) · [🔥 Heat and Power](#-heat-and-power) · [🎯 Encoder Tuner](#-encoder-tuner) · [👁 Pilot's Eye](#-pilots-eye) · [👑 Boss level: the 6-week challenge](#-boss-level-the-6-week-challenge) · [Posting a result](#posting-a-result) · [Suggested schedule](#suggested-schedule)
 
@@ -42,7 +46,7 @@ Every experiment follows the same four steps, and **the first one is the fun one
 
 **Ranks:** 🪸 Cadet (start) → 🔧 Technician (100 pts) → ⚙️ Engineer (250 pts) → 🧠 Chief Engineer (450 pts **and** 3 badges). The **👑 Boss level** is a team challenge and is scored separately.
 
-Points are awarded by a mentor when the result issue is verified (see [Posting a result](#posting-a-result)); `python3 docs/experiments/experiment_board.py` prints the leaderboard and badges. The board is read out at the weekly knowledge exchange.
+Points are awarded by your team leader when the result issue is verified (see [Posting a result](#posting-a-result)); `python3 docs/experiments/experiment_board.py` prints the leaderboard and badges. The board is read out at the weekly knowledge exchange.
 
 ---
 
@@ -70,6 +74,8 @@ CAM=/dev/video0        # one camera        (v4l2-ctl --list-devices)
 ```
 
 **Tools already in this repo:**
+
+- **Health check:** `bash docs/debug/rov_healthcheck.sh --top $TOP --cams 4` on the ROV computer. Run it at the start of every session: an experiment on a broken ROV measures the fault, not the system.
 
 - **ms clock:** open [`docs/experiments/ms_clock.html`](ms_clock.html) in a browser and press F for full screen. It runs offline.
 - **Encoding Lab:** `streamlit run encoding_lab/app.py`.
@@ -840,7 +846,7 @@ Open a GitHub issue with the **🧪 Experiment result** template (`.github/ISSUE
 - **explanation**: which stage causes the number, and **what surprised you**;
 - **next question** the result raises.
 
-A mentor checks the issue and adds labels: `exp:E07` (the experiment, worth its points) and any bonus labels (`bonus:prediction`, `bonus:replicated`, `bonus:bug`, `bonus:chart`). Then:
+Your team leader checks the issue and adds labels: `exp:E07` (the experiment, worth its points) and any bonus labels (`bonus:prediction`, `bonus:replicated`, `bonus:bug`, `bonus:chart`). Then:
 
 ```bash
 gh issue list --state all --label experiment --limit 500 --json number,title,labels,author > experiments.json
@@ -863,6 +869,6 @@ prints the leaderboard, each person's rank and badges, and which experiments nob
 | 6 | Advanced | E8, E26, and any replications | bench |
 | 7–12 | 👑 Boss level | the 6-week challenge | everywhere |
 
-Every week, start the knowledge exchange with the leaderboard and the most surprising result.
+Every week, start the knowledge exchange with the leaderboard and the most surprising result. Your leader's session plan for each week is in the [Leader's Recipe](Leader_Guide.md#the-six-sessions).
 
-**Related:** [Measure and diagnose](../streaming/measure-and-diagnose.md) (every command and the 45-problem field guide) · [Hardware and encoders](../streaming/hardware-and-encoders.md) · [Compression, MJPEG and FFmpeg](../streaming/codecs-and-ffmpeg.md) · [Cheat sheet](../../workshop/student_materials/Video_Streaming_Cheat_Sheet.md) · [Knowledge exchange](../sdlc/knowledge-exchange.md)
+**Related:** [Leader's Recipe](Leader_Guide.md) · [ROV Video Debug Checklist](../debug/ROV_Debug_Checklist.md) · [Measure and diagnose](../streaming/measure-and-diagnose.md) (every command and the 45-problem field guide) · [Hardware and encoders](../streaming/hardware-and-encoders.md) · [Compression, MJPEG and FFmpeg](../streaming/codecs-and-ffmpeg.md) · [Cheat sheet](../../workshop/student_materials/Video_Streaming_Cheat_Sheet.md) · [Knowledge exchange](../sdlc/knowledge-exchange.md)

@@ -44,7 +44,7 @@ Two half-day sessions (≈ 3 h 50 min each, incl. breaks). Full timing is in `pr
 
 | Session | Content | Activities |
 |---|---|---|
-| **1 · Video engineering** | Why video matters → architecture and unknowns → bandwidth → how encoding works → codecs, rate control, GOP and loss → quality metrics → Jetson Nano vs Raspberry Pi 5 → heat and reliability → protocols and latency → multi-camera and computer vision | 1 Estimate the Bandwidth · 3 Compression Challenge · 2 Diagnose the ROV · homework: the [ROV experiments](../docs/experiments/ROV_Experiments.md) |
+| **1 · Video engineering** | Why video matters → architecture and unknowns → bandwidth → how encoding works → codecs, rate control, GOP and loss → quality metrics → Jetson Nano vs Raspberry Pi 5 → heat and reliability → protocols and latency → multi-camera and computer vision | 1 Estimate the Bandwidth · 3 Compression Challenge · 2 Diagnose the ROV · homework: the [ROV experiments](../docs/experiments/ROV_Experiments.md), run by team leaders with the [Leader's Recipe](../docs/experiments/Leader_Guide.md) · tool: the [debug checklist](../docs/debug/ROV_Debug_Checklist.md) |
 | **2 · Engineering practice and UX** | Quality × Efficiency → SDLC → requirements, DoR/DoD → testing and the Bug Hunt League → code review, GitHub workflow, board, metrics → UX for pilots → final challenge | 4 Break the Other Team's Software · 6 Design the Perfect Pilot Experience · 5 Architecture Challenge |
 
 **Before session 1:**

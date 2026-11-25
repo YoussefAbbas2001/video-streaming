@@ -12,7 +12,9 @@ Everything for our video-streaming session: two slide decks, three recorded vide
 | **Watching the videos** | [`videos/`](videos/): three videos, about 25 min |
 | **Trying a camera and an encoder live** | Encoding Lab → **Live camera** tab (laptop camera, MJPEG passthrough vs x264 vs NVENC, with a latency overlay) |
 | **Benchmarking the Pi 5 / Jetson / laptop** | Run the Encoding Lab on that computer → **Bandwidth budget → Measure this computer** |
-| **🧪 Homework: experiments on the real ROV** | [`docs/experiments/ROV_Experiments.md`](docs/experiments/ROV_Experiments.md) |
+| **🧪 Homework: experiments on the real ROV** (members) | [`docs/experiments/ROV_Experiments.md`](docs/experiments/ROV_Experiments.md) |
+| **🧑‍🍳 A team leader running the experiments with members** | [`docs/experiments/Leader_Guide.md`](docs/experiments/Leader_Guide.md): six 90-minute session recipes, answer key, result sheet |
+| **🩺 The video is broken right now** | [`docs/debug/ROV_Debug_Checklist.md`](docs/debug/ROV_Debug_Checklist.md) + `bash docs/debug/rov_healthcheck.sh` on the ROV (✅ ⚠️ ❌ for about 20 checks in 10 s) |
 | **Measuring our ROV, diagnosing a bad picture (45 symptoms with pictures), throughput and loss in the GUI** | [`docs/streaming/measure-and-diagnose.md`](docs/streaming/measure-and-diagnose.md) |
 | **Choosing cameras and the encoder board (Jetson Nano 2GB vs Raspberry Pi 5), heat** | [`docs/streaming/hardware-and-encoders.md`](docs/streaming/hardware-and-encoders.md) |
 | **Why compression matters, MJPEG cameras, lowering their resolution, NVENC, FFmpeg recipes** | [`docs/streaming/codecs-and-ffmpeg.md`](docs/streaming/codecs-and-ffmpeg.md) |
@@ -24,16 +26,18 @@ Everything for our video-streaming session: two slide decks, three recorded vide
 ## What's in the repo
 
 ```
-├── presentation/   MIA_Video_Streaming.pptx (56 slides) and MIA_Software_Dev_Cycle.pptx (36 slides), click-by-click builds, speaker notes
+├── presentation/   MIA_Video_Streaming.pptx (87 slides) and MIA_Software_Dev_Cycle.pptx (36 slides), click-by-click builds, speaker notes
 ├── encoding_lab/   ROV Encoding Lab: Streamlit app — Encode, Live camera, Sweep, Bandwidth budget, Report, Learn
 ├── docs/
-│   ├── streaming/  compression economics, USB vs IP, Jetson Nano vs Pi 5, MJPEG + FFmpeg, GUI stream metrics, measuring
+│   ├── streaming/  measure and diagnose (45-problem field guide), hardware and encoders, codecs and FFmpeg
+│   ├── experiments/ the ROV experiments: member handbook, leader's recipe, ms clock, leaderboard
+│   ├── debug/      the debug checklist and rov_healthcheck.sh
 │   └── sdlc/       Quality × Efficiency, Bug Hunt League, GitHub workflow, knowledge exchange, postmortems
 ├── videos/         Arabic scripts for the 3 recorded videos + recording checklist
 ├── workshop/       the full workshop (presenter guide, student materials, activities, UX pack)
 ├── assets/         sample 4K clips to upload into the Encoding Lab
 ├── build/          scripts that generate slides and insert them into the decks (see build/README.md)
-└── .github/        bug and task forms, PR template, CI that runs the tests on every pull request
+└── .github/        bug, task and experiment-result forms, PR template, CI that runs the tests on every pull request
 ```
 
 ## Quick start

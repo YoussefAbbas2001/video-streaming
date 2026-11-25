@@ -48,7 +48,7 @@ const IMG = (...p) => path.join(ROOT, "docs", ...p);
   {
     const s = content("x_mission", "Homework · the ROV experiments", `${EXPS.length} experiments. One real ROV. Every number is yours.`,
       `This replaces the old "measure your own ROV" homework. Everything we argued about today (latency, bandwidth, loss, heat, encoder limits, what the pilot can read) can be measured on our own ROV, and docs/experiments/ROV_Experiments.md turns each of those numbers into an experiment: ${EXPS.length} of them, from 15-minute bench checks to pool-day tests with a pilot. ` +
-      `It is a game on purpose. Every experiment follows four steps: predict (everyone writes a number before touching anything), measure (repeat, report median and worst), explain (which stage causes it, using the field guide), post (a GitHub issue with the Experiment result template). A mentor verifies it and the points go on the leaderboard, which we read out at every weekly knowledge exchange. ` +
+      `It is a game on purpose. Every experiment follows four steps: predict (everyone writes a number before touching anything), measure (repeat, report median and worst), explain (which stage causes it, using the field guide), post (a GitHub issue with the Experiment result template). Your team leader verifies it and the points go on the leaderboard, which we read out at every weekly knowledge exchange. ` +
       `There are ${nb} badges, ${TOTAL} points in total, ranks from Cadet to Chief Engineer, and a 6-week boss level for the team that turns the numbers into a better system. Ask the room: who wants to be the first Latency Hunter?`);
     [[`${EXPS.length}`, "experiments", col.cyan], [`${nb}`, "badges", col.amber], [`${TOTAL}`, "points to win", col.teal], ["1", "boss level", col.rose]].forEach(([v, l, c], i) => {
       const x = 0.6 + i * 3.05;
@@ -57,7 +57,7 @@ const IMG = (...p) => path.join(ROOT, "docs", ...p);
       text(s, l.toUpperCase(), { x, y: 2.75, w: 2.9, h: 0.4, fontSize: 13, bold: true, color: col.muted, align: "center", charSpacing: 1 });
     });
     const steps = [["1 · Predict", "Write a number before you touch anything", col.cyan], ["2 · Measure", "Repeat it. Report median and worst", col.teal],
-                   ["3 · Explain", "Which stage causes it? Use the field guide", col.amber], ["4 · Post", "GitHub issue → a mentor verifies → points", col.rose]];
+                   ["3 · Explain", "Which stage causes it? Use the field guide", col.amber], ["4 · Post", "GitHub issue → your leader verifies → points", col.rose]];
     steps.forEach(([t, b, c], i) => {
       const x = 0.6 + i * 3.05;
       s.addShape(pres.shapes.OVAL, { x: x + 0.95, y: 3.6, w: 1.0, h: 1.0, fill: { color: col.card }, line: { color: c, width: 3 }, objectName: `step-${i}` });
@@ -180,7 +180,7 @@ const IMG = (...p) => path.join(ROOT, "docs", ...p);
     const s = content("x_plan", "Homework · the plan", "Six weeks of experiments, then the boss level",
       "A suggested schedule. Week 1 is the baseline on the bench (E0, E1, E6, E7, E20, E21). Week 2 is latency and encoders (E2, E3, E4, E9, E19). Week 3 is chaos week, bench only with props off (E10 to E15). Weeks 4 and 5 are pool days (E16, E17, E18, E23, then E5, E22, E24, E25). Week 6 is for the advanced experiments (E8, E26) and replications. " +
       "Weeks 7 to 12 are the boss level: the team turns the numbers into requirements (F1–F6, N1–N7), compares at least two architecture options with measurements, builds and tests, and gives a 10-minute demonstration judged on measured results, evidence, failure handling, pilot usability and documentation. " +
-      "Results are posted as GitHub issues with the Experiment result template; a mentor verifies and labels them, and docs/experiments/experiment_board.py prints the leaderboard and badges for the weekly knowledge exchange. Tonight: everyone does E0 and E1.");
+      "Results are posted as GitHub issues with the Experiment result template; the team leader verifies and labels them, and docs/experiments/experiment_board.py prints the leaderboard and badges for the weekly knowledge exchange. Tonight: everyone does E0 and E1.");
     const weeks = [["W1", "Baseline", "E0 E1 E6 E7 E20 E21", col.cyan], ["W2", "Latency + encoders", "E2 E3 E4 E9 E19", col.cyan], ["W3", "Chaos week", "E10 → E15", col.rose],
                    ["W4", "Pool day 1", "E16 E17 E18 E23", col.teal], ["W5", "Pool day 2", "E5 E22 E24 E25", col.teal], ["W6", "Advanced", "E8 E26 + replications", col.amber]];
     weeks.forEach(([w, t, e, c], i) => {
@@ -195,7 +195,7 @@ const IMG = (...p) => path.join(ROOT, "docs", ...p);
     text(s, "👑 Boss level", { x: 10.95, y: 2.6, w: 1.75, h: 0.45, fontSize: 13, bold: true, color: col.amber, align: "center" });
     text(s, "the 6-week challenge", { x: 10.95, y: 3.05, w: 1.75, h: 0.7, fontSize: 11.5, color: col.muted, align: "center" });
     [["Post", "GitHub issue → 🧪 Experiment result template: prediction, result, method, evidence, explanation", col.cyan],
-     ["Verify", "a mentor adds exp:E07 + bonus labels", col.teal],
+     ["Verify", "your leader adds exp:E07 + bonus labels", col.teal],
      ["Leaderboard", "experiment_board.py → read out at every knowledge exchange", col.amber]].forEach(([t, b, c], i) => {
       const x = 0.6 + i * 3.1;
       box(s, x, 4.0, 2.95, 1.45, { line: c });

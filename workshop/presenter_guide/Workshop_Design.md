@@ -30,10 +30,8 @@ By the end of the session a student should be able to:
 5. **Run FFmpeg/ffprobe** to encode, inspect and quality-score a stream (PSNR/SSIM/VMAF), and read the results critically.
 6. **State correctly** what the Jetson Nano and the Raspberry Pi 5 can and cannot do in hardware.
 7. **Investigate** their own ROV with a diagnostic checklist, producing measurements instead of guesses.
-8. **Write** a user story with acceptance criteria and a Definition of Done for an ROV feature.
-9. **Design and execute** test cases (boundary, negative, stress) and write a reproducible bug report.
-10. **Review** code constructively using a checklist.
-11. **Apply** UX principles (information hierarchy, cognitive load, feedback, error prevention) to the pilot dashboard and validate a design with a usability test.
+
+Session 2's objectives (requirements, testing, code review, UX) are in the [mia-software-practice repo](https://github.com/YoussefAbbas2001/mia-software-practice/blob/HEAD/workshop/presenter_guide/Workshop_Design.md).
 
 The over-arching outcome: **students leave asking "how would we measure that?" before "how do we fix that?"**
 
@@ -60,23 +58,11 @@ The full content is about **7 h 45 min including breaks** (≈ 7 h of contact ti
 | 2:50 | Hardware (Jetson Nano vs Pi 5), where to encode, protocols, latency | Talk | 29–35 |
 | 3:15 | Main/substreams, priorities, measurement toolbox, **Activity 2: Diagnose the ROV**, strategy, homework | Talk + team activity | 36–41 |
 
-**Session 2 — Engineering Practice and the Pilot (≈ 3 h 55 min incl. one 10-min break)**
-
-| Time | Block | Format | Deck slides |
-|---|---|---|---|
-| 0:00 | Recap + results of the diagnostic homework | Discussion | — |
-| 0:10 | SDLC, requirements, epic → test case, DoR/DoD | Talk + mini-exercise | 42–47 |
-| 0:40 | Testing levels, techniques, mindset | Talk | 48–49 |
-| 0:50 | **Activity 4: Break the Other Team's Software** (incl. debrief) | Competition (60 min) | 50 |
-| 1:50 | *Break 10 min* | | |
-| 2:00 | Code review (live bad → good review), Git, board, metrics | Talk + pair review | 51–55 |
-| 2:25 | UX for ROV pilots | Talk | 56–65 |
-| 3:00 | **Activity 6: Design the Perfect ROV Pilot Experience** | Competition (40 min) | 66 |
-| 3:40 | Final challenge (**Activity 5** briefing / live if time), takeaways, close | Talk | 67–70 |
+**Session 2 — Engineering Practice and the Pilot (≈ 3 h 55 min)** is described in the [mia-software-practice repo](https://github.com/YoussefAbbas2001/mia-software-practice/blob/HEAD/workshop/presenter_guide/Workshop_Design.md#3-agenda--3-h-55-min-incl-one-10-min-break).
 
 ### Option B — one long day (≈ 6 h 30 min + breaks)
 
-Cut: Experiment 4 (presets) becomes a pre-recorded result; Activity 3 shortened to 10 min; testing competition reduced to 45 min; UX activity reduced to 30 min with paper wireframes only; Architecture Challenge assigned as homework only.
+Cut: Experiment 4 (presets) becomes a pre-recorded result; Activity 3 shortened to 10 min; Architecture Challenge assigned as homework only. (Session 2's cuts are in the mia-software-practice repo.)
 
 ---
 
@@ -104,11 +90,9 @@ Cut: Experiment 4 (presets) becomes a pre-recorded result; Activity 3 shortened 
 | 1 | Estimate the Bandwidth | Session 1, bandwidth block | 15 min | Filled worksheet | Accuracy + headroom judgement |
 | 2 | Diagnose the ROV | End of Session 1 | 20 min | Ranked hypothesis list + measurement plan | Quality of measurements proposed |
 | 3 | Compression Challenge | After quality metrics | 15 min | Blind ranking of encodings | Closeness to measured ranking |
-| 4 | Break the Other Team's Software | Session 2 | 60 min | Bug reports, fixes, regression tests | Defect points (see Testing Competition Guide) |
 | 5 | Architecture Challenge | Session 2 close / homework | 20 min + homework | Architecture proposal with numbers | Rubric |
-| 6 | Design the Perfect ROV Pilot Experience | Session 2 | 40 min | Wireframe + usability test results | UX rubric |
 
-Full instructions: `workshop_activities/Activity_Instructions.md`, `student_materials/Testing_Competition_Guide.md`, `ux_materials/UX_Pilot_Experience_Pack.md`.
+Full instructions: `workshop_activities/Activity_Instructions.md`. Activities 4 (testing competition) and 6 (pilot UX) are in the [mia-software-practice repo](https://github.com/YoussefAbbas2001/mia-software-practice).
 
 ---
 
@@ -175,5 +159,4 @@ Ask the team lead to fill this in. Each answer changes the recommendations.
 2. **Measure, don't assume.** Every recommendation is paired with the command that verifies it.
 3. **Honesty about uncertainty.** Hardware claims are cited; architecture claims are labeled as assumptions.
 4. **Activities every 20–30 minutes.** Long lectures lose a student audience.
-5. **Lightweight process.** Everything in Part C must be runnable by a student team in < 1 hour/week of overhead.
-6. **The pilot is the customer.** The UX part closes the loop: the video system exists to serve a human making decisions under pressure.
+5. **The pilot is the customer.** The UX part closes the loop: the video system exists to serve a human making decisions under pressure.

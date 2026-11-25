@@ -52,40 +52,9 @@ Note: the Raspberry Pi processor documentation quotes "H264 1080p30 encode (from
 - **iperf3** — <https://iperf.fr/> · **tc netem** (simulate delay/loss) — <https://man7.org/linux/man-pages/man8/tc-netem.8.html> ✔
 - **Wireshark** user guide — <https://www.wireshark.org/docs/>
 
-## E. Software testing
+Testing, code review, team organisation and UX references moved to the [mia-software-practice repo](https://github.com/YoussefAbbas2001/mia-software-practice/blob/HEAD/workshop/resources/References.md).
 
-- **The Practical Test Pyramid** (Ham Vocke, martinfowler.com) — <https://martinfowler.com/articles/practical-test-pyramid.html> ✔
-- **pytest** documentation — <https://docs.pytest.org/> · **GoogleTest** (C++) — <https://google.github.io/googletest/>
-- **ISTQB Glossary** (testing terminology) — <https://glossary.istqb.org/>
-- Glenford Myers et al., *The Art of Software Testing*, 3rd ed., Wiley ○
-
-## F. Code review and Git
-
-- **Google Engineering Practices — Code Review** — <https://google.github.io/eng-practices/review/> ✔ (both the reviewer's and the author's guide)
-- **Conventional Commits** — <https://www.conventionalcommits.org/en/v1.0.0/> ✔
-- **Pro Git** (free book) — <https://git-scm.com/book/en/v2>
-- **Trunk-Based Development** — <https://trunkbaseddevelopment.com/> ✔
-- **Semantic Versioning** — <https://semver.org/>
-- GitHub Docs: pull requests, protected branches, Projects — <https://docs.github.com/>
-
-## G. Team organisation
-
-- **The Kanban Guide** — <https://kanbanguides.org/> ✔
-- **The Scrum Guide** (for vocabulary: sprint, backlog refinement, retrospective) — <https://scrumguides.org/>
-- **Architecture Decision Records** (decision log format) — <https://adr.github.io/>
-- Atlassian Agile Coach (practical articles on boards, user stories, DoD) — <https://www.atlassian.com/agile>
-
-## H. UX, human factors and safety
-
-- **Nielsen's 10 usability heuristics** — <https://www.nngroup.com/articles/ten-usability-heuristics/> ✔
-- **Why you only need to test with 5 users** — <https://www.nngroup.com/articles/why-you-only-need-to-test-with-5-users/> ✔
-- **System Usability Scale (SUS)** — <https://measuringu.com/sus/> ✔ · original: J. Brooke, "SUS: a 'quick and dirty' usability scale", 1996 ○
-- **Situational awareness** — M. R. Endsley, "Toward a Theory of Situation Awareness in Dynamic Systems", *Human Factors* 37(1), 1995 ○
-- **Cognitive load / workload** — NASA-TLX (task load index) for measuring pilot workload: <https://humansystems.arc.nasa.gov/groups/tlx/>
-- **Design tools** — Figma for Education: <https://www.figma.com/education/> · Penpot (open source): <https://penpot.app/> ✔ · Excalidraw: <https://excalidraw.com/>
-- Don Norman, *The Design of Everyday Things* (revised ed., 2013) ○ — feedback, mapping, error prevention
-
-## I. Underwater imaging & ROVs (background)
+## E. Underwater imaging & ROVs (background)
 
 - **MATE ROV Competition** — <https://materovcompetition.org/> (competition manuals, scoring, specs; check the current season)
 - **Marine Technology Society ROV Committee** — <https://www.rov.org/>

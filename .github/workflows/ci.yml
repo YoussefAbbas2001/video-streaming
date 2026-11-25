@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [master, main]
 
 jobs:
   test:
@@ -24,20 +24,12 @@ jobs:
 
       - name: Syntax check (Python and shell)
         run: |
-          python -m compileall -q encoding_lab demos sdlc build
+          python -m compileall -q encoding_lab build docs
           for f in $(git ls-files '*.sh'); do bash -n "$f"; done
 
       - name: Health-check script tests
         run: bash docs/debug/test_healthcheck.sh
 
       - name: Encoding Lab engine tests
-        run: python -m pytest -q encoding_lab/tests
-
-      - name: Testing-competition starter tests
-        working-directory: workshop/workshop_activities/testing_competition_code
-        run: python -m pytest -q
-
-      - name: Demo smoke tests
-        run: |
-          python demos/01_why_streaming/egypt_cost.py --minutes 1
-          bash demos/03_encoding/gop_view.sh > /dev/null
+        working-directory: encoding_lab
+        run: python -m pytest -q tests

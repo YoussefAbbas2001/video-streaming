@@ -32,7 +32,7 @@
   ```bash
   sudo bash docs/debug/rov_healthcheck.sh --top <topside IP> --cams <N> --md > baseline-health.md
   ```
-- [ ] **GitHub:** create the labels (`bash docs/sdlc/setup_github_labels.sh`), then open a test issue with the 🧪 *Experiment result* template and close it.
+- [ ] **GitHub:** create the labels (`bash docs/experiments/setup_experiment_labels.sh OWNER/REPO`), then open a test issue with the 🧪 *Experiment result* template and close it.
 - [ ] **Pairs:** mix experienced and new members. Rotate pairs every two weeks so knowledge spreads.
 - [ ] **Book the pool** for weeks 4 and 5 (or plan the [no-pool version](#adapting-the-recipe)).
 - [ ] **Print:** one mission map per pair, the eye chart for E24 (letters and digits 40, 20, 10 and 5 mm high, laminated), result sheets, and the safety rules from the handbook for the wall.
@@ -321,4 +321,4 @@ Leader:  ☐ verified   points ____   bonus: ☐ prediction ☐ replicated ☐ b
 
 ---
 
-**Related:** [Member handbook: ROV experiments](ROV_Experiments.md) · [ROV Video Debug Checklist](../debug/ROV_Debug_Checklist.md) · [Measure and diagnose](../streaming/measure-and-diagnose.md) · [Knowledge exchange](../sdlc/knowledge-exchange.md)
+**Related:** [Member handbook: ROV experiments](ROV_Experiments.md) · [ROV Video Debug Checklist](../debug/ROV_Debug_Checklist.md) · [Measure and diagnose](../streaming/measure-and-diagnose.md) · [Knowledge exchange](https://github.com/YoussefAbbas2001/mia-software-practice/blob/HEAD/docs/knowledge-exchange.md)

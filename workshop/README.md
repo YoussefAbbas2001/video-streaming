@@ -1,8 +1,8 @@
-# Workshop package: Engineering Better ROV Systems
+# Workshop, session 1: Video Engineering
 
-The full two-session workshop:
-- **Session 1, video engineering:** bandwidth, encoding, hardware, latency and multi-camera strategy.
-- **Session 2, engineering practice and UX:** requirements, testing, code review, Git, team organisation and UX for ROV pilots.
+Session 1 of *Engineering Better ROV Systems*: bandwidth, encoding, hardware, latency and multi-camera strategy.
+
+Session 2 (requirements, testing, code review, Git, team organisation and UX for ROV pilots) is in the [mia-software-practice repo](https://github.com/YoussefAbbas2001/mia-software-practice/tree/HEAD/workshop).
 
 The guiding idea: *students leave asking "how would we measure that?" before "how do we fix that?"*
 
@@ -14,38 +14,31 @@ The guiding idea: *students leave asking "how would we measure that?" before "ho
 workshop/
 ├── presenter_guide/
 │   ├── Workshop_Design.md                 audience, objectives, agenda, equipment, KNOWN / UNKNOWN about the ROV
-│   └── Presenter_Script.md                block-by-block script for all 82 slides: what to say, questions, misconceptions, timing
+│   └── Presenter_Script.md                block-by-block script for session 1: what to say, questions, misconceptions, timing
 ├── student_materials/
-│   ├── Video_Streaming_Cheat_Sheet.md     formulas, vocabulary, FFmpeg/GStreamer/Linux commands, review checklist
-│   ├── Testing_Competition_Guide.md       "Break the Other Team's Software!" rules, scoring, templates, scenarios
+│   ├── Video_Streaming_Cheat_Sheet.md     formulas, vocabulary, FFmpeg/GStreamer/Linux commands
 │   └── Proposed_Architecture_Options.md   5 architecture options with trade-offs + decision-log template
 ├── workshop_activities/
-│   ├── Activity_Instructions.md           Activities 1, 2, 3, 5 with materials and answer keys
-│   └── testing_competition_code/          small Python module (spec + code with seeded defects + starter tests)
-├── ux_materials/
-│   ├── UX_Pilot_Experience_Pack.md        persona, journey, wireframes, usability script, activity, rubric, user stories
-│   └── pilot_dashboard_wireframe.svg      printable before/after dashboard wireframe (A3)
+│   └── Activity_Instructions.md           Activities 1, 2, 3, 5 with materials and answer keys
 └── resources/
-    └── References.md                      sources for every hardware claim + curated learning resources
+    └── References.md                      sources for every hardware claim + video, networking and ROV resources
 ```
 
 Related, at the repo level:
-- the decks: `../presentation/` (MIA_Video_Streaming.pptx, MIA_Software_Dev_Cycle.pptx), click-by-click builds and speaker notes;
+- the deck: `../presentation/MIA_Video_Streaming.pptx`, click-by-click builds and speaker notes;
 - the **Encoding Lab** app, used for every live demo: `../encoding_lab/`;
 - the video series: `../videos/`;
-- the write-ups: `../docs/streaming/` and the SDLC live session: `../docs/sdlc/`;
+- the write-ups: `../docs/streaming/`, the experiments `../docs/experiments/` and the debug checklist `../docs/debug/`;
 - the original notebook (optional, not used in the session): `../encoding_lab/notebooks/`.
-
-**Presenter-only (not in this repo):** the testing-competition referee key and the seeded-defect proof tests live in the presenter's Drive folder (see the main README), so the team can't read the answers before the competition.
 
 ## Recommended session sequence
 
-Two half-day sessions (≈ 3 h 50 min each, incl. breaks). Full timing is in `presenter_guide/Workshop_Design.md` and in `Presenter_Script.md` (Appendix B).
+Two half-day sessions (≈ 3 h 50 min each, incl. breaks). Full timing for session 1 is in `presenter_guide/Workshop_Design.md` and in `Presenter_Script.md` (Appendix B).
 
 | Session | Content | Activities |
 |---|---|---|
 | **1 · Video engineering** | Why video matters → architecture and unknowns → bandwidth → how encoding works → codecs, rate control, GOP and loss → quality metrics → Jetson Nano vs Raspberry Pi 5 → heat and reliability → protocols and latency → multi-camera and computer vision | 1 Estimate the Bandwidth · 3 Compression Challenge · 2 Diagnose the ROV · homework: the [ROV experiments](../docs/experiments/ROV_Experiments.md), run by team leaders with the [Leader's Recipe](../docs/experiments/Leader_Guide.md) · tool: the [debug checklist](../docs/debug/ROV_Debug_Checklist.md) |
-| **2 · Engineering practice and UX** | Quality × Efficiency → SDLC → requirements, DoR/DoD → testing and the Bug Hunt League → code review, GitHub workflow, board, metrics → UX for pilots → final challenge | 4 Break the Other Team's Software · 6 Design the Perfect Pilot Experience · 5 Architecture Challenge |
+| **2 · Engineering practice and UX** | in the [mia-software-practice repo](https://github.com/YoussefAbbas2001/mia-software-practice) | 4 Break the Other Team's Software · 6 Design the Perfect Pilot Experience · 5 Architecture Challenge (its instructions stay here, in `workshop_activities/Activity_Instructions.md`) |
 
 **Before session 1:**
 - Send the questionnaire in `Workshop_Design.md` §6.5 to the team lead.
@@ -66,17 +59,8 @@ streamlit run ../encoding_lab/app.py          # http://localhost:8501
 - **Live camera tab:** uses the laptop's camera; Windows and macOS ask for permission the first time.
 - Results are cached in `encoding_lab/.lab_work/` (safe to delete). The presenter script's notebook-experiment → Lab-tab table is at the top of `Presenter_Script.md`.
 
-## Running the testing competition code
-
-```bash
-cd workshop_activities/testing_competition_code
-pip install pytest
-python -m pytest -q          # 7 starter tests pass, which proves nothing
-```
-
 ## Important caveats
 
 - **We do not yet know** the team's exact cameras, board, tether speed or streaming software. The material labels every assumption and gives the measurement that resolves it.
 - Hardware facts are cited in `resources/References.md` and `../docs/streaming/hardware-and-encoders.md`.
 - Latency budgets in the deck are **estimates** (labelled), except the measured x264 encoder hold.
-- Safety-related UX guidance describes principles. The actual safety behaviour must be designed with the vehicle's control architecture and the competition rules.

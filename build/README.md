@@ -1,14 +1,12 @@
 # build/
 
-The two decks in `presentation/` are **edited by hand** in PowerPoint. Never regenerate them wholesale, or the edits are lost. New slides are generated separately and **inserted**:
+The deck in `presentation/` is **edited by hand** in PowerPoint. Never regenerate them wholesale, or the edits are lost. New slides are generated separately and **inserted**:
 
 ```bash
 node build/new_slides_nov2026.js            # → out/new_slides_nov2026.pptx (10 slides, same layouts and style)
 python3 build/insert_slides.py out/new_slides_nov2026.pptx presentation/MIA_Video_Streaming.pptx \
     --place 1:21 --place 2:22 --place 3:22 --place 4:22 --place 5:22 --place 7:24 --place 8:24 --place 6:25 --place 9:26
-python3 build/insert_slides.py out/new_slides_nov2026.pptx presentation/MIA_Software_Dev_Cycle.pptx --place 10:19
 python3 build/add_click_builds.py presentation/MIA_Video_Streaming.pptx --only 22,24,25,26,27,30,31,33,35   # numbers printed by insert_slides.py
-python3 build/add_click_builds.py presentation/MIA_Software_Dev_Cycle.pptx --only 20
 ```
 
 Video-diagnostics slides (24 Nov 2026): pictures and text come from one catalog, shared with `docs/streaming/measure-and-diagnose.md`:
@@ -42,6 +40,8 @@ python3 build/add_click_builds.py presentation/MIA_Video_Streaming.pptx --only 6
 ```
 
 Note: the generated regions of `docs/streaming/measure-and-diagnose.md` (between `<!-- gen:NAME -->` markers) come from `diagnostics_catalog.py`; edit the catalog, not those regions.
+
+The Software Dev Cycle deck moved to the [mia-software-practice repo](https://github.com/YoussefAbbas2001/mia-software-practice) on 25 Nov 2026, with copies of `insert_slides.py`, `add_click_builds.py`, `fix_shape_ids.py`, `deck_helpers.js` and `write_theme.js`. Slide 10 of `new_slides_nov2026.js` (the knowledge exchange) was inserted into that deck. `deck_part_b.js` and parts of `deck_part_new.js` still hold the engineering-practice slides of the original combined deck; they are kept here because `build_deck.js` needs them.
 
 (These commands were run on 21 Nov 2026 against the decks as they were that day. To add more slides later, write a new generator like `new_slides_nov2026.js` and insert only those.)
 

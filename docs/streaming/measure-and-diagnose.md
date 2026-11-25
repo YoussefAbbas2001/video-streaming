@@ -273,7 +273,7 @@ sudo tc qdisc change dev eth0 root netem rate 5mbit      # squeeze the bandwidth
 sudo tc qdisc del dev eth0 root                          # back to normal
 ```
 
-The loss widget should read about 1 % and turn amber. Under the rate limit, throughput should flatten at about 5 Mb/s while the picture degrades. File the result as a test case in the Bug Hunt League.
+The loss widget should read about 1 % and turn amber. Under the rate limit, throughput should flatten at about 5 Mb/s while the picture degrades. File the result as a test case in the [Bug Hunt League](https://github.com/YoussefAbbas2001/mia-software-practice/blob/HEAD/docs/bug-hunt-league.md).
 
 ## 6. The first 15 diagnostics to build
 

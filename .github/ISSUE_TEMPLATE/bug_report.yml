@@ -1,5 +1,5 @@
-name: "🐞 Bug report (Bug Hunt League)"
-description: Found something broken? Report it and score points. Reproducible reports only.
+name: "🐞 Video bug report"
+description: Something wrong with the video (cameras, encoding, streaming, the Encoding Lab, these docs)? Report it. Reproducible reports only.
 title: "[Bug] "
 labels: ["bug"]
 body:
@@ -7,12 +7,12 @@ body:
     attributes:
       value: |
         Thanks for hunting! Points: Critical 10 · Major 5 · Minor 2 · UX 1. Bonuses: +2 with a video or failing test, +3 if a fixed bug came back.
-        Search the open issues first: the first reporter wins duplicates. Rules: `sdlc/bug-hunt-league.md`.
+        Search the open issues first: the first reporter wins duplicates. Video bugs count in the Bug Hunt League; rules: https://github.com/YoussefAbbas2001/mia-software-practice/blob/HEAD/docs/bug-hunt-league.md. Before reporting, run the debug checklist: docs/debug/ROV_Debug_Checklist.md.
   - type: dropdown
     id: area
     attributes:
       label: Area
-      options: [Pilot GUI / web app, Video streaming / cameras, Control (thrusters, gripper), Electrical / power / sensors, Other]
+      options: [Cameras / USB, ROV computer / encoding, Tether / network, Topside player / display, Encoding Lab app, Docs / deck, Other]
     validations: { required: true }
   - type: dropdown
     id: severity

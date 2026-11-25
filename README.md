@@ -1,6 +1,8 @@
 # M.I.A Robotics · ROV Video Streaming
 
-Everything for our video-streaming session: two slide decks, three recorded videos, the **ROV Encoding Lab** app we use live in the session, write-ups, and the engineering-practice session.
+Everything for video streaming on the ROV: the slide deck, three recorded videos, the **ROV Encoding Lab** app we use live in the session, the write-ups, the ROV experiments and the debug checklist.
+
+Software practice (SDLC, testing, the Bug Hunt League, code review, the GitHub workflow, the knowledge exchange and pilot UX) lives in its own repo: **[mia-software-practice](https://github.com/YoussefAbbas2001/mia-software-practice)**.
 
 > A video stream is not just a camera feed. It is a real-time information pipeline with limited bandwidth, processing power and latency budget.
 
@@ -18,26 +20,23 @@ Everything for our video-streaming session: two slide decks, three recorded vide
 | **Measuring our ROV, diagnosing a bad picture (45 symptoms with pictures), throughput and loss in the GUI** | [`docs/streaming/measure-and-diagnose.md`](docs/streaming/measure-and-diagnose.md) |
 | **Choosing cameras and the encoder board (Jetson Nano 2GB vs Raspberry Pi 5), heat** | [`docs/streaming/hardware-and-encoders.md`](docs/streaming/hardware-and-encoders.md) |
 | **Why compression matters, MJPEG cameras, lowering their resolution, NVENC, FFmpeg recipes** | [`docs/streaming/codecs-and-ffmpeg.md`](docs/streaming/codecs-and-ffmpeg.md) |
-| **Testing the GUI (everyone!)** | [`docs/sdlc/bug-hunt-league.md`](docs/sdlc/bug-hunt-league.md), then open an issue with the 🐞 Bug report form |
-| **Running the weekly knowledge exchange** | [`docs/sdlc/knowledge-exchange.md`](docs/sdlc/knowledge-exchange.md) |
-| **Contributing code** | [`docs/sdlc/github-workflow.md`](docs/sdlc/github-workflow.md) |
-| **Presenting** | [`presentation/`](presentation/) + [`workshop/presenter_guide/`](workshop/presenter_guide/) + [`docs/sdlc/live-session-plan.md`](docs/sdlc/live-session-plan.md) |
+| **Testing, the Bug Hunt League, the GitHub workflow, the knowledge exchange** | the [mia-software-practice](https://github.com/YoussefAbbas2001/mia-software-practice) repo |
+| **Presenting** | [`presentation/`](presentation/) + [`workshop/presenter_guide/`](workshop/presenter_guide/) |
 
 ## What's in the repo
 
 ```
-├── presentation/   MIA_Video_Streaming.pptx (87 slides) and MIA_Software_Dev_Cycle.pptx (36 slides), click-by-click builds, speaker notes
+├── presentation/   MIA_Video_Streaming.pptx (87 slides), click-by-click builds, speaker notes
 ├── encoding_lab/   ROV Encoding Lab: Streamlit app — Encode, Live camera, Sweep, Bandwidth budget, Report, Learn
 ├── docs/
 │   ├── streaming/  measure and diagnose (45-problem field guide), hardware and encoders, codecs and FFmpeg
 │   ├── experiments/ the ROV experiments: member handbook, leader's recipe, ms clock, leaderboard
-│   ├── debug/      the debug checklist and rov_healthcheck.sh
-│   └── sdlc/       Quality × Efficiency, Bug Hunt League, GitHub workflow, knowledge exchange, postmortems
+│   └── debug/      the debug checklist and rov_healthcheck.sh
 ├── videos/         Arabic scripts for the 3 recorded videos + recording checklist
-├── workshop/       the full workshop (presenter guide, student materials, activities, UX pack)
+├── workshop/       session 1 of the workshop (presenter guide, student materials, activities)
 ├── assets/         sample 4K clips to upload into the Encoding Lab
 ├── build/          scripts that generate slides and insert them into the decks (see build/README.md)
-└── .github/        bug, task and experiment-result forms, PR template, CI that runs the tests on every pull request
+└── .github/        video bug, task and experiment-result forms, PR template, CI that runs the tests on every pull request
 ```
 
 ## Quick start
@@ -55,7 +54,6 @@ streamlit run encoding_lab/app.py            # the Encoding Lab, at http://local
 | [Video Scripts (Arabic)](https://docs.google.com/document/d/1SWHGTSIQwwm1V1WtW0lmQqg6DUTXLM_mvFM8sI3jAlc/edit) | Recording the three videos |
 | [MJPEG on our ROV, and why we use FFmpeg for it](https://docs.google.com/document/d/1814_NgCNUHJoMfy_53jX56oLAWMsYRoZREwSixIuZwM/edit) | Reading version of `docs/streaming/codecs-and-ffmpeg.md` (Nov 19 version) |
 | [Streaming Deep-Dive: 2026–27 additions](https://docs.google.com/document/d/1LyPRCtvt5-wCSomRh4We0snjWo5Yv7CyVO2TjXJWTn8/edit) | Reading version of `docs/streaming/` |
-| [SDLC Live Session Handbook](https://docs.google.com/document/d/1fNSU7e_k30IwDUwo2Okes1AsU7UCkOBIDUMoYps5qBU/edit) | Reading version of `docs/sdlc/` |
 | [Workshop Reader](https://docs.google.com/document/d/1vyha2504cYxIiiDhl5IKH1ydGZGvKrHlJblZICibaT0/edit) | The whole workshop at moderate detail |
 | [Video Streaming Brief (2 pages)](https://docs.google.com/document/d/1hb-U9hiFSG3xVDgvLhOdzBjFPkTLvZAK1YtnlFWPguw/edit) | Two-page, two-column summary of video streaming |
 
@@ -75,6 +73,6 @@ Files over 50 MB trigger GitHub warnings, and files over 100 MB are rejected. Th
 
 ## Rules of the road
 
-- Nothing goes to `main` without a pull request and one review (see [`docs/sdlc/github-workflow.md`](docs/sdlc/github-workflow.md)).
+- Nothing goes to `master` without a pull request and one review (see the [GitHub workflow](https://github.com/YoussefAbbas2001/mia-software-practice/blob/HEAD/docs/github-workflow.md)).
 - Tag the version that goes into the water before every pool test: `git tag -a v0.x-pool-test`.
 - Numbers beat opinions: put measurements in your PR.

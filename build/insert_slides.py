@@ -20,7 +20,9 @@ import shutil
 import sys
 import tempfile
 import zipfile
+
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from lxml import etree
 
@@ -159,6 +161,8 @@ def main() -> int:
             if f.is_file() and f != ctp:
                 z.write(f, f.relative_to(D).as_posix())
     shutil.move(tmp_out, out)
+    from fix_shape_ids import fix as fix_ids          # PowerPoint refuses repeated shape ids (pptxgenjs tables)
+    fix_ids(out)
     final = slide_order(unzip(out, tmp / "check"))
     numbers = [final.index(name) + 1 for _, name in new_parts]
     print(f"{out}: {len(final)} slides; inserted at " + ",".join(map(str, numbers)))

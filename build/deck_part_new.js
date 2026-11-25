@@ -4,7 +4,7 @@ const fi = require("react-icons/fi");
 const tb = require("react-icons/tb");
 const { HEX } = require("./deck_helpers");
 
-const SRC_NOTE = "Sources are listed in docs/streaming-additions.md and workshop/resources/References.md.";
+const SRC_NOTE = "Sources are listed in docs/streaming/codecs-and-ffmpeg.md and workshop/resources/References.md.";
 
 // ---------------------------------------------------------------- Why streaming is underrated
 exports.worldRunsOnCompression = async ({ H, content }) => {
@@ -254,7 +254,7 @@ exports.githubWorkflow = async ({ H, content }) => {
 };
 
 // ---------------------------------------------------------------- MJPEG: where it fits (added 19 Nov 2026)
-const MJ_NOTE = "Measured 19 Nov 2026 on the Encoding Lab's synthetic 720p30 clip (FFmpeg 6.1). Reading: docs/mjpeg-and-ffmpeg.md.";
+const MJ_NOTE = "Measured 19 Nov 2026 on the Encoding Lab's synthetic 720p30 clip (FFmpeg 6.1). Reading: docs/streaming/codecs-and-ffmpeg.md.";
 exports.mjpegWhere = async ({ H, content }) => {
   const { col, text, box, stat, card } = H;
   const s = content("Encoding", "MJPEG on the ROV", "MJPEG: costly in bits, cheap in everything else",

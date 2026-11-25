@@ -571,7 +571,7 @@ module.exports = async function partA(ctx) {
   // ---------------------------------------------------------------- 38 How to measure
   {
     const s = content("Hardware & transport", "Your measurement toolbox", "How to measure streaming performance",
-      "Walk through each tool briefly and point to the Diagnostic Checklist, which has the full commands. The point: every claim in the team's design document should come with one of these measurements. ffprobe tells you codec/resolution/fps/bitrate of a stream; v4l2-ctl lists what USB cameras can output; lsusb -t shows which bus and speed each camera is on; ethtool shows negotiated link speed and duplex; iperf3 measures throughput, jitter and loss; tegrastats / top / vcgencmd show CPU, encoder and temperature; the browser's chrome://webrtc-internals shows WebRTC stats including frames dropped and jitter buffer delay.");
+      "Walk through each tool briefly and point to the ROV experiments homework, which has the full commands. The point: every claim in the team's design document should come with one of these measurements. ffprobe tells you codec/resolution/fps/bitrate of a stream; v4l2-ctl lists what USB cameras can output; lsusb -t shows which bus and speed each camera is on; ethtool shows negotiated link speed and duplex; iperf3 measures throughput, jitter and loss; tegrastats / top / vcgencmd show CPU, encoder and temperature; the browser's chrome://webrtc-internals shows WebRTC stats including frames dropped and jitter buffer delay.");
     const tools = [
       ["Stream", "ffprobe -hide_banner rtsp://…", "codec, resolution, FPS, bitrate"],
       ["USB cameras", "v4l2-ctl --list-formats-ext · lsusb -t", "formats, bus, speed, sharing"],
@@ -613,8 +613,8 @@ module.exports = async function partA(ctx) {
   // ---------------------------------------------------------------- 41 Recap session 1
   {
     const s = content("Hardware & transport", "End of session 1", "Homework: measure your own ROV",
-      "Hand out the ROV System Diagnostic Checklist. Ask each subsystem owner to fill in their part before session 2. Even partial answers are valuable — 'we don't know' is a finding. Open session 2 with the results.");
-    const items = [[fi.FiClipboard, "Fill in the Diagnostic Checklist", "Camera models, formats, codec, link speed, CPU, temperature, latency."], [fi.FiFilm, "Record 60 s of real footage", "Re-run the notebook on it (set ROV_SOURCE). Your bits-per-pixel, not ours."], [fi.FiClock, "Measure glass-to-glass latency", "One camera, then all eight. Median and worst of 10."]];
+      "Launch the ROV experiments homework (docs/experiments/ROV_Experiments.md); every pair starts with E0 and E1 before session 2. Even partial answers are valuable — 'we don't know' is a finding. Open session 2 with the results.");
+    const items = [[fi.FiClipboard, "Start the ROV experiments (E0, E1)", "Camera models, formats, codec, link speed, CPU, temperature, latency."], [fi.FiFilm, "Record 60 s of real footage", "Re-run the notebook on it (set ROV_SOURCE). Your bits-per-pixel, not ours."], [fi.FiClock, "Measure glass-to-glass latency", "One camera, then all eight. Median and worst of 10."]];
     for (let i = 0; i < 3; i++) await card(s, 0.6 + i * 4.1, 1.8, 3.85, 3.3, { icon: items[i][0], title: items[i][1], body: items[i][2], titleSize: 16, bodySize: 15 });
     box(s, 0.6, 5.4, 12.1, 1.1, { fill: col.card });
     text(s, "Bring the numbers to session 2 — we will turn them into requirements, tests and a better pilot interface.", { x: 0.9, y: 5.5, w: 11.6, h: 0.9, fontSize: 17, valign: "middle" });

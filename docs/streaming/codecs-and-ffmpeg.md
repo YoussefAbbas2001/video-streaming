@@ -1,6 +1,42 @@
-# MJPEG on our ROV, and why we use FFmpeg for it
+# Compression, MJPEG and FFmpeg on our ROV
 
-*M.I.A Robotics · streaming reading · measured 19–21 Nov 2026 (FFmpeg 6.1, Encoding Lab synthetic 720p30 clip)*
+*M.I.A Robotics · streaming docs · 25 Nov 2026 · merges the former mjpeg-and-ffmpeg page (measured 19–21 Nov 2026, FFmpeg 6.1, Encoding Lab synthetic 720p30 clip) and the compression and computer-vision parts of streaming-additions*
+
+**Contents:** [Why compression matters](#why-streaming-is-underrated-compression-runs-the-world) · [Example in EGP](#a-practical-example-in-egyptian-pounds) · [MJPEG on our ROV](#mjpeg-on-our-rov-and-why-we-use-ffmpeg-for-it) · [The resolution trap](#the-resolution-trap) · [NVENC and friends](#better-than-re-encoding-mjpeg-nvenc-and-friends) · [Streaming for computer vision](#streaming-for-computer-vision-detection-3d-reconstruction-autonomy-slam) · [Sources](#sources)
+
+## Why streaming is underrated: compression runs the world
+
+Nobody notices video compression until it fails. Yet:
+
+- **Video is about two thirds of all internet traffic.** Sandvine's 2023 Global Internet Phenomena Report measured video at **65 %** of all internet traffic in 2022, with video volume growing **24 %** in a single year [S1].
+- **Every codec generation halves the bits.** HEVC/H.265 (2013) delivers about 50 % lower bitrate than H.264/AVC (2003) at equal quality. VVC/H.266, finalized in July 2020, delivers about 50 % less than HEVC and about **75 % less than H.264** [S2, S3]. Each step took the world's video-coding experts years of joint work: VVC alone went from an exploration phase in 2015 to a final standard in 2020 [S3].
+- **Compression wins Emmys.** The Joint Video Team that built H.264 received a 2008 Primetime Engineering Emmy and a 2009 Technology & Engineering Emmy [S4, S5]. Accepting the 2008 award, ITU's Malcolm Johnson called H.264 *"a jewel in the crown of international standards collaboration"* [S4].
+- **Compression moves money.** Streaming services spend heavily on encoding research because every saved bit is saved delivery cost for every viewer. One example is per-title encoding, which tunes the bitrate ladder to each video's complexity [S6].
+
+**The ROV link:** our robot is a tiny version of the same problem. We have eight cameras, one tether, a small computer and a pilot who needs the picture *now*. The engineering questions are the same ones streaming companies ask, only with harder latency limits.
+
+## A practical example in Egyptian pounds
+
+**Price basis (November 2026).** WE (Telecom Egypt) home internet:
+- The entry-level package is **100 GB for EGP 150 per month before 14 % VAT** (EGP 171 with VAT). The regulator doubled its quota from 50 GB effective 1 November 2026 [S7].
+- That is about **EGP 1.71 per GB**.
+- Larger WE Space tiers are in the same range, for example 150 GB for EGP 260 and 200 GB for EGP 330, VAT exclusive [S8].
+
+| One hour of 1080p30 video | Bitrate | Data per hour | Cost at EGP 1.71/GB | 100 GB package lasts |
+|---|---|---|---|---|
+| Raw RGB, 24 bits/pixel | 1.49 Gb/s | 672 GB | **≈ EGP 1,150** | **9 minutes** |
+| Raw YUV 4:2:0, 12 bits/pixel | 0.75 Gb/s | 336 GB | ≈ EGP 575 | 18 minutes |
+| H.264, 5 Mb/s (HD streaming) | 5 Mb/s | 2.25 GB | **≈ EGP 3.85** | **44 hours** |
+| H.264, 2 Mb/s (ROV pilot camera) | 2 Mb/s | 0.9 GB | ≈ EGP 1.54 | 111 hours |
+
+How the numbers are calculated:
+- **Raw bitrate:** 1920 × 1080 pixels × 30 frames/s × 24 bits = 1.49 Gb/s.
+- **Data per hour:** bitrate × 3600 s ÷ 8 bits per byte.
+- **Two takeaways:** H.264 is about **300× cheaper** than raw RGB for the same hour. A 30 Mb/s WE line would need about **50× more speed** just to carry raw 1080p30 live.
+
+Do it with your own numbers: GB per hour = Mb/s × 3600 ÷ 8 ÷ 1000; cost = GB × your price per GB (the Encoding Lab's Show the math view does the first half for any encode).
+
+## MJPEG on our ROV, and why we use FFmpeg for it
 
 **In one paragraph.** MJPEG is video made of separate JPEG photos. No frame depends on another, so encoding is cheap, there is no frame hold, and a broken frame never smears into the next one. The price is size: about **4–5× the bitrate of H.264** for the same picture quality (measured below). We keep **H.264 over RTP/UDP** for the pilot and manipulator cameras, and use MJPEG for aux cameras, CV debug views, snapshots, recordings and the fallback stream. **We build all of it with FFmpeg**, not with `mjpeg-streamer` (Python) or `mjpg-streamer` (C).
 
@@ -11,9 +47,8 @@
 1. Lowering an MJPEG camera's resolution is free **only if the camera does it** ([§ The resolution trap](#the-resolution-trap)).
 2. When a camera must be re-encoded, a hardware encoder such as NVENC or the Jetson's beats software MJPEG ([§ Better than re-encoding MJPEG](#better-than-re-encoding-mjpeg-nvenc-and-friends)).
 
----
 
-## 1. What MJPEG is
+### 1. What MJPEG is
 
 Each frame is compressed on its own as a JPEG (DCT blocks, quantisation set by a quality factor, entropy coding). There are no motion vectors, reference frames or GOP; every frame is effectively an I-frame.
 
@@ -29,7 +64,7 @@ Each frame is compressed on its own as a JPEG (DCT blocks, quantisation set by a
 
 **Why USB cameras give it to us for free.** Raw 1080p30 YUYV is about 995 Mb/s, more than USB 2.0's 480 Mb/s. So UVC cameras compress to MJPEG on their own chip, and the Pi or Jetson receives frames that are already compressed. Check with `v4l2-ctl -d /dev/video0 --list-formats-ext` (look for `MJPG`).
 
-## 2. MJPEG vs H.264, measured
+### 2. MJPEG vs H.264, measured
 
 720p30, 6 s synthetic underwater clip, SSIM against the source on raw-decoded frames, one CPU core.
 
@@ -57,7 +92,7 @@ Each frame is compressed on its own as a JPEG (DCT blocks, quantisation set by a
 
 A 640×480 aux camera at 15 fps costs about 1.3 Mb/s in MJPEG. The pilot camera at 1080p30 would cost about 17.9 Mb/s, so that is where H.264 pays for itself.
 
-## 3. The three tools, compared
+### 3. The three tools, compared
 
 [mjpg-streamer](https://github.com/jacksonliam/mjpg-streamer) is a C program with input/output plugins. It was last changed in Feb 2021, and its Pi camera plugin needs MMAL, which the Pi 5 doesn't have. [mjpeg-streamer](https://pypi.org/project/mjpeg-streamer/) is a Python library: OpenCV frames in, HTTP out (2024.2.8, AGPLv3).
 
@@ -76,7 +111,7 @@ A 640×480 aux camera at 15 fps costs about 1.3 Mb/s in MJPEG. The pilot camera 
 
 **Verdict:** use FFmpeg. It is already installed for the Encoding Lab, it does every job above, and it grows with us when a stream needs H.264, a filter or a recording.
 
-## 4. FFmpeg recipes (all tested except the `/dev/video0` capture lines)
+### 4. FFmpeg recipes (all tested except the `/dev/video0` capture lines)
 
 ```bash
 # 1. USB camera MJPEG passthrough to a browser
@@ -149,7 +184,7 @@ Once a camera has to be decoded anyway, re-encoding to MJPEG wastes the work. An
 | Option | Where it exists | FFmpeg / GStreamer | Notes |
 |---|---|---|---|
 | **NVENC** | NVIDIA GPUs (pilot laptop, desktop) | `-c:v h264_nvenc -preset p1 -tune ull -zerolatency 1 -bf 0 -b:v 2M` | very low latency, near-zero CPU; also `hevc_nvenc` (and `av1_nvenc` on RTX 40+) |
-| **Jetson hardware encoder** | Jetson Nano / Orin | GStreamer `nvv4l2h264enc` (MJPEG in: `nvv4l2decoder mjpeg=1`) | ≈ 4 × 1080p30; mainline FFmpeg cannot use it; see [jetson-nano-vs-pi5.md](jetson-nano-vs-pi5.md) |
+| **Jetson hardware encoder** | Jetson Nano / Orin | GStreamer `nvv4l2h264enc` (MJPEG in: `nvv4l2decoder mjpeg=1`) | ≈ 4 × 1080p30; mainline FFmpeg cannot use it; see [hardware-and-encoders.md](hardware-and-encoders.md) |
 | **Intel Quick Sync** | most Intel laptops | `-c:v h264_qsv -preset veryfast -async_depth 1` | good for a topside relay or recorder |
 | **AMD AMF** | AMD GPUs (Windows) | `-c:v h264_amf -usage ultralowlatency` | |
 | **VA-API** | Intel/AMD on Linux | `-vaapi_device /dev/dri/renderD128 -vf format=nv12,hwupload -c:v h264_vaapi` | |
@@ -163,7 +198,7 @@ Rule of thumb for our ROV:
 - **Main cameras:** H.264, from the camera itself, from a hardware encoder, or from x264 zerolatency.
 - **Never shrink MJPEG in software.**
 
-## 5. Where MJPEG helps us
+### 5. Where MJPEG helps us
 
 1. **Aux cameras at almost zero cost:** `-c:v copy` of the camera's own MJPEG, about 1–1.3 Mb/s per 640×480 camera at 10–15 fps.
 2. **Browser GUI tiles** with no decoder: a plain `<img>` tag.
@@ -175,7 +210,7 @@ Rule of thumb for our ROV:
 
 **Not for:** the pilot and manipulator main views, cameras above about 8 Mb/s, or anything that must stay smooth on a congested tether.
 
-## 6. Pitfalls
+### 6. Pitfalls
 
 | Pitfall | What you'll see | Fix |
 |---|---|---|
@@ -189,7 +224,7 @@ Rule of thumb for our ROV:
 | FFmpeg HTTP output looks like a download | Browser shows nothing | Add `-content_type "multipart/x-mixed-replace;boundary=ffmpeg"` |
 | No security | Anyone on the network can watch | Bind to the tether IP; never bridge to venue Wi-Fi |
 
-## 7. Next steps
+### 7. Next steps
 
 - [ ] List the formats of every camera we own (`v4l2-ctl --list-formats-ext`)
 - [ ] Bench one aux camera on the Pi 5 with recipe 3 (tee): CPU %, Mb/s, glass-to-glass latency (photograph a phone stopwatch next to the pilot screen)
@@ -199,3 +234,33 @@ Rule of thumb for our ROV:
 - [ ] Re-run the measurements on the Pi 5 / Jetson with pool footage
 
 Sources: [mjpg-streamer on GitHub](https://github.com/jacksonliam/mjpg-streamer) (plugin options read from its source at the 20 Feb 2021 commit) · [mjpeg-streamer on PyPI](https://pypi.org/project/mjpeg-streamer/) (behaviour read from the 2024.2.8 source and tested) · all numbers measured by us on 19 Nov 2026.
+
+## Streaming for computer vision: detection, 3D reconstruction, autonomy, SLAM
+
+When these algorithms run topside on the pilot stream, they inherit every streaming decision:
+
+- **Object detection.** A study of YOLOv5 on H.264 surveillance video found that CRF 37 instead of 22 barely changed detection while saving a lot of bitrate. Detection dropped noticeably at stronger compression, **especially in poor lighting and with fast motion** [S17], which describes underwater footage.
+- **SLAM and visual odometry.** Feature-based SLAM tracks corners and texture, exactly the detail compression removes. With compressed images fewer feature points survive and matching gets less accurate [S18].
+- **3D reconstruction / photogrammetry.** It needs sharp, consistent images. Compression artefacts and keyframe pulsing (quality changing every GOP) reduce the matches between images.
+- **Autonomous movement.** It is a control loop: acting on a frame that is several hundred milliseconds old makes the controller overshoot. Jitter and dropped frames make motion estimates wrong.
+
+**Rules for the team:**
+1. Run CV **next to the raw frames** (on the ROV) whenever the hardware allows.
+2. If CV runs topside, give it **its own stream profile**: higher bitrate, no B-frames, constant frame rate, accurate timestamps. Don't reuse the pilot's heavily compressed substream.
+3. For photogrammetry, **capture stills or record locally** at high quality and transfer them, instead of reconstructing from the live stream.
+4. **Measure it:** run your detector on your own footage encoded at several bitrates (the Encoding Lab's sweep produces them) and plot detection rate against bitrate. Choose the lowest bitrate that keeps the detection rate.
+
+---
+
+## Sources
+
+- [S1] Sandvine 2023 Global Internet Phenomena Report press release (video 65 % of traffic, +24 % in 2022): https://www.applogicnetworks.com/press-releases/sandvines-2023-global-internet-phenomena-report-shows-24-jump-in-video-traffic-with-netflix-volume-overtaking-youtube
+- [S2] Overview of the Versatile Video Coding (VVC) Standard and its Applications (≈ 50 % vs HEVC, ≈ 75 % vs AVC): https://www.microsoft.com/en-us/research/?p=798226
+- [S3] Fraunhofer HHI, Versatile Video Coding (timeline 2015–2020): https://www.hhi.fraunhofer.de/vvc
+- [S4] ISO, "Hollywood presents Emmy Award to ITU, ISO and IEC" (2008): https://www.iso.org/news/2008/08/Ref1153.html
+- [S5] Fraunhofer, "Second Emmy for the H.264 video standard" (2009): https://www.fraunhofer.de/en/press/research-news/2009/02/ResearchNews022009Topic7.html
+- [S6] Bitmovin, per-title encoding savings: https://bitmovin.com/blog/per-title-encoding-savings/
+- [S7] SEE News, Egypt doubles basic home internet data to 100 GB (1 Nov 2026, EGP 150, 14 % VAT): https://see.news/egypt-doubles-basic-home-internet-data-to-100gb-same-price
+- [S8] Telecom Egypt, WE Space plans: https://te.eg/en/personal/home/we-internet/we-space/super?filterBy=we-internet-space-super
+- [S17] O'Byrne, Vibhoothi, Sugrue, Kokaram, "Impact of Video Compression on the Performance of Object Detection Systems for Surveillance Applications", AVSS 2022: https://arxiv.org/abs/2211.05805
+- [S18] ORBBuf: A Robust Buffering Method for Remote Visual SLAM (effect of JPEG compression on feature points): https://arxiv.org/abs/2010.14861

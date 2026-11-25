@@ -147,7 +147,7 @@ md(r"""
 
 * With a **long GOP**, a single burst of loss corrupts the picture for seconds: the decoder keeps predicting from a broken reference. With a **short GOP**, the damage lasts at most until the next I-frame. **Intra refresh** heals progressively, within about one refresh period (here 0.5–0.7 s for a 30-frame refresh at 30 FPS) — *and* it has no I-frame bitrate spikes.
 * Look at the GOP 150 row: the damage lasts until the next I-frame at t = 5 s (3.6 s for the loss at 1.4 s). For the loss at 2.5 s it stopped earlier, at the camera **cut** at t ≈ 4 s, because that frame is coded almost entirely with intra blocks. Being rescued by a lucky scene change is not a design — plan for the worst case.
-* The short-GOP cost is bitrate (the table above). On a reliable, short, wired tether with little loss, 1–2 s GOPs are a common compromise; if you see loss, shorten the GOP or use intra refresh — and **find the cause of the loss** (Diagnostic Checklist).
+* The short-GOP cost is bitrate (the table above). On a reliable, short, wired tether with little loss, 1–2 s GOPs are a common compromise; if you see loss, shorten the GOP or use intra refresh — and **find the cause of the loss** (ROV Experiments E6 and E10).
 * **Switching cameras** in the pilot UI has the same physics: a player that starts a new stream mid-GOP shows nothing until an I-frame arrives. If camera switching "takes a second or two", your GOP is probably 1–2 s long. Options: shorter GOP, request a keyframe on switch, or keep a decoder running per camera (substreams!).
 
 ### Exercises
@@ -451,7 +451,7 @@ r = simulate("my design", my_design); print(r, "→", verdict(r["wire_Mb/s"], 10
 
 md(r"""
 ### Exercises
-1. Measure `ethtool eth0 | grep Speed` on **both ends** of your tether. Is it 100 or 1000 Mb/s? Then run `iperf3` across it (Diagnostic Checklist §3). Use the **measured** throughput as `LINK`, not the nominal one.
+1. Measure `ethtool eth0 | grep Speed` on **both ends** of your tether. Is it 100 or 1000 Mb/s? Then run `iperf3` across it (ROV Experiments E6). Use the **measured** throughput as `LINK`, not the nominal one.
 2. Test the $(\cdot)^{0.25}$ rule: encode the reference at 640×360 and 1920×1080 with the same CRF and compare the measured bits per pixel.
 3. How many Mb/s does your **control and telemetry** traffic need? Add it to the budget.
 """)

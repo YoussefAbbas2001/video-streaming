@@ -141,7 +141,7 @@ python3 demos/02_pipeline/monitor.py --iface lo    # terminal 2: الـmonitor
 
 كل رقم قلناه النهارده ليه tool بيقيسه: `iperf3` للـthroughput، و`ethtool` للـlink speed، و`iftop` و`nload` للـbandwidth المستخدم، و`tegrastats` و`vcgencmd` للـCPU والحرارة، و`chrome://webrtc-internals` للـbrowser، والـglass-to-glass للـlatency الحقيقية.
 
-كل ده مكتوب بالتفصيل، بالـcommands، في `docs/measuring-performance.md` في الـrepo.
+كل ده مكتوب بالتفصيل، بالـcommands، في `docs/streaming/measure-and-diagnose.md` في الـrepo.
 
 ## Takeaway ⏱️ 6:40
 

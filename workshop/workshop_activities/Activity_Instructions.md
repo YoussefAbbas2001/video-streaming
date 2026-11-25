@@ -8,7 +8,7 @@ Six activities, one every 20–30 minutes. Teams of 3–5, mixed experience in e
 | 2 | Diagnose the ROV | S1 · 39 | 20 min | this file |
 | 3 | Compression Challenge | S1 · 28 | 15 min | this file |
 | 4 | Break the Other Team's Software | S2 · 50 | 60 min | `student_materials/Testing_Competition_Guide.md` |
-| 5 | Architecture Challenge | S2 · 68 | 20 min + homework | this file + `Post_Workshop_Challenge.md` |
+| 5 | Architecture Challenge | S2 · 68 | 20 min + homework | this file + the 👑 Boss level in `docs/experiments/ROV_Experiments.md` |
 | 6 | Design the Perfect ROV Pilot Experience | S2 · 66 | 40 min | `ux_materials/UX_Pilot_Experience_Pack.md` §6 |
 
 Keep a running **team scoreboard** across all activities; announce a winner at the end (small prize: first pick of pool-test slots, stickers, …).

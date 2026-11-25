@@ -12,10 +12,10 @@ Everything for our video-streaming session: two slide decks, three recorded vide
 | **Watching the videos** | [`videos/`](videos/): three videos, about 25 min |
 | **Trying a camera and an encoder live** | Encoding Lab → **Live camera** tab (laptop camera, MJPEG passthrough vs x264 vs NVENC, with a latency overlay) |
 | **Benchmarking the Pi 5 / Jetson / laptop** | Run the Encoding Lab on that computer → **Bandwidth budget → Measure this computer** |
-| **Choosing Jetson Nano 2GB vs Raspberry Pi 5** | [`docs/streaming/jetson-nano-vs-pi5.md`](docs/streaming/jetson-nano-vs-pi5.md) |
-| **MJPEG cameras, lowering their resolution, NVENC** | [`docs/streaming/mjpeg-and-ffmpeg.md`](docs/streaming/mjpeg-and-ffmpeg.md) |
-| **Adding bandwidth and loss to the pilot GUI** | [`docs/streaming/gui-stream-metrics.md`](docs/streaming/gui-stream-metrics.md) |
-| **Measuring our ROV** | [`docs/streaming/measuring-performance.md`](docs/streaming/measuring-performance.md) |
+| **🧪 Homework: experiments on the real ROV** | [`docs/experiments/ROV_Experiments.md`](docs/experiments/ROV_Experiments.md) |
+| **Measuring our ROV, diagnosing a bad picture (45 symptoms with pictures), throughput and loss in the GUI** | [`docs/streaming/measure-and-diagnose.md`](docs/streaming/measure-and-diagnose.md) |
+| **Choosing cameras and the encoder board (Jetson Nano 2GB vs Raspberry Pi 5), heat** | [`docs/streaming/hardware-and-encoders.md`](docs/streaming/hardware-and-encoders.md) |
+| **Why compression matters, MJPEG cameras, lowering their resolution, NVENC, FFmpeg recipes** | [`docs/streaming/codecs-and-ffmpeg.md`](docs/streaming/codecs-and-ffmpeg.md) |
 | **Testing the GUI (everyone!)** | [`docs/sdlc/bug-hunt-league.md`](docs/sdlc/bug-hunt-league.md), then open an issue with the 🐞 Bug report form |
 | **Running the weekly knowledge exchange** | [`docs/sdlc/knowledge-exchange.md`](docs/sdlc/knowledge-exchange.md) |
 | **Contributing code** | [`docs/sdlc/github-workflow.md`](docs/sdlc/github-workflow.md) |
@@ -49,7 +49,7 @@ streamlit run encoding_lab/app.py            # the Encoding Lab, at http://local
 | Document | For |
 |---|---|
 | [Video Scripts (Arabic)](https://docs.google.com/document/d/1SWHGTSIQwwm1V1WtW0lmQqg6DUTXLM_mvFM8sI3jAlc/edit) | Recording the three videos |
-| [MJPEG on our ROV, and why we use FFmpeg for it](https://docs.google.com/document/d/1814_NgCNUHJoMfy_53jX56oLAWMsYRoZREwSixIuZwM/edit) | Reading version of `docs/streaming/mjpeg-and-ffmpeg.md` (Nov 19 version) |
+| [MJPEG on our ROV, and why we use FFmpeg for it](https://docs.google.com/document/d/1814_NgCNUHJoMfy_53jX56oLAWMsYRoZREwSixIuZwM/edit) | Reading version of `docs/streaming/codecs-and-ffmpeg.md` (Nov 19 version) |
 | [Streaming Deep-Dive: 2026–27 additions](https://docs.google.com/document/d/1LyPRCtvt5-wCSomRh4We0snjWo5Yv7CyVO2TjXJWTn8/edit) | Reading version of `docs/streaming/` |
 | [SDLC Live Session Handbook](https://docs.google.com/document/d/1fNSU7e_k30IwDUwo2Okes1AsU7UCkOBIDUMoYps5qBU/edit) | Reading version of `docs/sdlc/` |
 | [Workshop Reader](https://docs.google.com/document/d/1vyha2504cYxIiiDhl5IKH1ydGZGvKrHlJblZICibaT0/edit) | The whole workshop at moderate detail |

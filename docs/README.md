@@ -4,11 +4,16 @@
 
 | File | What's inside |
 |---|---|
-| [streaming-additions.md](streaming/streaming-additions.md) | Why compression runs the world · the Egypt cost example · USB vs IP cameras · Pi 5 vs Jetson Nano · the 2023 heat failure · streaming for computer vision · sources |
-| [jetson-nano-vs-pi5.md](streaming/jetson-nano-vs-pi5.md) | Jetson Nano 2GB (hardware + software encoder) vs Raspberry Pi 5 (software) vs MJPEG passthrough: capacity, CPU, latency, quality, how many cameras, recommendation |
-| [mjpeg-and-ffmpeg.md](streaming/mjpeg-and-ffmpeg.md) | What MJPEG is · MJPEG vs H.264 measured · **the resolution trap** · NVENC and other hardware options · mjpeg-streamer vs mjpg-streamer vs **FFmpeg (our choice)** · tested recipes · pitfalls |
-| [gui-stream-metrics.md](streaming/gui-stream-metrics.md) | The two numbers every camera tile needs (throughput and loss), thresholds, and tested code to get them |
-| [measuring-performance.md](streaming/measuring-performance.md) | Every metric (network, stream, compute and heat, latency, quality, reliability), with the tool and the exact command |
+| [measure-and-diagnose.md](streaming/measure-and-diagnose.md) | **Measure and diagnose.** Diagnose by stage · symptom → suspect matrix · every metric with the tool and exact command (network, stream, compute and heat, latency, quality, reliability) · latency methods · throughput and loss in the pilot GUI (with tested code) · first 15 diagnostics · reporting template · **field guide: 45 problems with pictures**, cause, ROV meaning, confirm and fix |
+| [hardware-and-encoders.md](streaming/hardware-and-encoders.md) | **Cameras, boards, heat.** USB vs IP cameras · Jetson Nano 2GB (hardware + software) vs Raspberry Pi 5 vs MJPEG passthrough: capacity, CPU, latency, quality, how many cameras · can the Pi 5 replace the Nano · the 2023 heat failure · sources |
+| [codecs-and-ffmpeg.md](streaming/codecs-and-ffmpeg.md) | **Compression and tools.** Why compression runs the world · the Egypt cost example · MJPEG vs H.264 measured · **the resolution trap** · NVENC and other hardware options · mjpeg-streamer vs mjpg-streamer vs FFmpeg · tested recipes · pitfalls · streaming for computer vision · sources |
+
+## Experiments (`experiments/`)
+
+| File | What's inside |
+|---|---|
+| [ROV_Experiments.md](experiments/ROV_Experiments.md) | **The homework.** Every experiment the team can run on the real ROV (glass-to-glass latency, tether truth, encoder limits, packet-loss torture, heat soak, chaos drills, pilot blind tests…), with predictions, steps, result sheets, points and badges |
+| [ms_clock.html](experiments/ms_clock.html) | Full-screen millisecond clock for glass-to-glass latency photos |
 
 ## Engineering practice (`sdlc/`)
 

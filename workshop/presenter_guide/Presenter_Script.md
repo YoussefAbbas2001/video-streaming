@@ -25,7 +25,7 @@ Every demo is done live in the **ROV Encoding Lab**. Where this script names a n
 | 8 · Substreams and priorities | Bandwidth budget (edit the camera table, read *Cheapest ways to make it fit*) + Live camera → Output size |
 | 9 · Latency | Encode → latency graph; Live camera (x264 with Low latency off, then on); Bandwidth budget → Measure this computer → Compare defaults vs low latency |
 | 10 · What this machine can do | Bandwidth budget → Measure this computer (then pick *This computer (benchmarked)* in Plan the budget) |
-| 11 · Take it to the ROV | Report + `docs/streaming/jetson-nano-vs-pi5.md` |
+| 11 · Take it to the ROV | Report + `docs/streaming/hardware-and-encoders.md` |
 | *(new)* MJPEG passthrough vs resize, NVENC | Live camera |
 
 ---
@@ -36,7 +36,7 @@ Every demo is done live in the **ROV Encoding Lab**. Where this script names a n
 - [ ] Start the Encoding Lab on the presenter laptop (`streamlit run encoding_lab/app.py`). Run one encode in Encode, run Bandwidth budget → Measure this computer once, and press **Start** once in Live camera with the laptop camera (Windows and macOS ask for camera permission the first time). Keep it open on the Encode tab.
 - [ ] Open the deck in **Presenter View** (speaker notes visible).
 - [ ] Click through the deck once. Every content slide **builds on click** (title and kicker stay; each card, chart or recipe fades in on the next click, at most 8 clicks per slide). The presenter view shows the next step. To change the grouping, edit `build/add_click_builds.py` and rebuild (`node build/build_deck.js`).
-- [ ] Print: Activity 1 cards, Activity 2 answer sheets, the Testing Competition Guide, the UX scenario and A3 sheets, the Diagnostic Checklist (one per subsystem owner), the Cheat Sheet (one per student).
+- [ ] Print: Activity 1 cards, Activity 2 answer sheets, the Testing Competition Guide, the UX scenario and A3 sheets, the ROV Experiments mission map (one per pair; `docs/experiments/ROV_Experiments.md` owner), the Cheat Sheet (one per student).
 - [ ] Copy `workshop_activities/testing_competition_code/` to every team laptop; check `python -m pytest -q` passes (7 tests).
 - [ ] Prepare Activity 3 clips: copy the five encodes listed in `Activity_Instructions.md` (Activity 3) by encoding them in the Encoding Lab's Encode tab (they are saved under `encoding_lab/.lab_work/`), rename them A–E, keep the answer key.
 - [ ] If possible: bring the real ROV, tether, and the topside laptop. Ask for SSH access to the SBC.
@@ -274,7 +274,7 @@ The chart shows the bitrate each codec needed for equal SSIM at two operating po
 - **H.265**: better compression at many operating points; hardware encode on Jetson Nano; Pi 5 decodes it in hardware but can't encode it in hardware; browser support is uneven — **test the pilot laptop's browser**.
 - **AV1**: excellent compression, very expensive software encode; neither board encodes it in hardware. Recording/archiving later, not the live ROV today.
 
-**Slide 29 — MJPEG: costly in bits, cheap in everything else.** *(new, Nov 2026)* Click through the three numbers, then the two cards. MJPEG is every frame as its own JPEG: no encoder hold, and a lost frame never smears into the next. Measured on our 720p30 clip: at the same SSIM, MJPEG needed **4.7×** H.264's bitrate (q=3: 11.9 Mb/s vs CRF 21: 2.52 Mb/s); copying a USB camera's own MJPEG with FFmpeg cost **1.3 % of one core**. So: H.264 for what the pilot drives with; MJPEG where it is free (the camera already makes it) or flexible (CV debug views, snapshots, training data, the fallback stream). Reading: `docs/mjpeg-and-ffmpeg.md`.
+**Slide 29 — MJPEG: costly in bits, cheap in everything else.** *(new, Nov 2026)* Click through the three numbers, then the two cards. MJPEG is every frame as its own JPEG: no encoder hold, and a lost frame never smears into the next. Measured on our 720p30 clip: at the same SSIM, MJPEG needed **4.7×** H.264's bitrate (q=3: 11.9 Mb/s vs CRF 21: 2.52 Mb/s); copying a USB camera's own MJPEG with FFmpeg cost **1.3 % of one core**. So: H.264 for what the pilot drives with; MJPEG where it is free (the camera already makes it) or flexible (CV debug views, snapshots, training data, the fallback stream). Reading: `docs/streaming/codecs-and-ffmpeg.md`.
 
 **Slide 30 — use FFmpeg, not mjpeg-streamer.** *(new, Nov 2026)* Click once for the table, once for the verdict. We read the PyPI library's source and tested it: it **re-encodes for every viewer** (2 viewers = 28 encodes/s instead of 14) and **paces by a timer** (a 5 fps source went out at ≈ 14 fps of duplicates). mjpg-streamer (C) is fine at passthrough but was last changed in 2021 and its Pi-camera plugin needs MMAL, which the Pi 5 lacks. FFmpeg does every job, plus RTP, recording, filters, H.264 and metrics, and the team already uses it. Be honest about the one gap: FFmpeg's HTTP server serves **one viewer per process**; we cover it by sending RTP once over the tether and fanning out topside.
 
@@ -392,7 +392,16 @@ Requirements for this: encoders whose bitrate can change at runtime (hardware en
 
 **Slide 46 — streaming for computer vision.** *(new, Nov 2026)* Detection, 3D reconstruction, autonomy and SLAM all inherit streaming decisions when they run on the topside stream. A YOLOv5 study on H.264 found moderate compression (CRF 37 vs 22) barely mattered, but performance dropped at stronger compression — worst in poor light and fast motion, which is underwater footage. SLAM needs corners and texture, exactly what compression removes. Rules: run CV next to the raw frames; otherwise give CV its own stream profile; photogrammetry uses stills or local recordings.
 
-**Slide 47 — toolbox.** Point at the Diagnostic Checklist, which has the full commands. Each claim in their design document should cite one of these measurements.
+**Slide 47 — toolbox.** Point at the ROV experiments homework, which has the full commands for each measurement. Each claim in their design document should cite one of these measurements.
+
+**Diagnostics block (deck slides 54–59, Nov 2026, ≈ 8 min).** Six slides between the toolbox and Activity 2, so teams have the method before they diagnose.
+- *Find the stage:* one cause in one of eight stages; the six cards are traps where a healthy number hides the problem (high latency at a perfect 30 fps, a frozen frame on a live link…).
+- *Troubleshooting matrix:* symptom → first suspect → what to inspect. Tell them to use it during Activity 2.
+- *Measure, don't guess:* nine metric categories and where we already get each one (Encoding Lab, `rtp_probe.py`, tegrastats). Stress **frame age**.
+- *Latency three ways:* ms-clock photo (truth, no clock sync), timestamp overlay, stage timestamps; always median and p95.
+- *First 15 diagnostics:* 9 exist today; the 6 GUI timers are a first task for the software sub-team.
+- *Pilot screen:* four numbers and six stage lights; correlate over time.
+The **Field guide appendix** (slides 63–79) has one picture per problem: 45 symptoms with cause, ROV meaning and fix. Do not present it; point to it and to `docs/streaming/measure-and-diagnose.md` as the pool reference.
 
 **🎯 Slide 48 — Activity 2: Diagnose the ROV (20 min).** Read the scenario: 8 cameras at 640×480; after ~10 min in the water video lags ~1 s; two cameras freeze occasionally; one sometimes fails to start; thrusters feel slow; plan = reduce resolution again. Teams list ≥ 5 hypotheses, rank them, and give a measurement for each. Answer key in `Activity_Instructions.md`. Score: 1 per plausible hypothesis, 2 per correct measurement, +3 for the best-ranked root cause.
 
@@ -400,7 +409,19 @@ Good answers to listen for: USB bus/isochronous reservation (camera fails to sta
 
 **Slide 49 — optimization strategy.** In order: inventory & measure → stop wasting bits → stream smart → design latency → design failure → verify. *“Reducing resolution is the last lever, not the first.”*
 
-**Slide 50 — homework.** Hand out the Diagnostic Checklist; each subsystem owner fills their part. Record 60 s of real footage (upload it to the Encoding Lab (sidebar → Upload your own video). Measure glass-to-glass latency.
+**Slide 50 — homework.** Launch the ROV experiments homework (see the *Experiments mission* block below); everyone starts with E0 and E1. Also record 60 s of real footage and upload it to the Encoding Lab (sidebar → Upload your own video).
+
+**🧪 Experiments mission (≈ 12 min).** In `presentation/MIA_Video_Streaming.pptx` this is the 7-slide section after "A practical optimization strategy" (slides 62–68); the doc is `docs/experiments/ROV_Experiments.md`.
+
+- **Mission briefing.** 27 experiments, 6 badges, 775 points, one boss level. The loop is **Predict → Measure → Explain → Post**. Stress *predict*: a written guess before measuring is how intuition improves, and it earns +5 if within 20 %.
+- **How the game works.** 🟢 15 / 🟡 30 / 🔴 50 points; bonuses for prediction, replication (+10 for both pairs), a real defect (+20), chart of the week (+10). Ranks Cadet → Technician (100) → Engineer (250) → Chief Engineer (450 + 3 badges). Pairs, roles rotate: operator, recorder, skeptic.
+- **Mission map.** E0 (inventory) is required first. Point at one experiment per badge that matches a problem they already know (E14 *does the UI tell the truth?*, E21 *USB bus limit*, E16 *30-minute soak*).
+- **Spotlight E1 — do it live if you can.** Everyone writes a guess in ms first. Open `docs/experiments/ms_clock.html`, press F, point a camera at it, photograph both. Closest guess gets the first bonus of the season. Target ≤ 150 ms median, ≤ 250 ms worst.
+- **Spotlight Chaos Monkey.** `tc netem`, `tc tbf`, `kill -STOP` reproduce competition failures on the bench. **Safety, say it twice:** props off, bench only, `tc` also hits control traffic, always `tc qdisc del` and check with `tc qdisc show`.
+- **Spotlight Pilot's Eye.** The eye test: the lowest readable bitrate becomes requirement N2. Show that 1 Mb/s still reads and 0.2 Mb/s loses the bottom row, then ask what *our* smallest mission marking needs.
+- **The plan.** Weeks 1–6 of experiments (week 3 = chaos week, bench only; weeks 4–5 = pool days), weeks 7–12 the boss level. Results go in a GitHub issue (🧪 Experiment result template); a mentor labels it; `python3 docs/experiments/experiment_board.py` prints the leaderboard for the weekly knowledge exchange. **Tonight: E0 + E1.**
+
+*Ask the room:* "How late do you think the pilot camera is?" Write three or four guesses on the board and keep them for next session's recap.
 
 **Transition to Session 2 (next time):** *“Bring the numbers. We'll turn them into requirements, tests and a better pilot interface.”*
 
@@ -542,7 +563,7 @@ Debrief: *“What surprised the designers when someone else used their design?�
 
 ## 2.6 Close — the challenge (15 min)
 
-**Slide 80 — Activity 5 + post-workshop challenge.** Mission statement on screen. 4–6 weeks: baseline (week 1) → design with ≥ 2 architecture options compared by numbers (2–3) → build & test incl. failure cases and usability (3–5) → demonstrate before/after against requirements (6). Judged on requirements met (measured), quality of evidence, failure handling, pilot usability, documentation. No architecture is prescribed — the first deliverable is the measured baseline. Details: `workshop_activities/Post_Workshop_Challenge.md`; options: `student_materials/Proposed_Architecture_Options.md`.
+**Slide 80 — Activity 5 + the 👑 Boss level of the ROV experiments.** Mission statement on screen. 4–6 weeks: baseline (week 1) → design with ≥ 2 architecture options compared by numbers (2–3) → build & test incl. failure cases and usability (3–5) → demonstrate before/after against requirements (6). Judged on requirements met (measured), quality of evidence, failure handling, pilot usability, documentation. No architecture is prescribed — the first deliverable is the measured baseline. Details: the 👑 Boss level in `docs/experiments/ROV_Experiments.md`; options: `student_materials/Proposed_Architecture_Options.md`.
 
 If you have 20 minutes left, run **Activity 5** live: each team sketches its target architecture on A3 with a bandwidth budget and an encoder-capacity budget (rubric in `Activity_Instructions.md`).
 

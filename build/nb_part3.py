@@ -362,7 +362,7 @@ md(r"""
 ---
 ## What to take back to the ROV
 
-1. **Find out what you actually have** — USB or IP cameras, which codec, which protocol, which link speed. (Diagnostic Checklist.)
+1. **Find out what you actually have** — USB or IP cameras, which codec, which protocol, which link speed. (ROV Experiments, E0.)
 2. **Compression beats resolution cuts.** Moving from MJPEG to H.264 typically saves far more bandwidth than halving the resolution.
 3. **Plan on peaks, not averages.** Use capped rate control for live video; keep ≥ 30 % headroom.
 4. **Not every camera needs full quality all the time.** Main streams + substreams + priorities.

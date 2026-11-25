@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ROV ms clock</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #000; color: #fff; font-family: "DejaVu Sans Mono", Consolas, monospace; overflow: hidden; }
+  #wrap { height: 100%; display: grid; grid-template-rows: 1fr auto; }
+  #clock { display: flex; align-items: center; justify-content: center; font-size: min(22vw, 40vh); font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+  #clock .ms { color: #22D3EE; }
+  #bar { display: flex; gap: 2vw; align-items: center; justify-content: center; padding: 2vh; font-size: 2.2vh; color: #9FB3C8; }
+  #flash { width: 8vh; height: 8vh; border-radius: 1vh; background: #111; }
+  #blocks { display: flex; gap: 0.6vh; }
+  #blocks div { width: 3.2vh; height: 3.2vh; background: #111; }
+  #blocks div.on { background: #F59E0B; }
+  button { font: inherit; background: #13294A; color: #fff; border: 1px solid #24406A; border-radius: 0.8vh; padding: 0.8vh 1.6vh; cursor: pointer; }
+</style>
+</head>
+<body>
+<!-- Millisecond clock for glass-to-glass latency (M.I.A Robotics, docs/experiments/ROV_Experiments.md, E1).
+     Point the ROV camera at this screen, put the video window next to it, and photograph both:
+     latency = clock on this screen − clock seen in the video. Works offline; nothing is sent anywhere. -->
+<div id="wrap">
+  <div id="clock"><span id="s">00:00</span>.<span class="ms" id="ms">000</span></div>
+  <div id="bar">
+    <div id="flash" title="turns white once a second, on the whole second"></div>
+    <div id="blocks" title="binary frame counter: readable even when the digits blur"></div>
+    <span id="hz">— Hz</span>
+    <button id="fs">Full screen (F)</button>
+  </div>
+</div>
+<script>
+  const s = document.getElementById("s"), ms = document.getElementById("ms"), flash = document.getElementById("flash"),
+        hz = document.getElementById("hz"), blocks = document.getElementById("blocks");
+  for (let i = 0; i < 10; i++) blocks.appendChild(document.createElement("div"));
+  const cells = [...blocks.children];
+  let frames = 0, last = performance.now(), n = 0;
+  function tick(now) {
+    const t = Date.now(), d = new Date(t);
+    s.textContent = String(d.getMinutes()).padStart(2, "0") + ":" + String(d.getSeconds()).padStart(2, "0");
+    ms.textContent = String(d.getMilliseconds()).padStart(3, "0");
+    flash.style.background = d.getMilliseconds() < 100 ? "#fff" : "#111";
+    n++; cells.forEach((c, i) => c.classList.toggle("on", (n >> (9 - i)) & 1));
+    frames++;
+    if (now - last > 1000) { hz.textContent = Math.round(frames * 1000 / (now - last)) + " Hz screen"; frames = 0; last = now; }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+  const full = () => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()).catch(() => {});
+  document.getElementById("fs").onclick = full;
+  addEventListener("keydown", (e) => { if (e.key === "f" || e.key === "F") full(); });
+</script>
+</body>
+</html>

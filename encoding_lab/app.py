@@ -970,7 +970,7 @@ with sub[1]:
         if st.button("Probe hardware encoders", width="stretch"):
             ss.hw = B.hw_encoders()
         st.caption("Listed ≠ working: every encoder FFmpeg lists gets a real 1-second test encode. "
-                   "The Jetson Nano's encoder is used through GStreamer (nvv4l2h264enc), not FFmpeg: see docs/streaming/jetson-nano-vs-pi5.md. "
+                   "The Jetson Nano's encoder is used through GStreamer (nvv4l2h264enc), not FFmpeg: see docs/streaming/hardware-and-encoders.md. "
                    "To watch a hardware encoder work live, use the Live camera tab.")
     with h2:
         if "hw" in ss:

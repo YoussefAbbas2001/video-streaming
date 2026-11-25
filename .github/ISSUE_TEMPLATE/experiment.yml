@@ -1,0 +1,46 @@
+name: "🧪 Experiment result"
+description: Post the result of an ROV experiment (docs/experiments/ROV_Experiments.md) to collect points
+title: "[Exp E__] "
+labels: ["experiment"]
+body:
+  - type: dropdown
+    id: experiment
+    attributes:
+      label: Experiment
+      options: ["E0 · Know your ROV (inventory)", "E1 · How late is the pilot? (glass-to-glass)", "E2 · Where do the milliseconds go?", "E3 · Hunt the frames the encoder hides", "E4 · Camera switch stopwatch", "E5 · The long dive (latency drift)", "E6 · Tether truth", "E7 · Bandwidth census", "E8 · Keyframe pile-up", "E9 · The MTU detective", "E10 · Packet-loss torture", "E11 · Jitter vs the buffer", "E12 · The squeeze", "E13 · Pull the plug", "E14 · Does the UI tell the truth?", "E15 · Recording vs power cut", "E16 · The 30-minute soak", "E17 · Power under thruster load", "E18 · Your footage's bits-per-pixel", "E19 · How many cameras can the ROV computer encode?", "E20 · The resolution trap", "E21 · USB bus limit", "E22 · Lights vs backscatter (bucket of milk)", "E23 · Camera settings under water", "E24 · Eye test for the ROV", "E25 · Pilot blind test", "E26 · The LED race (telemetry vs video)"]
+    validations: { required: true }
+  - type: input
+    id: pair
+    attributes: { label: Pair or group (GitHub usernames), placeholder: "@me with @partner" }
+    validations: { required: true }
+  - type: input
+    id: prediction
+    attributes: { label: Prediction, written BEFORE measuring, placeholder: "glass-to-glass median 180 ms" }
+    validations: { required: true }
+  - type: textarea
+    id: result
+    attributes:
+      label: Result (median and worst, with units) and the filled table
+      placeholder: Paste the table from the experiment.
+    validations: { required: true }
+  - type: textarea
+    id: method
+    attributes:
+      label: Method and conditions
+      placeholder: bench / pool · enclosure open / closed · cameras streaming · software version · commands run
+    validations: { required: true }
+  - type: textarea
+    id: evidence
+    attributes: { label: Evidence (photos, screenshots, logs), placeholder: Drag files here }
+  - type: textarea
+    id: explain
+    attributes:
+      label: Explanation and surprises
+      placeholder: Which stage causes this number? What surprised you?
+    validations: { required: true }
+  - type: input
+    id: next
+    attributes: { label: Next question this raises }
+  - type: markdown
+    attributes:
+      value: "A mentor verifies the result and adds `exp:E__` plus any bonus labels (`bonus:prediction`, `bonus:replicated`, `bonus:bug`, `bonus:chart`)."

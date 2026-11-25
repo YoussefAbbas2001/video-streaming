@@ -1,6 +1,6 @@
 """The video-diagnostics field guide: one entry per phenomenon. Single source for the doc and the slides.
 
-    python3 build/diagnostics_catalog.py    # writes docs/streaming/video-diagnostics.md and out/diagnostics.json
+    python3 build/diagnostics_catalog.py    # refreshes the generated parts of docs/streaming/measure-and-diagnose.md + out/diagnostics.json
 
 Fields: name · img (docs/streaming/img/diagnostics/<img>.jpg, or None + code) · see · why · rov (why it matters on OUR ROV) ·
 check (how to confirm) · fix. Keep each field to one sentence: the slides print them as they are.
@@ -409,7 +409,7 @@ def markdown() -> str:
           "todo": "to build in the pilot GUI"}
     L += [f"| {i} | {a} | {b} | {st[c]} |" for i, (a, b, c) in enumerate(FIRST15, 1)]
     L += ["", "For the pilot GUI, show four numbers (latency p50/p95, bitrate, display fps, loss %) and one health light per stage; "
-              "details go in a tooltip or a debug view. See [gui-stream-metrics.md](gui-stream-metrics.md).", "",
+              "details go in a tooltip or a debug view. See [section 5](#5-two-numbers-for-the-pilot-gui-throughput-and-loss).", "",
           "## 6. Field guide", ""]
     for g, title, intro in GROUPS:
         L += [f"### {title}", "", f"*{intro}*", ""]
@@ -421,10 +421,8 @@ def markdown() -> str:
                 L += ["```", c["code"], "```", ""]
             L += [f"- **What you see:** {c['see']}", f"- **Why:** {c['why']}", f"- **On our ROV:** {c['rov']}",
                   f"- **Confirm:** {c['check']}", f"- **Fix:** {c['fix']}", ""]
-    L += ["## Related", "", "- [measuring-performance.md](measuring-performance.md): the measurement toolbox",
-          "- [gui-stream-metrics.md](gui-stream-metrics.md): throughput and loss in the pilot GUI",
-          "- [mjpeg-and-ffmpeg.md](mjpeg-and-ffmpeg.md): the resolution trap",
-          "- [jetson-nano-vs-pi5.md](jetson-nano-vs-pi5.md): encoder capacity and heat",
+    L += ["## Related", "", "- [codecs-and-ffmpeg.md](codecs-and-ffmpeg.md): the resolution trap",
+          "- [hardware-and-encoders.md](hardware-and-encoders.md): encoder capacity and heat",
           "- Encoding Lab: Encode (Frame compare, Bitrate over time), Live camera, Bandwidth budget (Packet-loss lab)", ""]
     return "\n".join(L)
 
@@ -434,13 +432,35 @@ def slug(s: str) -> str:
     return re.sub(r"[^a-z0-9 -]", "", s.lower()).replace(" ", "-")
 
 
+REGIONS = {"matrix": "2. Symptom", "metrics": "3. Measure", "first15": "5. The first 15", "fieldguide": "6. Field guide"}
+
+
+def fill_regions(doc: Path) -> None:
+    """Refresh the catalog-made parts of the merged doc (between <!-- gen:NAME --> markers); hand-written text is kept."""
+    import re
+    full = markdown()
+    secs = {}
+    for chunk in re.split(r"\n(?=## )", full):
+        if chunk.startswith("## "):
+            head, _, body = chunk.partition("\n")
+            secs[head[3:].strip()] = body.strip("\n")
+    text = doc.read_text()
+    for name, prefix in REGIONS.items():
+        body = next(v for k, v in secs.items() if k.startswith(prefix))
+        if name == "fieldguide":                 # stop before the trailing "Related" block of the standalone version
+            body = body.split("\n## Related")[0]
+        text, n = re.subn(rf"(<!-- gen:{name} -->\n).*?(\n<!-- /gen:{name} -->)", lambda m: m.group(1) + body.strip("\n") + m.group(2), text, flags=re.S)
+        assert n == 1, name
+    doc.write_text(text)
+
+
 if __name__ == "__main__":
     assert len({c["id"] for c in C}) == len(C)
     for c in C:
         if c.get("img"):
             assert (ROOT / f"docs/streaming/img/diagnostics/{c['img']}.jpg").exists(), c["img"]
-    (ROOT / "docs/streaming/video-diagnostics.md").write_text(markdown())
+    fill_regions(ROOT / "docs/streaming/measure-and-diagnose.md")
     (ROOT / "out").mkdir(exist_ok=True)
     (ROOT / "out/diagnostics.json").write_text(json.dumps({"groups": GROUPS, "items": C, "metrics": METRICS, "matrix": MATRIX,
                                                             "first15": FIRST15, "meas": MEAS}, ensure_ascii=False, indent=1))
-    print(len(C), "entries,", sum(1 for c in C if c.get("img")), "with pictures")
+    print(len(C), "entries,", sum(1 for c in C if c.get("img")), "with pictures; regions refreshed in docs/streaming/measure-and-diagnose.md")

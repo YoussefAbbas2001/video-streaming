@@ -12,4 +12,4 @@ Everything for the live engineering-practice session and the habits it starts.
 | [setup_github_labels.sh](setup_github_labels.sh) | Creates the League's labels on a repo (`gh` CLI) |
 | [leaderboard.py](leaderboard.py) | Computes the leaderboard from closed issues |
 
-The bug report form, task form, PR template and CI workflow live in [`../.github/`](../.github/) and work as soon as this repo is on GitHub.
+The bug report form, task form, PR template and CI workflow live in [`../.github/`](../../.github/) and work as soon as this repo is on GitHub.

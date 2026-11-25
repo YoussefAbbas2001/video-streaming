@@ -1,12 +1,14 @@
-# Video diagnostics field guide: what you see, why, and how to fix it
+# Measure and diagnose ROV video
 
-*M.I.A Robotics · streaming docs · 24 Nov 2026*
+*M.I.A Robotics · streaming docs · 25 Nov 2026 · merges the former measuring-performance, gui-stream-metrics and video-diagnostics pages*
 
-A video problem shows up as a symptom on the pilot's screen, but its cause can be in any stage: **camera → capture → encoder → network → receiver → decoder → renderer → display**. This guide lists the symptoms we can meet on the ROV, what causes each one, how to confirm it, and how to fix it. It started from a generic checklist and adds the ROV-specific problems we have met or measured: encoder hold-back, keyframe pile-up, the wrong link speed, IP fragmentation, condensation, PWM light banding, thermal throttling, USB bandwidth and clock drift.
+A video problem shows up as a symptom on the pilot's screen, but its cause can be in any stage: **camera → capture → encoder → network → receiver → decoder → renderer → display**. This page lists the symptoms we can meet on the ROV, what causes each one, how to confirm it, and how to fix it. It started from a generic checklist and adds the ROV-specific problems we have met or measured: encoder hold-back, keyframe pile-up, the wrong link speed, IP fragmentation, condensation, PWM light banding, thermal throttling, USB bandwidth and clock drift.
 
 **How the pictures were made.** Every picture comes from the Encoding Lab's synthetic underwater clip (`build/make_diagnostic_images.py`). Compression artifacts are real encodes at bad settings; packet loss and decoder corruption are real damaged streams decoded by FFmpeg; camera, motion and display effects are simulated from how they happen; timing problems are charts. Charts marked *illustration* show the shape of a problem, not a measurement.
 
-The same material is in the deck: *Diagnostics* (after *Your measurement toolbox*) and the *Field guide* appendix.
+The same material is in the deck: *Diagnostics* (after *Your measurement toolbox*) and the *Field guide* appendix. To practise all of it on the real ROV, see the [ROV experiments](../experiments/ROV_Experiments.md).
+
+**Contents:** [1 Diagnose by stage](#1-diagnose-by-stage-not-by-symptom) · [2 Symptom → suspect](#2-symptom--first-suspect--what-to-inspect) · [3 What to measure + commands](#3-what-to-measure-and-the-commands) · [4 Latency](#4-measuring-latency-properly) · [5 Throughput and loss in the GUI](#5-two-numbers-for-the-pilot-gui-throughput-and-loss) · [6 First 15 diagnostics](#6-the-first-15-diagnostics-to-build) · [7 Reporting template](#7-reporting-template) · [8 Field guide (45 problems)](#8-field-guide)
 
 ## 1. Diagnose by stage, not by symptom
 
@@ -32,6 +34,7 @@ So measure each stage separately. Otherwise a delay in the pilot laptop's render
 
 ## 2. Symptom → first suspect → what to inspect
 
+<!-- gen:matrix -->
 | Symptom | First suspect | Inspect | Field-guide entry |
 |---|---|---|---|
 | Delay grows over time | a queue that only grows | queue depth per stage, socket buffers | [Latency drift](#latency-drift) |
@@ -48,9 +51,11 @@ So measure each stage separately. Otherwise a delay in the pilot laptop's render
 | Works on the bench, fails on the tether | link speed, fragmentation, heat | ethtool, iperf3 on the tether, soak test | [Link at the wrong speed](#link-at-the-wrong-speed) |
 | Delay jumps after reconnect | start-up buffering, waiting for a keyframe | keyframe arrival, decoder init | [Intermittent dropouts](#intermittent-dropouts) |
 | 3rd camera will not start | USB bandwidth | lsusb -t, formats | [USB bandwidth](#usb-bandwidth) |
+<!-- /gen:matrix -->
 
-## 3. Measure, don't guess
+## 3. What to measure, and the commands
 
+<!-- gen:metrics -->
 | Category | Metrics | Unit | Where we get it |
 |---|---|---|---|
 | Latency | glass-to-glass, capture→encode, network transit, decode→display, frame age | ms (median, p95) | ms-clock photo; stage timestamps; Encoding Lab Live camera |
@@ -64,6 +69,88 @@ So measure each stage separately. Otherwise a delay in the pilot laptop's render
 | Resources | CPU per thread, RAM, GPU memory, temperature, throttling | %, MB, °C | htop; tegrastats; vcgencmd get_throttled |
 
 Add one more: **frame age** (now − capture timestamp of the frame on screen). It catches stale frames that the fps counter hides.
+<!-- /gen:metrics -->
+
+### Commands, by area
+
+**Conventions**
+- `ROV` is the ROV computer's IP address and `eth0` the tether interface. Replace both with yours (`ip -br addr` shows them).
+- "Good" values are starting targets for a pilot camera, not laws.
+- Per stream, live: `python3 encoding_lab/tools/rtp_probe.py --port 5600 --forward 5700` (throughput, packet loss, jitter; see [section 5](#5-two-numbers-for-the-pilot-gui-throughput-and-loss)).
+- Per computer, live: `sar -n DEV 1` (Mb/s per interface), `htop` (CPU per core), `vcgencmd measure_temp; vcgencmd get_throttled` (Pi) or `tegrastats` (Jetson).
+
+
+### Network
+
+| Metric | Why it matters | How to measure | Good |
+|---|---|---|---|
+| Link speed and duplex | A 1 Gb/s port that negotiated 100 Mb/s half-duplex explains "random" stalls | `ethtool eth0`: check the `Speed:` and `Duplex:` lines | Expected speed, Full duplex |
+| Usable throughput | The real budget, not the label on the switch | ROV: `iperf3 -s`. Topside: `iperf3 -c ROV -t 30` (TCP) and `iperf3 -c ROV -R -t 30` (reverse direction) | ≥ 90 % of link speed |
+| Loss and jitter under load | Lost packets corrupt video (UDP) or freeze it (TCP) | `iperf3 -c ROV -u -b 80M -t 30`; the result shows `Jitter` and `Lost/Total` | Loss 0 %, jitter < 5 ms |
+| Round-trip time | Adds to control latency; spikes reveal queueing | `ping -c 200 -i 0.2 ROV`: report min / avg / max / mdev | avg < 2 ms on a tether, no spikes |
+| Utilised bandwidth per interface | Is the tether full? | `monitor.py` (reads `/proc/net/dev` every second), or `nload eth0`, `bmon`, `sar -n DEV 1` | ≤ 70 % of measured throughput |
+| Bandwidth per connection or process | Who is using it? | `sudo iftop -i eth0` (per connection), `sudo nethogs eth0` (per process) | Matches your budget table |
+| Bandwidth per stream (live) | Check each camera against its budget | `sudo tcpdump -i eth0 -w cap.pcap udp` for 30 s, then Wireshark → Statistics → Conversations (UDP) or IO Graph | Within ±10 % of the configured bitrate |
+| RTP loss and jitter per stream | Per-camera health | Wireshark → Telephony → RTP → RTP Streams (lost %, max jitter, sequence errors) | 0 lost |
+
+### The video stream itself
+
+| Metric | How to measure |
+|---|---|
+| Codec, resolution, frame rate | `ffprobe -hide_banner rtsp://CAMERA/…` or `ffprobe -hide_banner file.mp4` |
+| Average bitrate of a recording | `ffprobe -v error -show_entries format=bit_rate -of default=nw=1 file.mp4` |
+| Live bitrate and fps | `ffmpeg -hide_banner -i udp://@:5600 -f null -`: the status line shows `fps=` and `bitrate=` |
+| Keyframe interval (GOP) | `ffprobe -v error -select_streams v -show_entries frame=pict_type -of csv file.mp4`, then count the frames between `I` lines |
+| Frame sizes and peaks | The same `ffprobe` command with `frame=pkt_size,pict_type`, or the Encoding Lab's *Bitrate over time* tab |
+| Camera formats (USB) | `v4l2-ctl -d /dev/video0 --list-formats-ext` (look for H264, MJPG, YUYV) |
+| Actual camera frame rate | `v4l2-ctl -d /dev/video0 --stream-mmap --stream-count=300`: prints the delivered fps |
+| USB bus sharing | `lsusb -t` shows which cameras share a bus and its speed (480M = USB 2.0) |
+
+### Compute and heat
+
+| Metric | Raspberry Pi | Jetson | Any Linux |
+|---|---|---|---|
+| CPU per core | | | `mpstat -P ALL 1`, `htop` |
+| CPU of one process (e.g. ffmpeg) | | | `pidstat -u -p $(pgrep -d, ffmpeg) 1` |
+| Encoder speed | | | FFmpeg status line `speed=` (≥ 1.0× = real time); `ffmpeg -benchmark` |
+| Hardware encoder load | none on a Pi 5 | `sudo tegrastats --interval 1000` (NVENC clock, GR3D GPU %) or `jtop` | |
+| SoC temperature | `vcgencmd measure_temp` | `tegrastats` (CPU/GPU °C), `/sys/class/thermal/thermal_zone*/temp` | `/sys/class/thermal/thermal_zone*/temp` |
+| Throttling | `vcgencmd get_throttled` (0x0 = never throttled; any other value means it happened, so decode it) | `tegrastats` clocks dropping under load | CPU MHz in `monitor.py` |
+| Clock speed | `vcgencmd measure_clock arm` | `tegrastats` | `/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq` |
+| Memory | | | `free -m` |
+
+`monitor.py` logs CPU per core, temperature, clock speed, Pi throttle flags and bandwidth per interface. It writes one CSV row per second, which is ideal for a 30-minute soak test.
+
+### Latency
+
+| What | How | Notes |
+|---|---|---|
+| **Glass-to-glass** (the number the pilot feels) | Run a millisecond stopwatch on a phone in front of the ROV camera, put the phone next to the pilot screen, and take 10+ photos of both. In each photo, latency = stopwatch − stopwatch-in-video | Report **median and worst**, not one photo |
+| Per-stage latency (GStreamer) | `GST_TRACERS="latency(flags=pipeline+element)" GST_DEBUG=GST_TRACER:7 gst-launch-1.0 …` | Shows which element holds frames |
+| Encoder hold (frames buffered before the first output) | Measured: x264 defaults held 41 frames (the Encoding Lab's Live camera tab measures it live); `-tune zerolatency` held 0 | Lookahead and B-frames are the usual culprits |
+| Network delay | `ping` RTT ÷ 2 (rough one-way estimate) | Usually tiny on a tether |
+| Browser receive side (WebRTC) | `chrome://webrtc-internals`: inbound-rtp `jitterBufferDelay ÷ jitterBufferEmittedCount`, `totalDecodeTime ÷ framesDecoded` | Jitter buffer is often the largest part |
+| Player cache (VLC, ffplay) | VLC's network caching defaults to 1000 ms. Use `ffplay -fflags nobuffer -flags low_delay -framedrop` | A big, avoidable delay |
+
+### Quality
+
+| Metric | Command |
+|---|---|
+| PSNR | `ffmpeg -i encoded.mp4 -i reference.mkv -lavfi psnr -f null -` |
+| SSIM | `ffmpeg -i encoded.mp4 -i reference.mkv -lavfi ssim -f null -` |
+| VMAF | `ffmpeg -i encoded.mp4 -i reference.mkv -lavfi libvmaf -f null -` (needs FFmpeg built with libvmaf) |
+| All of the above, interactively | Encoding Lab app (`encoding_lab/`), Encode and Compare tabs |
+
+The reference must be the **lossless** source, at the same resolution and frame rate (the Encoding Lab handles the scaling and timestamp alignment for you).
+
+### Reliability
+
+| Metric | How |
+|---|---|
+| Dropped or duplicated frames | FFmpeg status line `drop=` / `dup=`; WebRTC `framesDropped`; GStreamer `fpsdisplaysink` (rendered vs dropped) |
+| Recovery after loss | Unplug the tether for 2 s and time how long until a clean picture returns; the Encoding Lab *Bandwidth budget → Packet-loss lab* shows the same effect |
+| Time to switch cameras | Stopwatch from button press to clean picture (bounded by the keyframe interval) |
+| Soak test | 30 min, sealed enclosure, real camera configuration: `monitor.py --csv soak.csv`. Pass when there is no throttling, no growth in latency and no stream restarts |
 
 ## 4. Measuring latency properly
 
@@ -75,8 +162,122 @@ Glass-to-glass latency is *L = T(display) − T(capture)*. Three methods, from s
 
 Report **median and p95**, never a single number, and correlate over time: latency rising together with queue depth is buffering; latency steady while capture fps falls points at the camera or CPU.
 
-## 5. The first 15 diagnostics to build
+## 5. Two numbers for the pilot GUI: throughput and loss
 
+**Recommendation.** Give every camera tile in the pilot GUI two live numbers:
+
+- **Throughput:** the Mb/s this stream is using right now.
+- **Loss:** the % of its packets that never arrived.
+
+Add one total for the whole tether. Most "the video is bad" reports from the pool are one of these two numbers going wrong. Without them the team argues; with them it knows within a second whether the problem is bandwidth, loss or something else, such as the encoder or the camera.
+
+### What to show
+
+| Where | Metric | How it is computed | Green | Amber | Red |
+|---|---|---|---|---|---|
+| Each camera tile | **↓ Mb/s** | bytes received in the last 1 s × 8 | ≤ this camera's budget | ≤ 1.3 × budget | > 1.3 × budget |
+| Each camera tile | **Loss %** | RTP packets missing from the sequence numbers, last 1 s (and last 60 s in the tooltip) | < 0.1 % | 0.1–1 % | > 1 % |
+| Each camera tile | **STALE** badge | no packet for 500 ms | — | — | shown |
+| Status bar | **Tether** | sum of all streams ÷ the tether throughput you measured with iperf3 | < 70 % | 70–90 % | > 90 % |
+| Tooltip | Jitter | RFC 3550 interarrival jitter, ms | < 10 ms | 10–30 ms | > 30 ms |
+
+**Why the loss thresholds are this low.** With a 1 s GOP, one lost packet corrupts the picture until the next keyframe, up to a second later (Encoding Lab → Bandwidth budget: the *Broken picture* card, and the Packet-loss lab). Half a percent of loss is very visible.
+
+**Why STALE matters.** It is the "never show success the system hasn't confirmed" rule from the UX slides. A frozen last frame looks exactly like a still scene, so the pilot must be told.
+
+### "Bit loss" is packet loss
+
+On Ethernet a corrupted frame fails its CRC and is **dropped whole**, so the receiver never sees wrong bits, only missing packets. The application-level measure of "bit loss" is therefore **packet loss**, and RTP makes it easy:
+
+- every packet carries a 16-bit **sequence number** that goes up by one;
+- a gap means lost packets;
+- a packet that arrives after a later one is late (reordered), not lost.
+
+Lost bits ≈ lost packets × average packet size, if you want a bit count.
+
+### How to get the numbers
+
+#### A. Any player (ffplay, VLC, OpenCV, browser): put the probe in front
+
+`encoding_lab/tools/rtp_probe.py` listens on the camera's port, measures every packet, and forwards it unchanged to the player:
+
+```bash
+# the ROV sends camera 1 to the GUI computer on port 5600
+python3 encoding_lab/tools/rtp_probe.py --port 5600 --forward 5700 --json   # one JSON line per second
+ffplay -protocol_whitelist file,udp,rtp -fflags nobuffer -flags low_delay cam1_5700.sdp   # the sender's .sdp with "m=video 5600" changed to 5700
+```
+
+The JSON looks like this; the GUI reads one line per second per camera:
+
+```json
+{"throughput_mbps": 2.96, "loss_pct_window": 1.40, "loss_pct_total": 1.83, "lost_packets": 28, "received_packets": 1501, "jitter_ms": 0.3, "reordered": 0}
+```
+
+**Tested:** an FFmpeg 3 Mb/s H.264 RTP stream went through a relay that dropped 2.22 % of packets at random. The probe reported 2.23 % total loss and 2.8–3.0 Mb/s (unit tests: `encoding_lab/tests/test_rtp_probe.py`).
+
+#### B. Inside a Python GUI: import it
+
+```python
+from rtp_probe import RtpStats          # encoding_lab/tools/rtp_probe.py, standard library only
+stats = {cam: RtpStats() for cam in cameras}
+# in the thread that receives each camera's UDP datagrams:
+stats[cam].feed(datagram)
+# once a second, on the GUI thread (Qt: a QTimer; never touch widgets from the receive thread):
+s = stats[cam].snapshot()
+tile.set_throughput(s["throughput_mbps"]); tile.set_loss(s["loss_pct_window"])
+```
+
+#### C. A GStreamer receiver: read the jitter buffer's own counters
+
+If the GUI already receives through GStreamer, `rtpjitterbuffer` counts lost packets itself. Name it and read its `stats` once a second, and count bytes with a pad probe on `udpsrc`:
+
+```python
+pipeline = Gst.parse_launch(
+    'udpsrc name=src port=5600 caps="application/x-rtp,media=video,encoding-name=H264,payload=96" ! '
+    'rtpjitterbuffer name=jb latency=50 ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink name=sink')
+nbytes = 0
+def count(pad, info):
+    global nbytes
+    nbytes += info.get_buffer().get_size(); return Gst.PadProbeReturn.OK
+pipeline.get_by_name("src").get_static_pad("src").add_probe(Gst.PadProbeType.BUFFER, count)
+
+def every_second():                      # e.g. GLib.timeout_add_seconds(1, every_second)
+    global nbytes
+    st = pipeline.get_by_name("jb").get_property("stats")
+    lost, pushed = st.get_value("num-lost"), st.get_value("num-pushed")
+    mbps, nbytes = nbytes * 8 / 1e6, 0
+    ...                                  # loss % = Δlost / (Δlost + Δpushed) since the last call
+    return True
+```
+
+(Option C is a reference pattern and was not run here. Options A and B were tested.)
+
+#### D. Total tether use without touching the streams
+
+The operating system already counts every byte per network interface. This gives the status-bar total, including control traffic:
+
+```python
+import psutil, time                       # pip install psutil
+a = psutil.net_io_counters(pernic=True)["eth0"].bytes_recv; time.sleep(1)
+b = psutil.net_io_counters(pernic=True)["eth0"].bytes_recv
+print((b - a) * 8 / 1e6, "Mb/s on the tether")
+```
+
+### Check that the metrics tell the truth
+
+Before trusting the GUI, break the link on purpose and see whether the numbers react:
+
+```bash
+sudo tc qdisc add dev eth0 root netem loss 1%            # 1 % random loss on the GUI computer's interface
+sudo tc qdisc change dev eth0 root netem rate 5mbit      # squeeze the bandwidth
+sudo tc qdisc del dev eth0 root                          # back to normal
+```
+
+The loss widget should read about 1 % and turn amber. Under the rate limit, throughput should flatten at about 5 Mb/s while the picture degrades. File the result as a test case in the Bug Hunt League.
+
+## 6. The first 15 diagnostics to build
+
+<!-- gen:first15 -->
 | # | Diagnostic | Where | Status |
 |---|---|---|---|
 | 1 | Glass-to-glass latency | ms-clock photo (manual) | manual procedure |
@@ -95,10 +296,18 @@ Report **median and p95**, never a single number, and correlate over time: laten
 | 14 | Packet loss | rtp_probe.py | available: `encoding_lab/tools/rtp_probe.py` |
 | 15 | Queue depth at every stage + frame age | GUI (STALE badge) | to build in the pilot GUI |
 
-For the pilot GUI, show four numbers (latency p50/p95, bitrate, display fps, loss %) and one health light per stage; details go in a tooltip or a debug view. See [gui-stream-metrics.md](gui-stream-metrics.md).
+For the pilot GUI, show four numbers (latency p50/p95, bitrate, display fps, loss %) and one health light per stage; details go in a tooltip or a debug view. See [section 5](#5-two-numbers-for-the-pilot-gui-throughput-and-loss).
+<!-- /gen:first15 -->
 
-## 6. Field guide
+## 7. Reporting template
 
+For every test, write down: date, hardware, software versions, camera settings, the command used, the **number**, and what you will change because of it. Paste it into the GitHub issue or pull request it belongs to, so measurements live next to the code they justify.
+
+When a measurement shows a problem, look it up in the [video diagnostics field guide](#8-field-guide): symptom → cause → fix, with pictures.
+
+## 8. Field guide
+
+<!-- gen:fieldguide -->
 ### Timing and latency
 
 *The picture is late, uneven or stuck, even though FPS looks fine.*
@@ -594,11 +803,11 @@ $ chronyc tracking
 - **On our ROV:** The ROV computer has no internet time under water; its clock drifts from the topside.
 - **Confirm:** chronyc tracking on both ends; compare with the optical (ms-clock photo) measurement.
 - **Fix:** Run chrony with the topside as the server (or PTP); use monotonic clocks for stage timings on one machine.
+<!-- /gen:fieldguide -->
 
 ## Related
 
-- [measuring-performance.md](measuring-performance.md): the measurement toolbox
-- [gui-stream-metrics.md](gui-stream-metrics.md): throughput and loss in the pilot GUI
-- [mjpeg-and-ffmpeg.md](mjpeg-and-ffmpeg.md): the resolution trap
-- [jetson-nano-vs-pi5.md](jetson-nano-vs-pi5.md): encoder capacity and heat
-- Encoding Lab: Encode (Frame compare, Bitrate over time), Live camera, Bandwidth budget (Packet-loss lab)
+- [hardware-and-encoders.md](hardware-and-encoders.md): encoder capacity, Jetson vs Pi 5, heat
+- [codecs-and-ffmpeg.md](codecs-and-ffmpeg.md): MJPEG, the resolution trap, FFmpeg recipes
+- [../experiments/ROV_Experiments.md](../experiments/ROV_Experiments.md): every measurement on this page as a hands-on experiment
+- Encoding Lab: Encode (Frame compare, Bitrate over time), Live camera, Bandwidth budget (Measure this computer, Packet-loss lab)

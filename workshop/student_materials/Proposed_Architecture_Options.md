@@ -1,6 +1,6 @@
 # Proposed Improved Architectures — Options and Trade-offs
 
-> **Read this first.** None of these is a prescription. Which option is right depends on facts we have not yet measured: whether the cameras are USB or IP, which board flies (Jetson Nano, Orin Nano or Raspberry Pi 5), the tether's negotiated speed, the pilot laptop, and the browser. Fill in the Diagnostic Checklist first, then use this document to compare options **with your numbers**.
+> **Read this first.** None of these is a prescription. Which option is right depends on facts we have not yet measured: whether the cameras are USB or IP, which board flies (Jetson Nano, Orin Nano or Raspberry Pi 5), the tether's negotiated speed, the pilot laptop, and the browser. Run the experiments in `docs/experiments/ROV_Experiments.md` first (at least E0, E1, E6, E7, E16, E18), then use this document to compare options **with your numbers**.
 
 Notation: **E** = where encoding happens · **D** = where decoding happens · Mb/s figures are illustrative (from the workshop's synthetic clip) — replace with your measurements.
 

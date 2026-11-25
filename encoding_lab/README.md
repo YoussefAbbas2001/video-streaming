@@ -87,7 +87,7 @@ encoding_lab/
 ├── lab/live.py            Live camera: capture, per-stage timing, encoders, MJPEG server for the browser
 ├── lab/budget.py          Bandwidth budget planner: pipelines, encode computers, loss and keyframe pile-up, fixes
 ├── assets/mia_logo.png    header logo
-├── tools/rtp_probe.py     throughput, packet loss and jitter of an RTP stream (for the pilot GUI; see docs/streaming/gui-stream-metrics.md)
+├── tools/rtp_probe.py     throughput, packet loss and jitter of an RTP stream (for the pilot GUI; see docs/streaming/measure-and-diagnose.md (section 5))
 ├── tests/test_engine.py   self-test of engine, benchmarks and the live pipeline (pytest, ~30 s)
 ├── tests/test_rtp_probe.py tests for the probe
 ├── tests/test_budget.py   tests for the planner

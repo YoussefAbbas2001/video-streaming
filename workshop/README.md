@@ -17,12 +17,10 @@ workshop/
 │   └── Presenter_Script.md                block-by-block script for all 82 slides: what to say, questions, misconceptions, timing
 ├── student_materials/
 │   ├── Video_Streaming_Cheat_Sheet.md     formulas, vocabulary, FFmpeg/GStreamer/Linux commands, review checklist
-│   ├── ROV_System_Diagnostic_Checklist.md measure-your-own-ROV checklist (homework after session 1)
 │   ├── Testing_Competition_Guide.md       "Break the Other Team's Software!" rules, scoring, templates, scenarios
 │   └── Proposed_Architecture_Options.md   5 architecture options with trade-offs + decision-log template
 ├── workshop_activities/
 │   ├── Activity_Instructions.md           Activities 1, 2, 3, 5 with materials and answer keys
-│   ├── Post_Workshop_Challenge.md         6-week challenge: requirements, constraints, DoD, metrics, demo criteria
 │   └── testing_competition_code/          small Python module (spec + code with seeded defects + starter tests)
 ├── ux_materials/
 │   ├── UX_Pilot_Experience_Pack.md        persona, journey, wireframes, usability script, activity, rubric, user stories
@@ -46,7 +44,7 @@ Two half-day sessions (≈ 3 h 50 min each, incl. breaks). Full timing is in `pr
 
 | Session | Content | Activities |
 |---|---|---|
-| **1 · Video engineering** | Why video matters → architecture and unknowns → bandwidth → how encoding works → codecs, rate control, GOP and loss → quality metrics → Jetson Nano vs Raspberry Pi 5 → heat and reliability → protocols and latency → multi-camera and computer vision | 1 Estimate the Bandwidth · 3 Compression Challenge · 2 Diagnose the ROV · homework: Diagnostic Checklist |
+| **1 · Video engineering** | Why video matters → architecture and unknowns → bandwidth → how encoding works → codecs, rate control, GOP and loss → quality metrics → Jetson Nano vs Raspberry Pi 5 → heat and reliability → protocols and latency → multi-camera and computer vision | 1 Estimate the Bandwidth · 3 Compression Challenge · 2 Diagnose the ROV · homework: the [ROV experiments](../docs/experiments/ROV_Experiments.md) |
 | **2 · Engineering practice and UX** | Quality × Efficiency → SDLC → requirements, DoR/DoD → testing and the Bug Hunt League → code review, GitHub workflow, board, metrics → UX for pilots → final challenge | 4 Break the Other Team's Software · 6 Design the Perfect Pilot Experience · 5 Architecture Challenge |
 
 **Before session 1:**
@@ -79,6 +77,6 @@ python -m pytest -q          # 7 starter tests pass, which proves nothing
 ## Important caveats
 
 - **We do not yet know** the team's exact cameras, board, tether speed or streaming software. The material labels every assumption and gives the measurement that resolves it.
-- Hardware facts are cited in `resources/References.md` and `../docs/streaming-additions.md`.
+- Hardware facts are cited in `resources/References.md` and `../docs/streaming/hardware-and-encoders.md`.
 - Latency budgets in the deck are **estimates** (labelled), except the measured x264 encoder hold.
 - Safety-related UX guidance describes principles. The actual safety behaviour must be designed with the vehicle's control architecture and the competition rules.

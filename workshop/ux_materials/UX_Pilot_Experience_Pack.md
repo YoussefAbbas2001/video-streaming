@@ -49,7 +49,7 @@ Printable wireframe: `pilot_dashboard_wireframe.svg` (open in any browser; print
 | Mouse needed to switch camera | Cameras 1–8 selectable from the gamepad and number keys; switch ≤ 1 s | Usability + performance |
 | Unsure the gripper closed | Gripper shows **commanded** and **confirmed** state separately | Safety |
 | Mis-click on configuration | PID/RC configuration is not reachable from the mission screen while armed | Error prevention |
-| Video lag causes overshoot | Pilot camera latency ≤ 200 ms median (see Post-Workshop Challenge N1) | Performance |
+| Video lag causes overshoot | Pilot camera latency ≤ 200 ms median (see the ROV experiments, Boss level N1) | Performance |
 
 ---
 

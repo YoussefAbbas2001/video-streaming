@@ -1,5 +1,5 @@
 // Video-diagnostics slides (Nov 2026): 6 slides for the talk + the field-guide appendix (1 overview + 16 slides).
-// Content comes from build/diagnostics_catalog.py (same source as docs/streaming/video-diagnostics.md):
+// Content comes from build/diagnostics_catalog.py (same source as docs/streaming/measure-and-diagnose.md):
 //
 //   python3 build/make_diagnostic_images.py     # pictures (once)
 //   python3 build/diagnostics_catalog.py        # doc + out/diagnostics.json
@@ -47,7 +47,7 @@ const byId = Object.fromEntries(D.items.map((c) => [c.id, c]));
       "The pilot only sees the result on the screen, but the cause can be in any of eight stages. The same symptom can come from different stages, and a healthy-looking number can hide a problem. " +
       "Examples on the slide: high latency with a perfect 30 fps (encoder hold-back or a queue that only grows); low fps with plenty of bandwidth (CPU, heat or USB); a frozen picture while the connection is up (stale frame); blur only when the camera moves (bitrate cap or long exposure); smooth video but late telemetry (video buffering); a delay that grows during the dive (a queue). " +
       "Rule: measure each stage separately. Otherwise a delay in the pilot laptop's render queue gets blamed on the tether, and the team changes the wrong thing. " +
-      "Full guide with 45 symptoms and pictures: docs/streaming/video-diagnostics.md, and the Field guide appendix of this deck.");
+      "Full guide with 45 symptoms and pictures: docs/streaming/measure-and-diagnose.md, and the Field guide appendix of this deck.");
     flow(s, [
       { title: "Camera", sub: "exposure, gain, fps" }, { title: "Capture", sub: "dropped frames, USB" }, { title: "Encoder", sub: "ms, frames held, bitrate" },
       { title: "Network", sub: "Mb/s, loss, jitter" }, { title: "Receiver", sub: "jitter buffer, reorder" }, { title: "Decoder", sub: "ms, errors, queue" },
@@ -182,7 +182,7 @@ const byId = Object.fromEntries(D.items.map((c) => [c.id, c]));
       "This appendix is a reference for the pool, not part of the talk. Every page shows up to three symptoms with a picture, the cause, what it means on our ROV and the fix; the speaker notes add what you see and how to confirm it. " +
       "Groups: timing and latency, compression, network and transport, motion, camera and optics, display and sync, and the ROV computer itself. " +
       "The pictures were made from the Encoding Lab's synthetic clip: compression artifacts are real encodes at bad settings, packet loss and decoder corruption are real damaged streams, camera and display effects are simulated from how they happen, timing problems are charts. " +
-      "The same content, with a symptom → cause table, is in docs/streaming/video-diagnostics.md.");
+      "The same content, with a symptom → cause table, is in docs/streaming/measure-and-diagnose.md.");
     D.groups.forEach(([g, title, intro], i) => {
       const n = D.items.filter((c) => c.group === g).length;
       const x = 0.6 + (i % 4) * 3.05, y = 1.65 + Math.floor(i / 4) * 2.5;
@@ -193,7 +193,7 @@ const byId = Object.fromEntries(D.items.map((c) => [c.id, c]));
     });
     box(s, 0.6 + 3 * 3.05, 1.65 + 2.5, 2.9, 2.35, { line: col.amber });
     text(s, "Use it with the troubleshooting matrix", { x: 9.9, y: 4.3, w: 2.6, h: 0.65, fontSize: 14, bold: true, color: col.amber });
-    text(s, "Start from the symptom table in the Diagnostics section, then open the page for the suspect. Full text: docs/streaming/video-diagnostics.md", { x: 9.9, y: 4.95, w: 2.6, h: 1.4, fontSize: 11.5, color: col.muted });
+    text(s, "Start from the symptom table in the Diagnostics section, then open the page for the suspect. Full text: docs/streaming/measure-and-diagnose.md", { x: 9.9, y: 4.95, w: 2.6, h: 1.4, fontSize: 11.5, color: col.muted });
   }
 
   // ======================================================================= field-guide pages

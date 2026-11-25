@@ -11,16 +11,29 @@ python3 build/add_click_builds.py presentation/MIA_Video_Streaming.pptx --only 2
 python3 build/add_click_builds.py presentation/MIA_Software_Dev_Cycle.pptx --only 20
 ```
 
-Video-diagnostics slides (24 Nov 2026): pictures and text come from one catalog, shared with `docs/streaming/video-diagnostics.md`:
+Video-diagnostics slides (24 Nov 2026): pictures and text come from one catalog, shared with `docs/streaming/measure-and-diagnose.md`:
 
 ```bash
 python3 build/make_diagnostic_images.py     # 41 pictures + measurements.json in docs/streaming/img/diagnostics/ (≈ 2 min)
-python3 build/diagnostics_catalog.py        # → docs/streaming/video-diagnostics.md + out/diagnostics.json
+python3 build/diagnostics_catalog.py        # → docs/streaming/measure-and-diagnose.md + out/diagnostics.json
 node build/new_slides_diagnostics.js        # → out/new_slides_diagnostics.pptx (6 talk slides + 17 appendix slides)
 python3 build/insert_slides.py out/new_slides_diagnostics.pptx presentation/MIA_Video_Streaming.pptx \
     $(for i in 1 2 3 4 5 6; do echo --place $i:53; done) $(for i in $(seq 7 23); do echo --place $i:56; done)
 python3 build/add_click_builds.py presentation/MIA_Video_Streaming.pptx --only 54,55,56,57,58,59
 ```
+
+ROV experiments section (25 Nov 2026): 7 slides that replaced the old "Practice: measure your own ROV" slide. The experiment list, points and badges are read from the mission map in `docs/experiments/ROV_Experiments.md`, so the slides and the doc cannot disagree:
+
+```bash
+python3 build/make_experiment_images.py     # docs/experiments/img/g2g-photo.jpg + eye-test.jpg (real x264 encodes)
+node build/new_slides_experiments.js        # → out/new_slides_experiments.pptx (7 slides)
+python3 build/insert_slides.py out/new_slides_experiments.pptx presentation/MIA_Video_Streaming.pptx \
+    $(for i in 1 2 3 4 5 6 7; do echo --place $i:62; done)
+# then the old slide 62 was removed from <p:sldIdLst> and the pptx skill's clean.py run
+python3 build/add_click_builds.py presentation/MIA_Video_Streaming.pptx --only 62,63,64,65,66,67,68
+```
+
+Note: the generated regions of `docs/streaming/measure-and-diagnose.md` (between `<!-- gen:NAME -->` markers) come from `diagnostics_catalog.py`; edit the catalog, not those regions.
 
 (These commands were run on 21 Nov 2026 against the decks as they were that day. To add more slides later, write a new generator like `new_slides_nov2026.js` and insert only those.)
 
@@ -28,6 +41,7 @@ python3 build/add_click_builds.py presentation/MIA_Video_Streaming.pptx --only 5
 |---|---|
 | `new_slides_nov2026.js` | The November 2026 slides: chroma subsampling, intra and inter prediction, transform + quantization, entropy coding + loop filters, containers, Netflix-scale Fermi estimate, what the big streamers do, the MJPEG resolution trap, the weekly knowledge exchange. Numbers are measured by us or sourced in the speaker notes. |
 | `make_diagnostic_images.py`, `diagnostics_catalog.py`, `new_slides_diagnostics.js` | The video-diagnostics field guide: pictures (real bad encodes, real damaged streams, simulated camera/display effects, charts), the catalog of 45 problems, and the slides. |
+| `make_experiment_images.py`, `new_slides_experiments.js` | The homework experiments: the glass-to-glass photo and the eye-test encodes, and the 7 experiment slides built from the doc's mission map. |
 | `fix_shape_ids.py` | Gives every shape on a slide a unique id. pptxgenjs can give a table the same id as a text box; LibreOffice accepts that but PowerPoint asks to repair the file. `insert_slides.py` runs it automatically; re-run `add_click_builds.py --only` on the slides it lists. |
 | `insert_slides.py` | Copies slides (with their pictures and speaker notes) into a hand-edited deck after given slide numbers, mapped onto the target's own layout of the same name, so they take its footer, logo and theme. Touches nothing else. |
 | `add_click_builds.py` | Click-by-click Fade builds: each card, chart or row appears on its own click. `--only` limits it to the slides you name, so hand-made animations elsewhere are kept. |

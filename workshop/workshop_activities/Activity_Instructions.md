@@ -7,9 +7,9 @@ Six activities, one every 20–30 minutes. Teams of 3–5, mixed experience in e
 | 1 | Estimate the Bandwidth | S1 · 16 | 15 min | this file |
 | 2 | Diagnose the ROV | S1 · 39 | 20 min | this file |
 | 3 | Compression Challenge | S1 · 28 | 15 min | this file |
-| 4 | Break the Other Team's Software | S2 · 50 | 60 min | `student_materials/Testing_Competition_Guide.md` |
+| 4 | Break the Other Team's Software | S2 · 50 | 60 min | [mia-software-practice](https://github.com/YoussefAbbas2001/mia-software-practice/blob/HEAD/workshop/student_materials/Testing_Competition_Guide.md) |
 | 5 | Architecture Challenge | S2 · 68 | 20 min + homework | this file + the 👑 Boss level in `docs/experiments/ROV_Experiments.md` |
-| 6 | Design the Perfect ROV Pilot Experience | S2 · 66 | 40 min | `ux_materials/UX_Pilot_Experience_Pack.md` §6 |
+| 6 | Design the Perfect ROV Pilot Experience | S2 · 66 | 40 min | [mia-software-practice](https://github.com/YoussefAbbas2001/mia-software-practice/blob/HEAD/workshop/ux_materials/UX_Pilot_Experience_Pack.md) §6 |
 
 Keep a running **team scoreboard** across all activities; announce a winner at the end (small prize: first pick of pool-test slots, stickers, …).
 
@@ -145,5 +145,5 @@ Use notebook Experiment 11 (`evaluate(design)`) to check the numbers.
 
 ## Activities 4 and 6
 
-- **Activity 4 (testing competition):** full rules, scoring, templates and sample scenarios in `student_materials/Testing_Competition_Guide.md`. Referee key and proof tests: the presenter-only `referee/` folder in the presenter's Drive (not in the team repo).
-- **Activity 6 (UX design competition):** scenario, tasks, roles and rubric in `ux_materials/UX_Pilot_Experience_Pack.md` §6.
+- **Activity 4 (testing competition):** full rules, scoring, templates, sample scenarios and the code are in the [mia-software-practice repo](https://github.com/YoussefAbbas2001/mia-software-practice). Referee key and proof tests: the presenter-only `referee/` folder in the presenter's Drive (not in any team repo).
+- **Activity 6 (UX design competition):** scenario, tasks, roles and rubric in the [UX Pilot Experience Pack](https://github.com/YoussefAbbas2001/mia-software-practice/blob/HEAD/workshop/ux_materials/UX_Pilot_Experience_Pack.md) §6 (mia-software-practice repo).

@@ -148,7 +148,7 @@ The Pi 5 has not been tested on our ROV yet. What the vendors document:
 
 ## 4. Reliability: the 2023 heat failure and how to prevent it
 
-**What we know:** during a competition trial in 2023 the video stream stopped working because the SBC got too hot. The details still need collecting (board, cameras, enclosure, water and air temperature, minutes into the run). Collect them and write a blameless postmortem using [`sdlc/postmortem-template.md`](../sdlc/postmortem-template.md).
+**What we know:** during a competition trial in 2023 the video stream stopped working because the SBC got too hot. The details still need collecting (board, cameras, enclosure, water and air temperature, minutes into the run). Collect them and write a blameless postmortem using the [postmortem template](https://github.com/YoussefAbbas2001/mia-software-practice/blob/HEAD/docs/postmortem-template.md).
 
 **Mechanism:**
 1. The hull is sealed, so it has no airflow.

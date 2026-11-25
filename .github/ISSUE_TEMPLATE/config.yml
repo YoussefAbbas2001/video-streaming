@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: Bug Hunt League rules
-    url: https://github.com/OWNER/REPO/blob/main/sdlc/bug-hunt-league.md
-    about: Points, rules and how to write a bug that scores (replace OWNER/REPO after pushing)
+    url: https://github.com/YoussefAbbas2001/mia-software-practice/blob/HEAD/docs/bug-hunt-league.md
+    about: Points, rules and how to write a bug that scores (in the mia-software-practice repo)

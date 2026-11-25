@@ -161,34 +161,4 @@ Upstream FFmpeg does **not** use the Jetson Nano's hardware encoder. The **Jetso
 
 ---
 
-## 6. Testing terms
-
-| Term | One line |
-|---|---|
-| Unit test | one function/class in isolation |
-| Integration test | components together (stream manager + real FFmpeg) |
-| System test | the whole ROV, ideally in the pool |
-| Acceptance test | checks the acceptance criteria, with the user |
-| Regression test | old bugs stay fixed — re-run after every change |
-| Boundary test | at, below and above every limit (8 vs 9 cameras; −1.0 vs −1.0001) |
-| Negative test | invalid input must be rejected |
-| Special values | NaN, ±inf, 0, empty, None, True/False |
-| Stress / performance | all cameras + full thrust + 30 min; latency, CPU, temperature |
-| DoR / DoD | Definition of Ready (can we start?) / Definition of Done (are we really finished?) |
-
----
-
-## 7. Code review checklist
-
-- [ ] **Correctness** — meets the acceptance criteria; edge cases handled
-- [ ] **Readability & naming** — a new member understands it
-- [ ] **Architecture** — right layer; no unjustified new dependency
-- [ ] **Error handling** — camera lost, timeout, bad input, link loss
-- [ ] **Resources** — streams, sockets, processes, timers closed/stopped
-- [ ] **Concurrency** — no races between callbacks/threads; UI updated from the right thread
-- [ ] **Performance** — no per-frame copies/allocations/logging that aren't needed
-- [ ] **UX honesty** — the UI never shows success before the system confirms it
-- [ ] **Tests** — added/updated; they would fail without the change
-- [ ] **Docs** — decision log / README updated
-
-Comment on the code, not the person. Label comments *blocking / suggestion / question*. Keep PRs < 400 lines.
+Testing terms and the code review checklist are in the [Engineering Practice cheat sheet](https://github.com/YoussefAbbas2001/mia-software-practice/blob/HEAD/workshop/student_materials/Engineering_Practice_Cheat_Sheet.md) (mia-software-practice repo).

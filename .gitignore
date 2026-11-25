@@ -31,3 +31,6 @@ Thumbs.db
 .vscode/
 .idea/
 node_modules/
+
+# Office lock files
+.~lock.*#

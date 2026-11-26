@@ -11,6 +11,7 @@ Software practice (SDLC, testing, the Bug Hunt League, code review, the GitHub w
 | I am… | Go to |
 |---|---|
 | **In the session** | Run the [Encoding Lab](encoding_lab/) (below). Every experiment in the deck is done there, live. |
+| **Following the slides in a notebook** | [`encoding_lab/notebooks/ROV_Video_Streaming_Workshop.ipynb`](encoding_lab/notebooks/ROV_Video_Streaming_Workshop.ipynb): 35 experiments in slide order, most with live sliders |
 | **Watching the videos** | [`videos/`](videos/): three videos, about 25 min |
 | **Trying a camera and an encoder live** | Encoding Lab → **Live camera** tab (laptop camera, MJPEG passthrough vs x264 vs NVENC, with a latency overlay) |
 | **Benchmarking the Pi 5 / Jetson / laptop** | Run the Encoding Lab on that computer → **Bandwidth budget → Measure this computer** |
@@ -28,6 +29,7 @@ Software practice (SDLC, testing, the Bug Hunt League, code review, the GitHub w
 ```
 ├── presentation/   MIA_Video_Streaming.pptx (87 slides), click-by-click builds, speaker notes
 ├── encoding_lab/   ROV Encoding Lab: Streamlit app — Encode, Live camera, Sweep, Bandwidth budget, Report, Learn
+│                   + notebooks/: the session notebook, every experiment in slide order
 ├── docs/
 │   ├── streaming/  measure and diagnose (45-problem field guide), hardware and encoders, codecs and FFmpeg
 │   ├── experiments/ the ROV experiments: member handbook, leader's recipe, ms clock, leaderboard

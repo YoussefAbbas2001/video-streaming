@@ -1,0 +1,120 @@
+{
+ "source": {
+  "name": "Synthetic underwater clip"
+ },
+ "deblock_off": {
+  "mbps": 0.08145066666666667,
+  "ssim": 0.917637,
+  "psnr": 35.410864
+ },
+ "deblock_on": {
+  "mbps": 0.07836533333333333,
+  "ssim": 0.925392,
+  "psnr": 35.524372
+ },
+ "crf18": {
+  "mbps": 2.3758293333333333,
+  "ssim": 0.986224,
+  "psnr": 47.722927
+ },
+ "crf28": {
+  "mbps": 0.6527946666666666,
+  "ssim": 0.968085,
+  "psnr": 42.71558
+ },
+ "crf38": {
+  "mbps": 0.099688,
+  "ssim": 0.93113,
+  "psnr": 36.517707
+ },
+ "crf46": {
+  "mbps": 0.042272,
+  "ssim": 0.912272,
+  "psnr": 33.166313
+ },
+ "codec_libx264": {
+  "mbps": 0.09970933333333333,
+  "ssim": 0.925471,
+  "psnr": 35.703006
+ },
+ "codec_libx265": {
+  "mbps": 0.12118933333333333,
+  "ssim": 0.952195,
+  "psnr": 39.812558
+ },
+ "codec_libsvtav1": {
+  "mbps": 0.105088,
+  "ssim": 0.963286,
+  "psnr": 41.129697
+ },
+ "codec_mjpeg": {
+  "mbps": 3.1252933333333335,
+  "ssim": 0.946735,
+  "psnr": 40.171443
+ },
+ "preset_ultrafast": {
+  "mbps": 0.5173333333333333,
+  "ssim": 0.930243,
+  "psnr": 37.212807,
+  "cpu_ms_per_frame": 26.563755555555563
+ },
+ "preset_veryfast": {
+  "mbps": 0.4246693333333333,
+  "ssim": 0.956744,
+  "psnr": 40.452138,
+  "cpu_ms_per_frame": 34.729188888888885
+ },
+ "preset_medium": {
+  "mbps": 0.456528,
+  "ssim": 0.960462,
+  "psnr": 41.20397,
+  "cpu_ms_per_frame": 47.28185555555553
+ },
+ "preset_slow": {
+  "mbps": 0.4595626666666667,
+  "ssim": 0.960638,
+  "psnr": 41.289483,
+  "cpu_ms_per_frame": 54.75127777777781
+ },
+ "res_1280": {
+  "mbps": 0.09970933333333333,
+  "ssim": 0.925471,
+  "psnr": 35.703006
+ },
+ "res_640": {
+  "mbps": 0.105888,
+  "ssim": 0.947734,
+  "psnr": 39.085786
+ },
+ "res_320": {
+  "mbps": 0.12618933333333332,
+  "ssim": 0.953654,
+  "psnr": 40.038371
+ },
+ "loss_0": {
+  "name": "keyframe every 1 s",
+  "pct_wrong_1s_later": 0.0
+ },
+ "loss_1": {
+  "name": "keyframe every 5 s",
+  "pct_wrong_1s_later": 15.325520833333334
+ },
+ "loss_2": {
+  "name": "intra refresh (no keyframes)",
+  "pct_wrong_1s_later": 9.775390625
+ },
+ "noise_False": {
+  "mbps": 1.2358586666666667,
+  "ssim": 0.979976,
+  "psnr": 45.568175
+ },
+ "noise_True": {
+  "mbps": 8.425061333333334,
+  "ssim": 0.920839,
+  "psnr": 40.033534
+ },
+ "motion": {
+  "error_without": 4.292855322265624,
+  "error_with": 0.9685956217447916
+ }
+}

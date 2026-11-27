@@ -9,24 +9,31 @@ How to use this script:
 - ⏱ marks a natural place to check time. 🧪 marks a live Encoding Lab demo. 🎯 marks an activity.
 - The numbers quoted were measured on a 2-core laptop with the synthetic clip. **Re-measure them in the Encoding Lab the night before** (and on the team's own footage if you get it: sidebar → Upload your own video) and update any number that differs.
 
-### The session runs on the Encoding Lab, not the notebook
+### Live demos: the Encoding Lab or the session notebook
 
-Every demo is done live in the **ROV Encoding Lab**. Where this script names a notebook experiment, use the matching Lab tab:
+Two tools, same experiments:
 
-| Notebook experiment | Encoding Lab |
-|---|---|
-| 1 · Raw bandwidth | sidebar (raw 4:2:0 Mb/s) + Encode → 🧮 Show the math |
-| 2 · Codecs and the FFmpeg command | Encode: codec selector; Compare section at the bottom |
-| 3 · CRF vs bitrate cap | Encode: Rate control + Bitrate over time; Sweep → Quality / Target bitrate |
-| 4 · Encoder parameters | Sweep → Preset, Keyframe interval, Resolution, Frame rate |
-| 5 · Packet loss and GOP | Bandwidth budget → Packet-loss lab (and the *Broken picture* card in Plan the budget) |
-| 6 · Quality metrics | Encode → Frame compare (Diff ×8, Zoom), Quality over time (VMAF under More) |
-| 7 · Bandwidth planning | Bandwidth budget → Plan the budget (start from *What we fly now*, then switch the tether to powerline) |
-| 8 · Substreams and priorities | Bandwidth budget (edit the camera table, read *Cheapest ways to make it fit*) + Live camera → Output size |
-| 9 · Latency | Encode → latency graph; Live camera (x264 with Low latency off, then on); Bandwidth budget → Measure this computer → Compare defaults vs low latency |
-| 10 · What this machine can do | Bandwidth budget → Measure this computer (then pick *This computer (benchmarked)* in Plan the budget) |
-| 11 · Take it to the ROV | Report + `docs/streaming/hardware-and-encoders.md` |
-| *(new)* MJPEG passthrough vs resize, NVENC | Live camera |
+- **The session notebook** (`encoding_lab/notebooks/ROV_Video_Streaming_Workshop.ipynb`) follows the deck. Every experiment's banner names its slide, so you open the matching cell while the slide is up. 35 experiments, most with a live panel. Run all cells once the night before (10–20 min); after that everything is cached.
+- **The Encoding Lab** app is the bigger version for open-ended play: upload the team's footage, sweeps, the bandwidth budget.
+
+| Slide | Notebook (banner says the slide) | Encoding Lab |
+|---|---|---|
+| 13–14 · Raw bandwidth | *How big is raw video?* | sidebar (raw 4:2:0 Mb/s) + Encode → 🧮 Show the math |
+| 17, 32 · Codecs | *Same clip, four codecs* · *whole rate–quality curves* | Encode: codec selector; Compare section at the bottom |
+| 29 · CRF vs bitrate cap | *Quality target or bitrate cap?* | Encode: Rate control + Bitrate over time; Sweep → Quality / Target bitrate |
+| 38 · Encoder parameters | *Encoder presets* | Sweep → Preset, Keyframe interval, Resolution, Frame rate |
+| 39 · Packet loss and GOP | *Packet loss and the keyframe interval* | Bandwidth budget → Packet-loss lab |
+| 40 · Quality metrics | *PSNR, SSIM, and your own eyes* · *The blind test* | Encode → Frame compare (Diff ×8, Zoom), Quality over time |
+| 50 · Bandwidth planning | *Eight cameras on one tether* | Bandwidth budget → Plan the budget |
+| 50–51 · Substreams and priorities | *Design a substream* · *Share a shrinking tether* | Bandwidth budget (camera table) + Live camera → Output size |
+| 48–49 · Latency | *Build your own latency budget* · *How many frames does the encoder hold?* | Live camera (x264 with Low latency off, then on); Bandwidth budget → Measure this computer |
+| 43–45 · What the board can do | *How many streams can the ROV computer encode?* | Bandwidth budget → Measure this computer |
+| 34–35 · MJPEG and the resolution trap | *The resolution trap* | Live camera |
+| 62 · Take it to the ROV | *Design the eight-camera system* | Report + `docs/streaming/hardware-and-encoders.md` |
+
+New in the notebook only: the cost of murky water (6), the USB bus (9), Egyptian pounds (15), Activity 1 answer check (16), packet overhead (18), chroma subsampling (21–22), motion search (23–25), DCT and quantization (26), frame types (28), Netflix Fermi (30), power cut vs container (33), throttle flags (46), TCP vs UDP (47), corners after compression (52), latency drift (54/72), stale frames (73), glass-to-glass readings (57), health check (61).
+
+**Speaker notes:** every slide's notes now start with a short **QUICK NOTES** card (3–5 lines: what to say, what to ask, what's next). The detailed notes are below the divider. Edit the cards in `build/add_quick_notes.py` and re-run it.
 
 ---
 

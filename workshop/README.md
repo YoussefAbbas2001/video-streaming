@@ -29,7 +29,7 @@ Related, at the repo level:
 - the **Encoding Lab** app, used for every live demo: `../encoding_lab/`;
 - the video series: `../videos/`;
 - the write-ups: `../docs/streaming/`, the experiments `../docs/experiments/` and the debug checklist `../docs/debug/`;
-- the original notebook (optional, not used in the session): `../encoding_lab/notebooks/`.
+- the session notebook, every experiment in slide order: `../encoding_lab/notebooks/ROV_Video_Streaming_Workshop.ipynb`.
 
 ## Recommended session sequence
 

@@ -1,5 +1,6 @@
 # Generated / cached outputs (re-created by running the code)
 notebooks/work/
+encoding_lab/notebooks/work/
 encoding_lab/.lab_work/
 demos/**/out/
 build/run.log

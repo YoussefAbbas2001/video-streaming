@@ -1,5 +1,5 @@
 import nbformat, os, sys, time
-os.environ["NB_BATCH"] = "1"   # tuning panels render their default result directly (see nb_tuning.py)
+os.environ["NB_BATCH"] = "1"   # panels draw their default result straight into the cell (see panel() in the setup cell)
 from nbclient import NotebookClient
 p = sys.argv[1]
 nb = nbformat.read(p, as_version=4)

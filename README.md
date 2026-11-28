@@ -1,4 +1,4 @@
-# M.I.A Robotics · ROV Video Streaming
+# M.I.A Robotics ·  Video Streaming
 
 Everything for video streaming on the ROV: the slide deck, three recorded videos, the **ROV Encoding Lab** app we use live in the session, the write-ups, the ROV experiments and the debug checklist.
 
